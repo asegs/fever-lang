@@ -67,7 +67,10 @@ const isNegation = (text, idx) => {
         return true;
     }
     return infixes.includes(prev) || extras.includes(prev);
+}
 
+const notQuoted = (s, d) => {
+    return s % 2 === 0 && d % 2 === 0;
 }
 
 const preprocess = (text) => {
@@ -104,11 +107,13 @@ const lexer = (rawText) => {
     const text = preprocess(rawText);
     const reorderStack = [];
     const operatorStack = [];
+    let doubleQuotes = 0;
+    let singleQuotes = 0;
     let currentBuffer = "";
 
     for (let i = 0 ; i < text.length ; i ++ ) {
         const char = text[i];
-        if (char in unusualCases) {
+        if (char in unusualCases && notQuoted(singleQuotes, doubleQuotes)) {
             const score = unusualCases[char](text, i);
             if (score === 1) {
                 operatorStack.push(char + text[i + 1]);
@@ -119,13 +124,18 @@ const lexer = (rawText) => {
             } else {
                 currentBuffer += char;
             }
-        } else if (infixes.includes(char)) {
+        } else if (infixes.includes(char) && notQuoted(singleQuotes, doubleQuotes)) {
             operatorStack.push(char);
         } else if (char !== ' ') {
             currentBuffer += char;
         }
+        if (char === '"') {
+            doubleQuotes++;
+        } else if (char === "'") {
+            singleQuotes++;
+        }
 
-        if (char === ' ' || i === text.length - 1) {
+        if ((char === ' ' && notQuoted(singleQuotes, doubleQuotes)) || i === text.length - 1) {
             if (currentBuffer.length > 0) {
                 reorderStack.push(currentBuffer);
             }
@@ -141,10 +151,9 @@ const lexer = (rawText) => {
     return reorderStack[0];
 }
 
-console.log(lexer("3+5+8/2.2*3+f(a,b)"))
+console.log(lexer("3+5+8/2.2*3+f(a,b) + '3 + 5'"))
 console.log(lexer("[1,2,3] -> (3 + @)"))
 
 /*
 Handle parens, text, expression blocks
-Put spaces around infix operators
  */
