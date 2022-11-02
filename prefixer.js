@@ -70,7 +70,38 @@ const isNegation = (text, idx) => {
 
 }
 
-const lexer = (text) => {
+const preprocess = (text) => {
+    let builder = "";
+    for (let i = 0 ; i < text.length ; i ++ ) {
+        const [prev, char, next] = getSurroundingChars(text, i);
+        if (char in unusualCases) {
+            const score = unusualCases[char](text, i);
+            if (score >= 0) {
+                if (prev !== null && prev !== ' ') {
+                    builder += ' ';
+                }
+                builder += text.slice(i, i + score);
+                if (next !== null && next !== ' ') {
+                    builder += ' ';
+                }
+            }
+        } else if (infixes.includes(char)) {
+            if (prev !== null && prev !== ' ') {
+                builder += ' ';
+            }
+            builder += char;
+            if (next !== null && next !== ' ') {
+                builder += ' ';
+            }
+        } else {
+            builder += char;
+        }
+    }
+    return builder;
+}
+
+const lexer = (rawText) => {
+    const text = preprocess(rawText);
     const reorderStack = [];
     const operatorStack = [];
     let currentBuffer = "";
@@ -110,7 +141,7 @@ const lexer = (text) => {
     return reorderStack[0];
 }
 
-console.log(lexer("3 + 5 + 8 / 2.2 * 3 + f(a,b)"))
+console.log(lexer("3+5+8/2.2*3+f(a,b)"))
 console.log(lexer("[1,2,3] -> (3 + @)"))
 
 /*
