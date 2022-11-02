@@ -155,7 +155,8 @@ const lexer = (rawText) => {
 console.log(lexer("3+5+8/2.2*3+f(a,b) + '3 + 5'"))
 console.log(lexer("[1,2,3] -> (3 + @)"))
 console.log(lexer("3 + -5"))
+console.log(lexer("[1,2,3+4]"))
 
 /*
-Handle parens
+Handle parens and arrays
  */
