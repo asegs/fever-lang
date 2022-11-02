@@ -87,6 +87,8 @@ const preprocess = (text) => {
                 if (next !== null && next !== ' ') {
                     builder += ' ';
                 }
+            } else {
+                builder += char;
             }
         } else if (infixes.includes(char)) {
             if (prev !== null && prev !== ' ') {
@@ -110,7 +112,6 @@ const lexer = (rawText) => {
     let doubleQuotes = 0;
     let singleQuotes = 0;
     let currentBuffer = "";
-
     for (let i = 0 ; i < text.length ; i ++ ) {
         const char = text[i];
         if (char in unusualCases && notQuoted(singleQuotes, doubleQuotes)) {
@@ -126,7 +127,7 @@ const lexer = (rawText) => {
             }
         } else if (infixes.includes(char) && notQuoted(singleQuotes, doubleQuotes)) {
             operatorStack.push(char);
-        } else if (char !== ' ') {
+        } else if (char !== ' ' || !notQuoted(singleQuotes, doubleQuotes)) {
             currentBuffer += char;
         }
         if (char === '"') {
@@ -153,7 +154,8 @@ const lexer = (rawText) => {
 
 console.log(lexer("3+5+8/2.2*3+f(a,b) + '3 + 5'"))
 console.log(lexer("[1,2,3] -> (3 + @)"))
+console.log(lexer("3 + -5"))
 
 /*
-Handle parens, text, expression blocks
+Handle parens
  */
