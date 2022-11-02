@@ -1,0 +1,22 @@
+x = 3 + 5
+show(x) //8
+
+add (a (Number), b (Number)): a + b
+
+myRoutine (a,b,c):
+    sum = a + b + c
+    avg/3
+
+[1,2,3] -> @ * 2
+
+Book:
+    Title (String)
+
+
+
+
+-> is just an infix function that takes an object and a function.
+=> is an infix operator that returns a function with the given destructure signature
+Expression on its own is just an expression
+(-> list [], func): provide function, internally add @, #, ^ to the scope
+A function can either be defined or anonymous with (a,b) => a + b or pure expression syntax...TBD
