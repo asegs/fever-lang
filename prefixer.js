@@ -241,7 +241,7 @@ const lexer = (rawText) => {
             }
         }
     }
-    return reorderStack[0];
+    return reorderStack.join('');
 }
 
 const prompt = () => {
