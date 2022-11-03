@@ -134,10 +134,10 @@ const builtins = {
     '->': [
         {
             'arity': 2,
-            'types': [types.meta.LIST, types.meta.FUNCTION],
+            'types': [types.meta.LIST, types.meta.TUPLE],
             'conditions': [() => true, () => true],
             'function': (list, action, variables, functions, parseFunction) => {
-                return list.map((item, index) => {
+                return list.reduce((item, index) => {
                     variables.enterScope();
                     variables.assignValue('@', item);
                     variables.assignValue('#', index);
