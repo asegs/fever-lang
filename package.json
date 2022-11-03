@@ -1,0 +1,19 @@
+{
+  "name": "fever-lang",
+  "version": "1.0.0",
+  "description": "",
+  "main": "builtins.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asegs/fever-lang.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asegs/fever-lang/issues"
+  },
+  "homepage": "https://github.com/asegs/fever-lang#readme"
+}

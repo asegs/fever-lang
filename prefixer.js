@@ -1,3 +1,8 @@
+const readline = require("readline");
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 const infixes = ['+','-','*','/','>','<','&','|','<=','>=','->','\\>','~>','=>','==','%']
 
 const unusualCases = {
@@ -239,9 +244,10 @@ const lexer = (rawText) => {
     return reorderStack[0];
 }
 
-console.log(lexer("3+5+8/2.2*3+f(a,b) + '3 + 5'"))
-console.log(lexer("[1,2,3]->(3+@)"))
-console.log(lexer("3 + -5"))
-console.log(lexer("[1,2,3+4]"))
-console.log(lexer("3=5"))
-console.log(lexer("[1,2,3,4+5]"))
+const prompt = () => {
+    rl.question(">", (inp) => {
+        console.log(lexer(inp));
+        prompt();
+    })
+}
+prompt();
