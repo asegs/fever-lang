@@ -83,10 +83,17 @@ const preprocess = (text) => {
                 if (prev !== null && prev !== ' ') {
                     builder += ' ';
                 }
-                builder += text.slice(i, i + score);
-                if (next !== null && next !== ' ') {
+                builder += text.slice(i, i + score + 1);
+                i += score;
+                if (score === 1) {
+                    const superNext = getSurroundingChars(text, i)[2];
+                    if (superNext !== null && superNext !== ' ') {
+                        builder += ' ';
+                    }
+                } else if (next !== null && next !== ' ') {
                     builder += ' ';
                 }
+
             } else {
                 builder += char;
             }
@@ -112,23 +119,54 @@ const lexer = (rawText) => {
     let doubleQuotes = 0;
     let singleQuotes = 0;
     let currentBuffer = "";
+    let recursiveBuffer = "";
+    let openParens = 0;
+    let openBrackets = 0;
     for (let i = 0 ; i < text.length ; i ++ ) {
         const char = text[i];
-        if (char in unusualCases && notQuoted(singleQuotes, doubleQuotes)) {
+        if (char in unusualCases && notQuoted(singleQuotes, doubleQuotes) && (openParens === 0 && openBrackets === 0)) {
             const score = unusualCases[char](text, i);
             if (score === 1) {
                 operatorStack.push(char + text[i + 1]);
                 i ++;
-
             } else if (score === 0) {
                 operatorStack.push(char);
             } else {
                 currentBuffer += char;
             }
-        } else if (infixes.includes(char) && notQuoted(singleQuotes, doubleQuotes)) {
+        } else if (infixes.includes(char) && notQuoted(singleQuotes, doubleQuotes) && (openParens === 0 && openBrackets === 0)) {
             operatorStack.push(char);
         } else if (char !== ' ' || !notQuoted(singleQuotes, doubleQuotes)) {
-            currentBuffer += char;
+            if (notQuoted(singleQuotes, doubleQuotes)) {
+                switch (char) {
+                    case '(':
+                        openParens++;
+                        break;
+                    case '[':
+                        openBrackets++;
+                        break;
+                    case ')':
+                        openParens--;
+                        break;
+                    case ']':
+                        openBrackets--;
+                        break;
+                }
+            }
+            if (openBrackets === 0 && openParens === 0) {
+                if (recursiveBuffer.length > 0) {
+                    if (char === ')' || char === ']') {
+                        recursiveBuffer += char;
+                    }
+                    const internal = recursiveBuffer.slice(1, recursiveBuffer.length - 1);
+                    currentBuffer += recursiveBuffer[0] + lexer(internal) + recursiveBuffer[recursiveBuffer.length - 1];
+                    recursiveBuffer = "";
+                } else {
+                    currentBuffer += char;
+                }
+            } else {
+                recursiveBuffer += char;
+            }
         }
         if (char === '"') {
             doubleQuotes++;
@@ -153,10 +191,10 @@ const lexer = (rawText) => {
 }
 
 console.log(lexer("3+5+8/2.2*3+f(a,b) + '3 + 5'"))
-console.log(lexer("[1,2,3] -> (3 + @)"))
+console.log(lexer("[1,2,3]->(3+@)"))
 console.log(lexer("3 + -5"))
 console.log(lexer("[1,2,3+4]"))
 
 /*
-Handle parens and arrays
+Handle arrays with special flag to lexer
  */
