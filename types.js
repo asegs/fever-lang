@@ -2,9 +2,11 @@ module.exports = {
     primitives,
     meta,
     createType,
+    createVar,
     createTypedList,
     createTypedTuple,
-    createTypedFunction
+    createTypedFunction,
+    parseSignatureToTypeList
 }
 
 const createType = (baseName, types, methods, meta) => {
@@ -44,7 +46,9 @@ const primitives = {
     STRING: createType("STRING", [], {}, false),
     BOOLEAN: createType("BOOLEAN", [], {}, false),
     ANY: createType("ANY", [], {}, false),
-    VOID: createType("VOID")
+    VOID: createType("VOID"),
+    TYPE: createType("TYPE", [], {}, false),
+    EXPRESSION: createType("EXPRESSION", [], {}, false)
 }
 
 const createTypedList = (ofType) => {
@@ -59,14 +63,22 @@ const createTypedTuple = (types) => {
     }, true);
 }
 
-const createTypedFunction = (types) => {
-    return createType("FUNCTION", types, {
-        'match': (t) => t.every((item, index) => typesEqual(item.type, types[index]))
+//Has body to eval and var names table.
+const createTypedFunction = (signature) => {
+    return createType("FUNCTION", signature.value, {
+        'match': (t) => t.every((item, index) => typesEqual(item.type, signature.value[index]))
     }, true);
 }
 
 const meta = {
+    SIGNATURE: createTypedList(primitives.TYPE),
     LIST: createTypedList(primitives.ANY),
     FUNCTION: createTypedFunction([primitives.VOID]),
     TUPLE: createTypedTuple([primitives.ANY])
+}
+
+
+//Stub
+const parseSignatureToTypeList = (signatureString) => {
+    return [];
 }
