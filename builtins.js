@@ -1,4 +1,4 @@
-import types from './types'
+import  {primitives, meta, createType, createTypedList, createTypedTuple, createTypedFunction} from './types'
 
 module.exports = {
  builtins
@@ -8,25 +8,25 @@ const builtins = {
     '+': [
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.primitives.OBJECT],
+            'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => a + b
         },
         {
             'arity': 2,
-            'types': [types.meta.LIST, types.meta.LIST],
+            'types': [meta.LIST, meta.LIST],
             'conditions': [() => true, () => true],
             'function': (a, b) => a.concat(b)
         },
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.meta.LIST],
+            'types': [primitives.ANY, meta.LIST],
             'conditions': [() => true, () => true],
             'function': (a, b) => [a, ...b]
         },
         {
             'arity': 2,
-            'types': [types.meta.LIST, types.primitives.OBJECT],
+            'types': [meta.LIST, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => [...a, b]
         },
@@ -34,13 +34,13 @@ const builtins = {
     '*': [
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.primitives.OBJECT],
+            'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => a * b
         },
         {
             'arity': 2,
-            'types': [types.meta.LIST, types.primitives.NUMBER],
+            'types': [meta.LIST, primitives.NUMBER],
             'conditions': [() => true, () => true],
             'function': (a, b) => {
                 const list = [];
@@ -54,7 +54,7 @@ const builtins = {
         },
         {
             'arity': 2,
-            'types': [types.primitives.NUMBER, types.meta.LIST],
+            'types': [primitives.NUMBER, meta.LIST],
             'conditions': [() => true, () => true],
             'function': (a, b) => {
                 const list = [];
@@ -70,7 +70,7 @@ const builtins = {
     '-': [
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.primitives.OBJECT],
+            'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => a - b
         }
@@ -78,7 +78,7 @@ const builtins = {
     '/': [
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.primitives.OBJECT],
+            'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => a / b
         }
@@ -86,7 +86,7 @@ const builtins = {
     '>': [
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.primitives.OBJECT],
+            'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => a > b
         }
@@ -94,7 +94,7 @@ const builtins = {
     '<': [
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.primitives.OBJECT],
+            'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => a < b
         }
@@ -102,7 +102,7 @@ const builtins = {
     '&': [
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.primitives.OBJECT],
+            'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => a && b
         }
@@ -110,7 +110,7 @@ const builtins = {
     '|': [
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.primitives.OBJECT],
+            'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => a || b
         }
@@ -118,7 +118,7 @@ const builtins = {
     '<=': [
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.primitives.OBJECT],
+            'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => a <= b
         }
@@ -126,7 +126,7 @@ const builtins = {
     '>=': [
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.primitives.OBJECT],
+            'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': (a, b) => a >= b
         }
@@ -134,10 +134,10 @@ const builtins = {
     '->': [
         {
             'arity': 2,
-            'types': [types.meta.LIST, types.meta.TUPLE],
+            'types': [meta.LIST, createTypedFunction([primitives.ANY, primitives.ANY])],
             'conditions': [() => true, () => true],
             'function': (list, action, variables, functions, parseFunction) => {
-                return list.reduce((item, index) => {
+                return list.map((item, index) => {
                     variables.enterScope();
                     variables.assignValue('@', item);
                     variables.assignValue('#', index);
@@ -150,7 +150,7 @@ const builtins = {
         },
         {
             'arity': 2,
-            'types': [types.primitives.OBJECT, types.meta.FUNCTION],
+            'types': [primitives.ANY, createTypedFunction([primitives.ANY, primitives.ANY])],
             'conditions': [() => true, () => true],
             'function': (obj, action, variables, functions, parseFunction) => {
                 variables.enterScope();
@@ -161,6 +161,27 @@ const builtins = {
                 variables.exitScope();
                 return result;
             }
+        },
+    ],
+    '\\>': [
+        {
+            'arity': 2,
+            'types': [meta.LIST, createTypedTuple([createTypedFunction([primitives.ANY, primitives.ANY]), primitives.ANY])],
+            'conditions': [() => true, () => true],
+            'function': (list, reducer, variables, functions, parseFunction) => {
+                return list.reduce((item, index) => {
+                    variables.enterScope();
+                    variables.assignValue('@', item);
+                    variables.assignValue('#', index);
+                    variables.assignValue('^', list);
+                    const result = parseFunction(action['body'], variables, functions);
+                    variables.exitScope();
+                    return result;
+                })
+            }
         }
+    ],
+    '~>': [
+
     ]
 }
