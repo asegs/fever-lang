@@ -1,4 +1,4 @@
-import  {primitives, meta, createType, createVar, createTypedList, createTypedTuple, createTypedFunction, parseSignatureToTypeList} from './types'
+import {primitives, meta, createTypedFunction, createTypedTuple, createVar} from './types'
 
 module.exports = {
  builtins
