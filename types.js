@@ -37,7 +37,8 @@ export const primitives = {
     ANY: createType("ANY", [], {}, false),
     VOID: createType("VOID"),
     TYPE: createType("TYPE", [], {}, false),
-    EXPRESSION: createType("EXPRESSION", [], {}, false)
+    EXPRESSION: createType("EXPRESSION", [], {}, false),
+    CONDITION: createType("CONDITION", [], {}, false)
 }
 
 export const createTypedList = (ofType) => {
@@ -64,10 +65,4 @@ export const meta = {
     LIST: createTypedList(primitives.ANY),
     FUNCTION: createTypedFunction([primitives.VOID]),
     TUPLE: createTypedTuple([primitives.ANY])
-}
-
-
-//Stub
-export const parseSignatureToTypeList = (signatureString) => {
-    return [];
 }

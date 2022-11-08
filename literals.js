@@ -4,10 +4,6 @@ const everyCharNumeric = (string) => {
    return string.match(/^-?[0-9]+$/g) || string.match(/^-?[0-9]+\.[0-9]+$/g);
 }
 
-const startsAndEndsWith = (str, char) => {
-    return str[0] === char && str[str.length - 1];
-}
-
 const isStringLiteral = (string) => {
     return string.match(/^".+"$/g) || string.match(/^'.+'$/g);
 }
@@ -29,6 +25,14 @@ const isTuple = (string) => {
         return false;
     }
     return parseCollectionToItems(string).length > 1;
+
+    //Check for signature vs. tuple.  Signature is just typed tuple.
+}
+
+const isExpression = (string) => {
+    return string.match(/^\(.+\)$/g);
+
+    //Check for signature vs. expression.  They look similar, maybe ambiguous.
 }
 
 
@@ -100,7 +104,10 @@ const inferTypeAndValue = (string) => {
         const entries = parseCollectionToItems(string);
         const items = entries.map(e => inferTypeAndValue(e));
         return createVar(items, createTypedTuple(items.map(i => i.type)))
+    } else if (isExpression(string)) {
+        return createVar(string.slice(1, string.length - 1), primitives.EXPRESSION);
     }
+    return createVar(null, primitives.VOID);
 }
 
 console.log(inferTypeAndValue("3"))
@@ -116,3 +123,7 @@ console.log(inferTypeAndValue("(1,2)"))
 console.log(inferTypeAndValue("(1,'hello')"))
 console.log(inferTypeAndValue("(1,(2,'hello'))"))
 console.log(inferTypeAndValue("(+(3,1))"))
+console.log(inferTypeAndValue("(a: String, b: String)"))
+console.log(inferTypeAndValue("(a: String, b)"))
+console.log(inferTypeAndValue("(true, a: String)"))
+console.log(inferTypeAndValue("(true, >(length(a),1)): String"))
