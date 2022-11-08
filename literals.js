@@ -1,4 +1,4 @@
-import {createTypedList, createVar, meta, primitives, typesEqual} from './types.js'
+import {createTypedList, createTypedTuple, createVar, meta, primitives, typesEqual} from './types.js'
 
 const everyCharNumeric = (string) => {
    return string.match(/^-?[0-9]+$/g) || string.match(/^-?[0-9]+\.[0-9]+$/g);
@@ -25,9 +25,12 @@ const isList = (string) => {
 }
 
 const isTuple = (string) => {
-    //Trickier than lists, tuples and expressions are ambiguous.
-    //Easy starting heuristic is if it contains a top level comma?
+    if (!string.match(/^\(.+\)$/g)) {
+        return false;
+    }
+    return parseCollectionToItems(string).length > 1;
 }
+
 
 const parseCollectionToItems = (string) => {
     const internal = string.slice(1, string.length - 1);
@@ -93,6 +96,10 @@ const inferTypeAndValue = (string) => {
             }
         }
         return createVar(items, meta.LIST);
+    } else if (isTuple(string)) {
+        const entries = parseCollectionToItems(string);
+        const items = entries.map(e => inferTypeAndValue(e));
+        return createVar(items, createTypedTuple(items.map(i => i.type)))
     }
 }
 
