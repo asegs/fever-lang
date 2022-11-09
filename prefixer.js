@@ -1,5 +1,5 @@
-const readline = require("readline");
-const rl = readline.createInterface({
+import {createInterface} from 'readline';
+const rl = createInterface({
     input: process.stdin,
     output: process.stdout
 });
@@ -117,11 +117,12 @@ const preprocess = (text) => {
     return builder;
 }
 
-const splitArray = (text) => {
+export const splitArray = (text) => {
     let doubleQuotes = 0;
     let singleQuotes = 0;
     let openParens = 0;
     let openBrackets = 0;
+    let openBraces = 0;
     const chunks = [];
     let current = "";
     for (let i = 0 ; i < text.length ; i ++ ) {
@@ -145,8 +146,13 @@ const splitArray = (text) => {
             case ']':
                 openBrackets--;
                 break;
+            case '{':
+                openBraces ++;
+                break;
+            case '}':
+                openBraces --;
         }
-        if (char === ',' && (notQuoted(singleQuotes, doubleQuotes) && openParens === 0 && openBrackets === 0)) {
+        if (char === ',' && (notQuoted(singleQuotes, doubleQuotes) && openParens === 0 && openBrackets === 0 && openBraces === 0)) {
             chunks.push(current);
             current = ""
         } else {
@@ -169,9 +175,10 @@ const lexer = (rawText) => {
     let recursiveBuffer = "";
     let openParens = 0;
     let openBrackets = 0;
+    let openBraces = 0;
     for (let i = 0 ; i < text.length ; i ++ ) {
         const char = text[i];
-        if (char in unusualCases && notQuoted(singleQuotes, doubleQuotes) && (openParens === 0 && openBrackets === 0)) {
+        if (char in unusualCases && notQuoted(singleQuotes, doubleQuotes) && (openParens === 0 && openBrackets === 0 && openBraces === 0)) {
             const score = unusualCases[char](text, i);
             if (score === 1) {
                 operatorStack.push(char + text[i + 1]);
@@ -181,7 +188,7 @@ const lexer = (rawText) => {
             } else {
                 currentBuffer += char;
             }
-        } else if (infixes.includes(char) && notQuoted(singleQuotes, doubleQuotes) && (openParens === 0 && openBrackets === 0)) {
+        } else if (infixes.includes(char) && notQuoted(singleQuotes, doubleQuotes) && (openParens === 0 && openBrackets === 0 && openBraces === 0)) {
             operatorStack.push(char);
         } else if (char !== ' ' || !notQuoted(singleQuotes, doubleQuotes)) {
             if (notQuoted(singleQuotes, doubleQuotes)) {
@@ -198,16 +205,21 @@ const lexer = (rawText) => {
                     case ']':
                         openBrackets--;
                         break;
+                    case '{':
+                        openBraces ++;
+                        break;
+                    case '}':
+                        openBraces --;
                 }
             }
-            if (openBrackets === 0 && openParens === 0) {
+            if (openBrackets === 0 && openParens === 0 && openBraces === 0) {
                 if (recursiveBuffer.length > 0) {
-                    if (char === ')' || char === ']') {
+                    if (char === ')' || char === ']' || char === '}') {
                         recursiveBuffer += char;
                     }
                     const internal = recursiveBuffer.slice(1, recursiveBuffer.length - 1);
                     let newBuffer = "";
-                    if (char === ']') {
+                    if (char === ']' || char === '}') {
                         const entries = splitArray(internal);
                         newBuffer = entries.map(e => lexer(e)).join(',');
                     } else {
@@ -250,4 +262,4 @@ const prompt = () => {
         prompt();
     })
 }
-prompt();
+//prompt();
