@@ -1,10 +1,7 @@
 import {primitives, meta, createTypedFunction, createTypedTuple, createVar} from './types'
 
-module.exports = {
- builtins
-}
 
-const builtins = {
+export const builtins = {
     '+': [
         {
             'arity': 2,

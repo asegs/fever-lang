@@ -26,14 +26,19 @@ const isTuple = (string) => {
         return false;
     }
     return parseCollectionToItems(string).length > 1;
-
-    //Check for signature vs. tuple.  Signature is just typed tuple.
 }
 
 const isExpression = (string) => {
     return string.match(/^\(.+\)$/g);
+}
 
-    //Check for signature vs. expression.  They look similar, maybe ambiguous.
+const isSignature = (string) => {
+    return string.match(/^{.+}$/g);
+}
+
+//Stub.
+const parseToCondition = (string) => {
+    return null;
 }
 
 
@@ -69,19 +74,22 @@ const inferTypeAndValue = (string) => {
         return createVar(items, createTypedTuple(items.map(i => i.type)))
     } else if (isExpression(string)) {
         return createVar(string.slice(1, string.length - 1), primitives.EXPRESSION);
+    } else if (isSignature(string)) {
+        const entries = parseCollectionToItems(string);
+        return createVar(entries.map(e => parseToCondition(e)), meta.SIGNATURE);
     }
     return createVar(null, primitives.VOID);
 }
 
-// console.log(inferTypeAndValue("3"))
-// console.log(inferTypeAndValue("3.5"))
-// console.log(inferTypeAndValue("-82.13"))
-// console.log(inferTypeAndValue('"hello"'))
-// console.log(inferTypeAndValue("'hello'"))
-// console.log(inferTypeAndValue("true"))
-// console.log(inferTypeAndValue("false"))
-// console.log(inferTypeAndValue("[1,2,3]"))
-// console.log(inferTypeAndValue('[1,2,"hello"]'))
+console.log(inferTypeAndValue("3"))
+console.log(inferTypeAndValue("3.5"))
+console.log(inferTypeAndValue("-82.13"))
+console.log(inferTypeAndValue('"hello"'))
+console.log(inferTypeAndValue("'hello'"))
+console.log(inferTypeAndValue("true"))
+console.log(inferTypeAndValue("false"))
+console.log(inferTypeAndValue("[1,2,3]"))
+console.log(inferTypeAndValue('[1,2,"hello"]'))
 console.log(inferTypeAndValue("(1,2)"))
 console.log(inferTypeAndValue("(1,'hello')"))
 console.log(inferTypeAndValue("(1,(2,'hello'))"))

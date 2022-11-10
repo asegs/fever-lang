@@ -36,7 +36,6 @@ export const primitives = {
     BOOLEAN: createType("BOOLEAN", [], {}, false),
     ANY: createType("ANY", [], {}, false),
     VOID: createType("VOID"),
-    TYPE: createType("TYPE", [], {}, false),
     EXPRESSION: createType("EXPRESSION", [], {}, false),
     CONDITION: createType("CONDITION", [], {}, false)
 }
@@ -61,7 +60,7 @@ export const createTypedFunction = (signature) => {
 }
 
 export const meta = {
-    SIGNATURE: createTypedList(primitives.TYPE),
+    SIGNATURE: createTypedList(primitives.CONDITION),
     LIST: createTypedList(primitives.ANY),
     FUNCTION: createTypedFunction([primitives.VOID]),
     TUPLE: createTypedTuple([primitives.ANY])
