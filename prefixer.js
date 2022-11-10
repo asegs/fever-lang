@@ -117,7 +117,7 @@ const preprocess = (text) => {
     return builder;
 }
 
-export const splitArray = (text) => {
+export const splitGeneral = (text, on) => {
     let doubleQuotes = 0;
     let singleQuotes = 0;
     let openParens = 0;
@@ -152,7 +152,7 @@ export const splitArray = (text) => {
             case '}':
                 openBraces --;
         }
-        if (char === ',' && (notQuoted(singleQuotes, doubleQuotes) && openParens === 0 && openBrackets === 0 && openBraces === 0)) {
+        if (char === on && (notQuoted(singleQuotes, doubleQuotes) && openParens === 0 && openBrackets === 0 && openBraces === 0)) {
             chunks.push(current);
             current = ""
         } else {
@@ -165,7 +165,11 @@ export const splitArray = (text) => {
     return chunks;
 }
 
-const lexer = (rawText) => {
+export const splitArray = (text) => {
+    return splitGeneral(text, ',');
+}
+
+export const lexer = (rawText) => {
     const text = preprocess(rawText);
     const reorderStack = [];
     const operatorStack = [];
@@ -219,11 +223,15 @@ const lexer = (rawText) => {
                     }
                     const internal = recursiveBuffer.slice(1, recursiveBuffer.length - 1);
                     let newBuffer = "";
+                    const entries = splitArray(internal);
                     if (char === ']' || char === '}') {
-                        const entries = splitArray(internal);
                         newBuffer = entries.map(e => lexer(e)).join(',');
                     } else {
-                        newBuffer = lexer(internal);
+                        if (entries.length > 1) {
+                            newBuffer = entries.map(e => lexer(e)).join(',');
+                        } else {
+                            newBuffer = lexer(internal);
+                        }
                     }
                     currentBuffer += recursiveBuffer[0] + newBuffer + recursiveBuffer[recursiveBuffer.length - 1];
                     recursiveBuffer = "";
@@ -262,4 +270,3 @@ const prompt = () => {
         prompt();
     })
 }
-//prompt();

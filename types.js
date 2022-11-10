@@ -1,3 +1,5 @@
+import {splitGeneral, splitArray} from "./prefixer.js";
+
 export const createType = (baseName, types, methods, meta) => {
     return {
         'baseName': baseName,
@@ -57,6 +59,37 @@ export const createTypedFunction = (signature) => {
     return createType("FUNCTION", signature.value, {
         'match': (t) => t.every((item, index) => typesEqual(item.type, signature.value[index]))
     }, true);
+}
+
+export const inferTypeFromString = (rawString) => {
+    const string = rawString.trim();
+    //Cases
+    for (const [, prim] of Object.entries(primitives)) {
+        if (string.toLowerCase() === prim.baseName.toLowerCase()) {
+            return prim;
+        }
+    }
+    if (string[0] === '[') {
+        const internalType = inferTypeFromString(string.slice(1, string.length - 1));
+        return createTypedList(internalType);
+    }
+    if (string[0] === '(') {
+        const types = splitArray(string.slice(1, string.length - 1)).map(e => inferTypeFromString(e));
+        return createTypedTuple(types);
+    }
+    return primitives.ANY;
+}
+
+export const createConditionFromString = (string) => {
+    const conditionAndType = splitGeneral(string, ':');
+    let type;
+    if (conditionAndType.length === 1) {
+        type = primitives.ANY;
+    } else {
+        type = inferTypeFromString(conditionAndType[1]);
+    }
+    console.log(type)
+
 }
 
 export const meta = {

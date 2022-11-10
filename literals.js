@@ -1,5 +1,13 @@
-import {createTypedList, createTypedTuple, createVar, meta, primitives, typesEqual} from './types.js'
-import {splitArray} from "./prefixer.js";
+import {
+    createConditionFromString,
+    createTypedList,
+    createTypedTuple,
+    createVar,
+    meta,
+    primitives,
+    typesEqual
+} from './types.js'
+import {splitArray, lexer} from "./prefixer.js";
 
 const everyCharNumeric = (string) => {
    return string.match(/^-?[0-9]+$/g) || string.match(/^-?[0-9]+\.[0-9]+$/g);
@@ -36,11 +44,6 @@ const isSignature = (string) => {
     return string.match(/^{.+}$/g);
 }
 
-//Stub.
-const parseToCondition = (string) => {
-    return null;
-}
-
 
 const parseCollectionToItems = (string) => {
     return splitArray(string.slice(1, string.length - 1));
@@ -48,7 +51,6 @@ const parseCollectionToItems = (string) => {
 
 //Will need to take variable table and maybe function table
 const inferTypeAndValue = (string) => {
-    console.log(string)
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);
     } else if (isStringLiteral(string)) {
@@ -76,28 +78,30 @@ const inferTypeAndValue = (string) => {
         return createVar(string.slice(1, string.length - 1), primitives.EXPRESSION);
     } else if (isSignature(string)) {
         const entries = parseCollectionToItems(string);
-        return createVar(entries.map(e => parseToCondition(e)), meta.SIGNATURE);
+        return createVar(entries.map(e => createConditionFromString(e)), meta.SIGNATURE);
     }
+    //Handle case of function call using function table.
     return createVar(null, primitives.VOID);
 }
 
-console.log(inferTypeAndValue("3"))
-console.log(inferTypeAndValue("3.5"))
-console.log(inferTypeAndValue("-82.13"))
-console.log(inferTypeAndValue('"hello"'))
-console.log(inferTypeAndValue("'hello'"))
-console.log(inferTypeAndValue("true"))
-console.log(inferTypeAndValue("false"))
-console.log(inferTypeAndValue("[1,2,3]"))
-console.log(inferTypeAndValue('[1,2,"hello"]'))
-console.log(inferTypeAndValue("(1,2)"))
-console.log(inferTypeAndValue("(1,'hello')"))
-console.log(inferTypeAndValue("(1,(2,'hello'))"))
-console.log(inferTypeAndValue("(+(3,1))"))
+console.log(inferTypeAndValue(lexer("3")))
+console.log(inferTypeAndValue(lexer("3.5")))
+console.log(inferTypeAndValue(lexer("-82.13")))
+console.log(inferTypeAndValue(lexer('"hello"')))
+console.log(inferTypeAndValue(lexer("'hello'")))
+console.log(inferTypeAndValue(lexer("true")))
+console.log(inferTypeAndValue(lexer("false")))
+console.log(inferTypeAndValue(lexer("[1,2,3]")))
+console.log(inferTypeAndValue(lexer('[1,2,"hello"]')))
+console.log(inferTypeAndValue(lexer("(1,2)")))
+console.log(inferTypeAndValue(lexer("(1,'hello')")))
+console.log(inferTypeAndValue(lexer("(1,(2,'hello'))")))
+console.log(inferTypeAndValue(lexer("(3+1)")))
+console.log(inferTypeAndValue(lexer("(1,2,3+5)")))
 console.log(inferTypeAndValue("{a: String, b: String}"))
 console.log(inferTypeAndValue("{a: String, b}"))
 console.log(inferTypeAndValue("{true, a: String}"))
-console.log(inferTypeAndValue("{true, >(length(a),1)): String}"))
+console.log(inferTypeAndValue(lexer("{true, (length(a) > 1): String}")))
 /**
  * Conditions:
  *
