@@ -8,6 +8,7 @@ import {
     typesEqual
 } from './types.js'
 import {splitArray, lexer} from "./prefixer.js";
+import {ScopedVars} from "./vars.js";
 
 const everyCharNumeric = (string) => {
    return string.match(/^-?[0-9]+$/g) || string.match(/^-?[0-9]+\.[0-9]+$/g);
@@ -50,7 +51,7 @@ const parseCollectionToItems = (string) => {
 }
 
 //Will need to take variable table and maybe function table
-const inferTypeAndValue = (string) => {
+const inferTypeAndValue = (string, vars, functions) => {
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);
     } else if (isStringLiteral(string)) {
@@ -84,24 +85,26 @@ const inferTypeAndValue = (string) => {
     return createVar(null, primitives.VOID);
 }
 
-console.log(inferTypeAndValue(lexer("3")))
-console.log(inferTypeAndValue(lexer("3.5")))
-console.log(inferTypeAndValue(lexer("-82.13")))
-console.log(inferTypeAndValue(lexer('"hello"')))
-console.log(inferTypeAndValue(lexer("'hello'")))
-console.log(inferTypeAndValue(lexer("true")))
-console.log(inferTypeAndValue(lexer("false")))
-console.log(inferTypeAndValue(lexer("[1,2,3]")))
-console.log(inferTypeAndValue(lexer('[1,2,"hello"]')))
-console.log(inferTypeAndValue(lexer("(1,2)")))
-console.log(inferTypeAndValue(lexer("(1,'hello')")))
-console.log(inferTypeAndValue(lexer("(1,(2,'hello'))")))
-console.log(inferTypeAndValue(lexer("(3+1)")))
-console.log(inferTypeAndValue(lexer("(1,2,3+5)")))
+const vars = new ScopedVars();
+
+console.log(inferTypeAndValue(lexer("3"), vars))
+console.log(inferTypeAndValue(lexer("3.5"), vars))
+console.log(inferTypeAndValue(lexer("-82.13"), vars))
+console.log(inferTypeAndValue(lexer('"hello"'), vars))
+console.log(inferTypeAndValue(lexer("'hello'"), vars))
+console.log(inferTypeAndValue(lexer("true"), vars))
+console.log(inferTypeAndValue(lexer("false"), vars))
+console.log(inferTypeAndValue(lexer("[1,2,3]"), vars))
+console.log(inferTypeAndValue(lexer('[1,2,"hello"]'), vars))
+console.log(inferTypeAndValue(lexer("(1,2)"), vars))
+console.log(inferTypeAndValue(lexer("(1,'hello')"), vars))
+console.log(inferTypeAndValue(lexer("(1,(2,'hello'))"), vars))
+console.log(inferTypeAndValue(lexer("(3+1)"), vars))
+console.log(inferTypeAndValue(lexer("(1,2,3+5)")), vars)
 console.log(inferTypeAndValue("{a: String, b: String}"))
 console.log(inferTypeAndValue("{a: String, b}"))
 console.log(inferTypeAndValue("{true, a: String}"))
-console.log(inferTypeAndValue(lexer("{true, (length(a) > 1): String}")))
+console.log(inferTypeAndValue(lexer("{true, (length(a) > 1): String}"), vars))
 /**
  * Conditions:
  *

@@ -1,4 +1,4 @@
-class ScopedVars {
+export class ScopedVars {
     constructor() {
         this.scopes = [{}];
         this.depth = 0;
@@ -55,8 +55,4 @@ class ScopedVars {
             this.scopes[this.depth][key] = value;
         }
     }
-}
-
-module.exports = {
-    ScopedVars
 }

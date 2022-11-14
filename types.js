@@ -63,7 +63,6 @@ export const createTypedFunction = (signature) => {
 
 export const inferTypeFromString = (rawString) => {
     const string = rawString.trim();
-    //Cases
     for (const [, prim] of Object.entries(primitives)) {
         if (string.toLowerCase() === prim.baseName.toLowerCase()) {
             return prim;
@@ -78,6 +77,11 @@ export const inferTypeFromString = (rawString) => {
         return createTypedTuple(types);
     }
     return primitives.ANY;
+}
+
+export const inferPatternFromString = (rawString, vars, functions) => {
+    const string = rawString.trim();
+
 }
 
 export const createConditionFromString = (string) => {
