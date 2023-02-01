@@ -34,12 +34,12 @@ export const typesEqual = (t1, t2) => {
 
 export const primitives = {
     NUMBER: createType("NUMBER", [], {}, false),
-    STRING: createType("STRING", [], {}, false),
     BOOLEAN: createType("BOOLEAN", [], {}, false),
+    CHARACTER: createType("CHARACTER",[], {}, false),
     ANY: createType("ANY", [], {}, false),
     VOID: createType("VOID"),
     EXPRESSION: createType("EXPRESSION", [], {}, false),
-    CONDITION: createType("CONDITION", [], {}, false)
+    CONDITION: createType("CONDITION", [], {}, false),
 }
 
 export const createTypedList = (ofType) => {
@@ -99,6 +99,7 @@ export const createConditionFromString = (string) => {
 export const meta = {
     SIGNATURE: createTypedList(primitives.CONDITION),
     LIST: createTypedList(primitives.ANY),
+    STRING: createTypedList(primitives.CHARACTER),
     FUNCTION: createTypedFunction([primitives.VOID]),
     TUPLE: createTypedTuple([primitives.ANY])
 }

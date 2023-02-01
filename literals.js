@@ -51,11 +51,11 @@ const parseCollectionToItems = (string) => {
 }
 
 //Will need to take variable table and maybe function table
-const inferTypeAndValue = (string, vars, functions) => {
+const inferTypeAndValue = (string, vars, functions, evaluateExpressions) => {
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);
     } else if (isStringLiteral(string)) {
-        return createVar(string.slice(1, string.length - 1), primitives.STRING);
+        return createVar(string.slice(1, string.length - 1), meta.STRING);
     } else if (isWord(string)) {
         if (wordIsBoolean(string)) {
             return createVar(string === "true", primitives.BOOLEAN);
@@ -100,11 +100,13 @@ console.log(inferTypeAndValue(lexer("(1,2)"), vars))
 console.log(inferTypeAndValue(lexer("(1,'hello')"), vars))
 console.log(inferTypeAndValue(lexer("(1,(2,'hello'))"), vars))
 console.log(inferTypeAndValue(lexer("(3+1)"), vars))
-console.log(inferTypeAndValue(lexer("(1,2,3+5)")), vars)
+console.log(inferTypeAndValue(lexer("(1,2,(3+5))")), vars)
 console.log(inferTypeAndValue("{a: String, b: String}"))
 console.log(inferTypeAndValue("{a: String, b}"))
 console.log(inferTypeAndValue("{true, a: String}"))
 console.log(inferTypeAndValue(lexer("{true, (length(a) > 1): String}"), vars))
+console.log(inferTypeAndValue(lexer("a = ({true} => 3)"), vars))
+console.log(inferTypeAndValue(lexer("a = 3")))
 /**
  * Conditions:
  *
