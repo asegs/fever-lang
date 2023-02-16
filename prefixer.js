@@ -169,6 +169,22 @@ export const splitArray = (text) => {
     return splitGeneral(text, ',');
 }
 
+export const isAssignment = (text) => {
+    return /^[a-zA-Z_]+[_0-9a-zA-Z]* *=.*$/gm.test(text);
+}
+
+export const splitAssignment = (text) => {
+    const firstEq = text.indexOf("=");
+    const name = (firstEq !== -1 ? text.slice(0, firstEq) : "_").trim();
+    const body = (firstEq !== -1 ? text.slice(firstEq + 1) : text).trim();
+    return [name, body];
+}
+
+export const lex = (rawText) => {
+    const [name, body] = splitAssignment(rawText);
+    return "=(" + name +"," + lexer(body) + ")";
+}
+
 export const lexer = (rawText) => {
     const text = preprocess(rawText);
     const reorderStack = [];
@@ -266,7 +282,8 @@ export const lexer = (rawText) => {
 
 const prompt = () => {
     rl.question(">", (inp) => {
-        console.log(lexer(inp));
+        console.log(lex(inp));
         prompt();
     })
 }
+prompt();
