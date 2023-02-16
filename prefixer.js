@@ -181,7 +181,7 @@ export const splitAssignment = (text) => {
 }
 
 export const lex = (rawText) => {
-    const [name, body] = splitAssignment(rawText);
+    const [name, body] = isAssignment(rawText) ? splitAssignment(rawText) : ["_", rawText];
     return "=(" + name +"," + lexer(body) + ")";
 }
 
