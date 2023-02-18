@@ -7,7 +7,7 @@ import {
     primitives,
     typesEqual
 } from './types.js'
-import {splitArray, lexer} from "./prefixer.js";
+import {splitArray, lex} from "./prefixer.js";
 import {ScopedVars} from "./vars.js";
 
 const everyCharNumeric = (string) => {
@@ -51,7 +51,8 @@ const parseCollectionToItems = (string) => {
 }
 
 //Will need to take variable table and maybe function table
-const inferTypeAndValue = (string, vars, functions, evaluateExpressions) => {
+export const inferTypeAndValue = (string, vars, functions) => {
+    console.log(string)
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);
     } else if (isStringLiteral(string)) {
@@ -81,32 +82,33 @@ const inferTypeAndValue = (string, vars, functions, evaluateExpressions) => {
         const entries = parseCollectionToItems(string);
         return createVar(entries.map(e => createConditionFromString(e)), meta.SIGNATURE);
     }
-    //Handle case of function call using function table.
+
     return createVar(null, primitives.VOID);
 }
 
 const vars = new ScopedVars();
 
-console.log(inferTypeAndValue(lexer("3"), vars))
-console.log(inferTypeAndValue(lexer("3.5"), vars))
-console.log(inferTypeAndValue(lexer("-82.13"), vars))
-console.log(inferTypeAndValue(lexer('"hello"'), vars))
-console.log(inferTypeAndValue(lexer("'hello'"), vars))
-console.log(inferTypeAndValue(lexer("true"), vars))
-console.log(inferTypeAndValue(lexer("false"), vars))
-console.log(inferTypeAndValue(lexer("[1,2,3]"), vars))
-console.log(inferTypeAndValue(lexer('[1,2,"hello"]'), vars))
-console.log(inferTypeAndValue(lexer("(1,2)"), vars))
-console.log(inferTypeAndValue(lexer("(1,'hello')"), vars))
-console.log(inferTypeAndValue(lexer("(1,(2,'hello'))"), vars))
-console.log(inferTypeAndValue(lexer("(3+1)"), vars))
-console.log(inferTypeAndValue(lexer("(1,2,(3+5))")), vars)
+console.log(inferTypeAndValue(lex("3"), vars))
+console.log(inferTypeAndValue(lex("3.5"), vars))
+console.log(inferTypeAndValue(lex("-82.13"), vars))
+console.log(inferTypeAndValue(lex('"hello"'), vars))
+console.log(inferTypeAndValue(lex("'hello'"), vars))
+console.log(inferTypeAndValue(lex("true"), vars))
+console.log(inferTypeAndValue(lex("false"), vars))
+console.log(inferTypeAndValue(lex("[1,2,3]"), vars))
+console.log(inferTypeAndValue(lex('[1,2,"hello"]'), vars))
+console.log(inferTypeAndValue(lex("(1,2)"), vars))
+console.log(inferTypeAndValue(lex("(1,'hello')"), vars))
+console.log(inferTypeAndValue(lex("(1,(2,'hello'))"), vars))
+console.log(inferTypeAndValue(lex("(3+1)"), vars))
+console.log(inferTypeAndValue(lex("(1,2,(3+5))")), vars)
 console.log(inferTypeAndValue("{a: String, b: String}"))
 console.log(inferTypeAndValue("{a: String, b}"))
 console.log(inferTypeAndValue("{true, a: String}"))
-console.log(inferTypeAndValue(lexer("{true, (length(a) > 1): String}"), vars))
-console.log(inferTypeAndValue(lexer("a = ({true} => 3)"), vars))
-console.log(inferTypeAndValue(lexer("a = 3")))
+console.log(inferTypeAndValue(lex("{true, (length(a) > 1): String}"), vars))
+console.log(inferTypeAndValue(lex("a = ({true} => 3)"), vars))
+console.log(inferTypeAndValue(lex("a = 3")))
+console.log(inferTypeAndValue(lex("3+5")))
 /**
  * Conditions:
  *
