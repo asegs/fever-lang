@@ -1,4 +1,4 @@
-import {lex} from "./prefixer.js";
+import {lex, splitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
 
 const goals = {
@@ -8,9 +8,9 @@ const goals = {
 
 //.. as infix function
 
-const interpret = (text, variables, functions, goal) => {
+const interpret = (text, variables, functions, morphisms ,goal) => {
     const lexed = lex()
-    const result = evaluate(lexed, variables, functions, goal);
+    return evaluate(lexed, variables, functions, morphisms, goal);
 }
 
 const stripRedundantParens = (text) => {
@@ -24,7 +24,12 @@ const isFunctionCall = (text) => {
     return /^.+\(.*\)$/gm.test(text);
 }
 
-const callFunction = (name, args, functions) => {
+const splitIntoNameAndBody = (text) => {
+    const firstParen = text.indexOf("(");
+    return [text.slice(0, firstParen), text.slice(firstParen)]
+}
+
+const callFunction = (name, args, functions, morphisms) => {
     if (!(name in functions)) {
         throw "Unknown function " + name + " invoked."
     }
@@ -37,10 +42,12 @@ const callFunction = (name, args, functions) => {
     }
 }
 
-const evaluate = (text, variables, functions, goal) => {
+const evaluate = (text, variables, functions, morphisms, goal) => {
     const cleanText = stripRedundantParens(text);
     if (isFunctionCall(text)) {
-        //interpret recursively
+        const [name, body] = splitIntoNameAndBody(text);
+        const args = splitArray(body).map(e => evaluate(e, variables, functions, morphisms, goal));
+        return callFunction(name, args, functions, morphisms);
     }
 
     return inferTypeAndValue(cleanText, variables, functions);
