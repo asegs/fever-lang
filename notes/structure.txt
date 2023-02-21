@@ -1,0 +1,104 @@
+{
+  "types": ["STRING"],
+  "value": "Hello, world"
+}
+
+
+Condition
+For (len(x) > 5): String
+{
+  "types": ["CONDITION"],
+  "value": {
+    "name": "x",
+    "typeTest": (x) => typeMatch(meta.STRING),
+    "valueTest": (x) => interpret("(>(len(x),5))").value
+  }
+}
+
+Signature
+d = 10
+For {a: String, b, (len(c) > 5), 3, [1,2,3], d}
+[
+    {
+      "types": ["CONDITION"],
+      "value": {
+        "name": "a",
+        "typeTest": (x) => typeMatch(meta.STRING),
+        "valueTest": null
+      }
+    },
+    {
+      "types": ["CONDITION"],
+      "value": {
+        "name": "b",
+        "typeTest": (x) => true,
+        "valueTest": (x) => interpret("(>(len(x),5))").value
+      }
+    },
+    {
+      "types": ["CONDITION"],
+      "value": {
+        "name": "",
+        "typeTest": (x) => typeMatch(meta.STRING),
+        "valueTest": (x) => x === 3
+      }
+    },
+    {
+          "types": ["CONDITION"],
+          "value": {
+            "name": "x",
+            "typeTest": (x) => typeMatch(meta.NUMBER),
+            "valueTest": (x) => x === 3
+          }
+     },
+     {
+           "types": ["CONDITION"],
+           "value": {
+             "name": "x",
+             "typeTest": (x) => typeMatch(meta.LIST),
+             "valueTest": (x) => x === [1,2,3]
+           }
+     },
+     {
+           "types": ["CONDITION"],
+           "value": {
+             "name": "x",
+             "typeTest": (x) => typeMatch(meta.STRING),
+             "valueTest": (x) => x === 3
+           }
+      },
+
+]
+
+Function:
+For {a: String, ""} => (reverse(a))
+{
+    "types": ["SIGNATURE", "EXPRESSION"],
+    "value": {
+        "signature": {
+            "types": ["SIGNATURE"],
+            "value": [
+                {
+                     "types": ["CONDITION"],
+                     "value": {
+                       "name": "a",
+                       "typeTest": (x) => typeMatch(meta.STRING),
+                       "valueTest": (x) => true
+                     }
+                },
+                {
+                   "types": ["CONDITION"],
+                   "value": {
+                     "name": "_",
+                     "typeTest": (x) => typeMatch(meta.STRING),
+                     "valueTest": (x) => x === ""
+                   }
+              },
+            ]
+        },
+        "expression": {
+            "types": ["EXPRESSION"],
+            "value": (reverse(a))
+        }
+    }
+}

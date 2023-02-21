@@ -101,5 +101,24 @@ export const meta = {
     LIST: createTypedList(primitives.ANY),
     STRING: createTypedList(primitives.CHARACTER),
     FUNCTION: createTypedFunction([primitives.VOID]),
-    TUPLE: createTypedTuple([primitives.ANY])
+    TUPLE: createTypedTuple([primitives.ANY]),
+
 }
+
+/**
+ *Signature:
+  {
+  "types": ["LIST"],
+  "value": [
+  {
+  "type": "STRING",
+  "test": () => interpret("len(x) > 5")
+  }
+  ]
+  }
+
+ *Function:
+ {
+ "types"
+ }
+ */

@@ -31,7 +31,7 @@ const isList = (string) => {
 }
 
 const isTuple = (string) => {
-    if (!string.match(/^\(.+\)$/g)) {
+    if (!isExpression(string)) {
         return false;
     }
     return parseCollectionToItems(string).length > 1;
