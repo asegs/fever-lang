@@ -17,7 +17,7 @@ For (len(x) > 5): String
 
 Signature
 d = 10
-For {a: String, b, (len(c) > 5), 3, [1,2,3], d}
+For {a: String, b, (len(c) > 5), 3, [1,2,3], d, String, :String}
 [
     {
       "types": ["CONDITION"],
@@ -71,30 +71,36 @@ For {a: String, b, (len(c) > 5), 3, [1,2,3], d}
 ]
 
 Function:
-For {a: String, ""} => (reverse(a))
+For {a: String, "", :String} => (reverse(a))
 {
     "types": ["SIGNATURE", "EXPRESSION"],
     "value": {
         "signature": {
             "types": ["SIGNATURE"],
-            "value": [
-                {
-                     "types": ["CONDITION"],
-                     "value": {
-                       "name": "a",
-                       "typeTest": (x) => typeMatch(meta.STRING),
-                       "valueTest": (x) => true
-                     }
-                },
-                {
-                   "types": ["CONDITION"],
-                   "value": {
-                     "name": "_",
-                     "typeTest": (x) => typeMatch(meta.STRING),
-                     "valueTest": (x) => x === ""
-                   }
-              },
-            ]
+            "value": {
+                "conditions": [
+                                  {
+                                       "types": ["CONDITION"],
+                                       "value": {
+                                         "name": "a",
+                                         "typeTest": (x) => typeMatch(meta.STRING),
+                                         "valueTest": (x) => true
+                                       }
+                                  },
+                                  {
+                                     "types": ["CONDITION"],
+                                     "value": {
+                                       "name": "_",
+                                       "typeTest": (x) => typeMatch(meta.STRING),
+                                       "valueTest": (x) => x === ""
+                                     }
+                                },
+                              ],
+                "return": {
+                    "types": ["TYPE"],
+                    "value": meta.STRING
+                }
+            }
         },
         "expression": {
             "types": ["EXPRESSION"],

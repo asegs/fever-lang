@@ -40,6 +40,9 @@ export const primitives = {
     VOID: createType("VOID"),
     EXPRESSION: createType("EXPRESSION", [], {}, false),
     CONDITION: createType("CONDITION", [], {}, false),
+    TYPE: createType("TYPE", [], {}, false),
+
+
 }
 
 export const createTypedList = (ofType) => {
