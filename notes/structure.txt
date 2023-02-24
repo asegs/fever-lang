@@ -83,20 +83,20 @@ For {a: String, "", :String} => (reverse(a))
                                        "types": ["CONDITION"],
                                        "value": {
                                          "name": "a",
-                                         "typeTest": (x) => typeMatch(meta.STRING),
-                                         "valueTest": (x) => true
+                                         "type": meta.STRING,
+                                         "valueExpression": "true"
                                        }
                                   },
                                   {
                                      "types": ["CONDITION"],
                                      "value": {
                                        "name": "_",
-                                       "typeTest": (x) => typeMatch(meta.STRING),
-                                       "valueTest": (x) => x === ""
+                                       "typeTest": meta.STRING,
+                                       "valueTest": '""'
                                      }
                                 },
                               ],
-                "return": {
+                "returned": {
                     "types": ["TYPE"],
                     "value": meta.STRING
                 }

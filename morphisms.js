@@ -4,7 +4,21 @@ export class Morphisms {
         this.cache = {};
     }
 
+    //Make from and true into string
     registerMorphism (morph)  {
         const signature = morph.value.signature;
+        const from = signature.conditions[0];
+        const to = signature.returned.value;
+
+        if (!(from in this.table)) {
+            this.table[from] = {}
+        }
+
+        this.table[from][to] = morph;
+    }
+
+    //Just track the type path, no need to generate composed functions.
+    rebuildCaches () {
+
     }
 }
