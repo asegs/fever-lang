@@ -21,4 +21,9 @@ export class Morphisms {
     rebuildCaches () {
 
     }
+
+    //We basically already have a graph, just add visited stat and children
+    buildGraph () {
+
+    }
 }
