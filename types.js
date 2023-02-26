@@ -41,8 +41,6 @@ export const primitives = {
     EXPRESSION: createType("EXPRESSION", [], {}, false),
     CONDITION: createType("CONDITION", [], {}, false),
     TYPE: createType("TYPE", [], {}, false),
-
-
 }
 
 export const createTypedList = (ofType) => {
