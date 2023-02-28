@@ -74,4 +74,3 @@ const pathBetweenRec = (end, m, path) => {
     return [];
 }
 
-console.log(pathBetween("BOOLEAN", "LIST(INTEGER)", example))

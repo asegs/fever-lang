@@ -32,6 +32,17 @@ export const typesEqual = (t1, t2) => {
     return t1.types.every((item, index) => typesEqual(item, t2.types[index]));
 }
 
+export const typeCloseness = (testType, comparedTo) => {
+    //Exact match is 1
+    //Same base type is something
+    //Handle [String, String, Int] never working with [String, String, String] (aside from morphisms)
+    //String <-> String => 1
+    //String <-> List => 0.5?
+    //String <-> List(Character) => 1 or 0.75 etc..
+    //Tuple(String, Number, Character) <-> Tuple => 0.5
+    //Tuple(String, Number, Character) <-> Tuple(String, Character, Character) => 0.8333 (assuming 1 step morphism from number to character)
+}
+
 export const primitives = {
     NUMBER: createType("NUMBER", [], {}, false),
     BOOLEAN: createType("BOOLEAN", [], {}, false),
