@@ -1,8 +1,3 @@
-import {createInterface} from 'readline';
-const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
 const infixes = ['+','-','*','/','>','<','&','|','<=','>=','->','\\>','~>','=>','==','%']
 
 const unusualCases = {
@@ -117,7 +112,48 @@ const preprocess = (text) => {
     return builder;
 }
 
+const pairs = [
+    ['[',']'],
+    ['(',')'],
+    ['{','}']
+]
+
+const pairBackRefs = {
+    ']': '[',
+    '}': '{',
+    ')': '('
+}
+
+const unensconce = (text, pair) => {
+    const [start, end] = pair;
+    if (text[0] === start && text[text.length - 1] === end) {
+        return text.slice(1, text.length - 1);
+    }
+    return text;
+}
+
+export const unshiftRedundantNesting = (text) => {
+    let interestedPair = undefined;
+    while (true) {
+        const before = text;
+        if (interestedPair) {
+            text = unensconce(text, interestedPair);
+        } else {
+            for (const pair of pairs) {
+                text = unensconce(text, pair);
+                if (text.length < before.length) {
+                    interestedPair = pair;
+                }
+            }
+        }
+        if (text.length === before.length) {
+            return text;
+        }
+    }
+}
+
 export const splitGeneral = (text, on) => {
+    text = unshiftRedundantNesting(text);
     let doubleQuotes = 0;
     let singleQuotes = 0;
     let openParens = 0;
@@ -280,10 +316,3 @@ export const lexer = (rawText) => {
     return reorderStack.join('');
 }
 
-const prompt = () => {
-    rl.question(">", (inp) => {
-        console.log(lex(inp));
-        prompt();
-    })
-}
-prompt();

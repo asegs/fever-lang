@@ -1,5 +1,7 @@
 import {splitGeneral, splitArray} from "./prefixer.js";
 
+const ANY_VALUE = 0.5;
+
 export const createType = (baseName, types, methods, meta) => {
     return {
         'baseName': baseName,
@@ -33,6 +35,13 @@ export const typesEqual = (t1, t2) => {
 }
 
 export const typeCloseness = (testType, comparedTo) => {
+    if (testType.baseName === "ANY") {
+        return ANY_VALUE;
+    }
+    if (typesEqual(testType, comparedTo)) {
+        return 1;
+    }
+    return 0;
     //Exact match is 1
     //Same base type is something
     //Handle [String, String, Int] never working with [String, String, String] (aside from morphisms)
@@ -104,7 +113,6 @@ export const createConditionFromString = (string) => {
     } else {
         type = inferTypeFromString(conditionAndType[1]);
     }
-    console.log(type)
 
 }
 

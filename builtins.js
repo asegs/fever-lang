@@ -1,4 +1,4 @@
-import {primitives, meta, createTypedFunction, createTypedTuple, createVar} from './types'
+import {primitives, meta, createTypedFunction, createTypedTuple, createVar} from './types.js'
 
 
 export const builtins = {
@@ -7,25 +7,25 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a + b
+            'function': (a, b) => createVar(a.value + b.value, a.type)
         },
         {
             'arity': 2,
             'types': [meta.LIST, meta.LIST],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a.concat(b)
+            'function': (a, b) => createVar(a.value.concat(b.value), a.type)
         },
         {
             'arity': 2,
             'types': [primitives.ANY, meta.LIST],
             'conditions': [() => true, () => true],
-            'function': (a, b) => [a, ...b]
+            'function': (a, b) => createVar([a, ...b.value], b.type)
         },
         {
             'arity': 2,
             'types': [meta.LIST, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => [...a, b]
+            'function': (a, b) => createVar([...a.value, b], a.type)
         },
     ],
     '*': [
@@ -33,7 +33,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a * b
+            'function': (a, b) => createVar(a.value * b.value, a.type)
         },
         {
             'arity': 2,
@@ -41,12 +41,12 @@ export const builtins = {
             'conditions': [() => true, () => true],
             'function': (a, b) => {
                 const list = [];
-                for (let i = 0 ; i < b ; i ++ ) {
-                    for (let z = 0 ; z < a.length ; z ++ ) {
-                        list.push(a[z]);
+                for (let i = 0 ; i < b.value ; i ++ ) {
+                    for (let z = 0 ; z < a.value.length ; z ++ ) {
+                        list.push(a.value[z]);
                     }
                 }
-                return list;
+                return createVar(list, a.type);
             }
         },
         {
@@ -55,12 +55,12 @@ export const builtins = {
             'conditions': [() => true, () => true],
             'function': (a, b) => {
                 const list = [];
-                for (let i = 0 ; i < b ; i ++ ) {
-                    for (let z = 0 ; z < a.length ; z ++ ) {
-                        list.push(a[z]);
+                for (let i = 0 ; i < b.value ; i ++ ) {
+                    for (let z = 0 ; z < a.value.length ; z ++ ) {
+                        list.push(a.value[z]);
                     }
                 }
-                return list;
+                return createVar(list, b.type);
             }
         }
     ],
@@ -69,7 +69,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a - b
+            'function': (a, b) => createVar(a.value - b.value, a.type)
         }
     ],
     '/': [
@@ -77,7 +77,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a / b
+            'function': (a, b) => createVar(a.value / b.value, a.type)
         }
     ],
     '>': [
@@ -85,7 +85,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a > b
+            'function': (a, b) => createVar(a.value > b.value, primitives.BOOLEAN)
         }
     ],
     '<': [
@@ -93,7 +93,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a < b
+            'function': (a, b) => createVar(a.value < b.value, primitives.BOOLEAN)
         }
     ],
     '&': [
@@ -101,7 +101,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a && b
+            'function': (a, b) => createVar(a.value && b.value, primitives.BOOLEAN)
         }
     ],
     '|': [
@@ -109,7 +109,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a || b
+            'function': (a, b) => createVar(a.value || b.value, primitives.BOOLEAN)
         }
     ],
     '<=': [
@@ -117,7 +117,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a <= b
+            'function': (a, b) => createVar(a.value <= b.value, primitives.BOOLEAN)
         }
     ],
     '>=': [
@@ -125,7 +125,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => a >= b
+            'function': (a, b) => createVar(a.value >= b.value, primitives.BOOLEAN)
         }
     ],
     '->': [
@@ -232,5 +232,34 @@ export const builtins = {
             }
 
         }
+    ],
+    '=': [
+        {
+            'arity': 2,
+            'types': [primitives.ANY, primitives.ANY],
+            'conditions': [() => true, () => true],
+            'function': (name, value) => {
+                //Assign to string value of name, wrap name in string at parser level.
+                return value;
+            }
+        }
+    ],
+    'show': [
+        {
+            'arity': 1,
+            'types': [primitives.ANY],
+            'conditions': [() => true],
+            'function': (v) => {
+                console.log(recursiveToString(v));
+                return createVar(v.value, v.type);
+            }
+        }
     ]
+}
+
+const recursiveToString = (v) => {
+    if (Array.isArray(v.value)) {
+        return "[" + v.value.map(i => recursiveToString(i)).join(",") + "]";
+    }
+    return v.value.toString();
 }
