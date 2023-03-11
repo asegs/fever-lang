@@ -21,7 +21,7 @@ export const goals = {
 const interpret = (text, variables, functions, morphisms ,goal) => {
     const lexed = lex(text)
     //Uncomment for debugging
-    console.log(lexed)
+    //console.log(lexed)
     return evaluate(lexed, variables, functions, morphisms, goal);
 }
 
@@ -93,7 +93,11 @@ const v = new ScopedVars();
 
 const prompt = () => {
     rl.question(">", (inp) => {
-        interpret(inp, v, builtins, new Morphisms(), goals.EVALUATE);
+        try {
+            interpret(inp, v, builtins, new Morphisms(), goals.EVALUATE);
+        } catch (e) {
+            console.log(e)
+        }
         prompt();
     })
 }

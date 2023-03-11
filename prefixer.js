@@ -1,5 +1,6 @@
 const infixes = ['+','-','*','/','>','<','&','|','<=','>=','->','\\>','~>','=>','==','%']
 
+//Add range .. operator
 const unusualCases = {
     '-': (text, idx) => {
         const nextChar = getSurroundingChars(text, idx)[2];

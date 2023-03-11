@@ -85,7 +85,7 @@ export const inferTypeAndValue = (string, vars, functions) => {
         return createVar(entries.map(e => createConditionFromString(e)), meta.SIGNATURE);
     }
 
-    return createVar(null, primitives.VOID);
+    throw "No variable named " + string;
 }
 
 const vars = new ScopedVars();
