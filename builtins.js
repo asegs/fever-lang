@@ -1,4 +1,5 @@
-import {primitives, meta, createTypedFunction, createTypedTuple, createVar} from './types.js'
+import {primitives, meta, createTypedFunction, createTypedTuple, createVar, createTypedList} from './types.js'
+import {evaluate, goals} from "./interpreter.js";
 
 
 export const builtins = {
@@ -131,18 +132,20 @@ export const builtins = {
     '->': [
         {
             'arity': 2,
-            'types': [meta.LIST, createTypedFunction([primitives.ANY, primitives.ANY])],
+            'types': [meta.LIST, primitives.EXPRESSION],
             'conditions': [() => true, () => true],
-            'function': (list, action, variables, functions, parseFunction) => {
-                return list.map((item, index) => {
+            'function': (list, action, variables, functions, morphisms) => {
+                const internalList = list.value.map((item, index) => {
                     variables.enterScope();
                     variables.assignValue('@', item);
                     variables.assignValue('#', index);
                     variables.assignValue('^', list);
-                    const result = parseFunction(action['body'], variables, functions);
+                    const result = evaluate(action.value, variables, functions, morphisms, goals.EVALUATE);
                     variables.exitScope();
                     return result;
-                })
+                    }
+                );
+                return createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY));
             }
         },
         {
@@ -252,6 +255,17 @@ export const builtins = {
             'conditions': [() => true],
             'function': (v) => {
                 console.log(recursiveToString(v));
+                return createVar(v.value, v.type);
+            }
+        }
+    ],
+    'explain': [
+        {
+            'arity': 1,
+            'types': [primitives.ANY],
+            'conditions': [() => true],
+            'function': (v) => {
+                console.dir(v, { depth: null });
                 return createVar(v.value, v.type);
             }
         }

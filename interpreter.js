@@ -11,7 +11,7 @@ const rl = createInterface({
     output: process.stdout
 });
 
-const goals = {
+export const goals = {
     EVALUATE: Symbol("EVALUATE"),
     MISSING: Symbol("MISSING"),
 }
@@ -21,7 +21,7 @@ const goals = {
 const interpret = (text, variables, functions, morphisms ,goal) => {
     const lexed = lex(text)
     //Uncomment for debugging
-    //console.log(lexed)
+    console.log(lexed)
     return evaluate(lexed, variables, functions, morphisms, goal);
 }
 
@@ -33,7 +33,7 @@ const stripRedundantParens = (text) => {
 }
 
 const isFunctionCall = (text) => {
-    return /^.+\(.*\)$/gm.test(text);
+    return /^[^(]+\(.*\)$/gm.test(text);
 }
 
 const splitIntoNameAndBody = (text) => {
@@ -77,8 +77,9 @@ const callFunction = (name, args, variables, functions, morphisms) => {
     return bestCandidate.function(...args, variables, functions, morphisms);
 }
 
-const evaluate = (text, variables, functions, morphisms, goal) => {
-    const cleanText = stripRedundantParens(text);
+export const evaluate = (text, variables, functions, morphisms, goal) => {
+    //const cleanText = stripRedundantParens(text);
+    const cleanText = text;
     if (isFunctionCall(text)) {
         const [name, body] = splitIntoNameAndBody(text);
         const args = trimAndSplitArray(body).map(e => evaluate(e, variables, functions, morphisms, goal));
