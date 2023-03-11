@@ -20,7 +20,8 @@ const goals = {
 
 const interpret = (text, variables, functions, morphisms ,goal) => {
     const lexed = lex(text)
-    console.log(lexed)
+    //Uncomment for debugging
+    //console.log(lexed)
     return evaluate(lexed, variables, functions, morphisms, goal);
 }
 
@@ -40,7 +41,7 @@ const splitIntoNameAndBody = (text) => {
     return [text.slice(0, firstParen), text.slice(firstParen)]
 }
 
-const callFunction = (name, args, functions, morphisms) => {
+const callFunction = (name, args, variables, functions, morphisms) => {
     if (!(name in functions)) {
         throw "Unknown function " + name + " invoked."
     }
@@ -73,7 +74,7 @@ const callFunction = (name, args, functions, morphisms) => {
     if (bestScore <= 0) {
         throw "No satisfactory match for " + name + ".";
     }
-    return bestCandidate.function(...args);
+    return bestCandidate.function(...args, variables, functions, morphisms);
 }
 
 const evaluate = (text, variables, functions, morphisms, goal) => {
@@ -81,15 +82,17 @@ const evaluate = (text, variables, functions, morphisms, goal) => {
     if (isFunctionCall(text)) {
         const [name, body] = splitIntoNameAndBody(text);
         const args = trimAndSplitArray(body).map(e => evaluate(e, variables, functions, morphisms, goal));
-        return callFunction(name, args, functions, morphisms);
+        return callFunction(name, args,variables, functions, morphisms);
     }
 
     return inferTypeAndValue(cleanText, variables, functions);
 }
 
+const v = new ScopedVars();
+
 const prompt = () => {
     rl.question(">", (inp) => {
-        interpret(inp, new ScopedVars(), builtins, new Morphisms(), goals.EVALUATE);
+        interpret(inp, v, builtins, new Morphisms(), goals.EVALUATE);
         prompt();
     })
 }

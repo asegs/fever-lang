@@ -238,7 +238,8 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (name, value) => {
+            'function': (name, value, variables) => {
+                variables.assignValue(name.value, value);
                 //Assign to string value of name, wrap name in string at parser level.
                 return value;
             }

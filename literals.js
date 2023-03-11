@@ -52,6 +52,9 @@ const parseCollectionToItems = (string) => {
 
 //Will need to take variable table and maybe function table
 export const inferTypeAndValue = (string, vars, functions) => {
+    if (vars.hasVariable(string)) {
+        return vars.lookupValue(string);
+    }
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);
     } else if (isStringLiteral(string)) {
@@ -63,7 +66,7 @@ export const inferTypeAndValue = (string, vars, functions) => {
         //Return from vars table.
     } else if (isList(string)) {
         const entries = parseCollectionToItems(string);
-        const items = entries.map(e => inferTypeAndValue(e));
+        const items = entries.map(e => inferTypeAndValue(e, vars, functions));
         if (items.length > 0) {
             const first = items[0];
             if (items.every(i => typesEqual(first.type, i.type))) {
@@ -73,7 +76,7 @@ export const inferTypeAndValue = (string, vars, functions) => {
         return createVar(items, meta.LIST);
     } else if (isTuple(string)) {
         const entries = parseCollectionToItems(string);
-        const items = entries.map(e => inferTypeAndValue(e));
+        const items = entries.map(e => inferTypeAndValue(e, vars, functions));
         return createVar(items, createTypedTuple(items.map(i => i.type)))
     } else if (isExpression(string)) {
         return createVar(string.slice(1, string.length - 1), primitives.EXPRESSION);
