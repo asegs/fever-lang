@@ -152,8 +152,10 @@ export const unshiftRedundantNesting = (text) => {
     }
 }
 
+/**
+ * This requires trimming of the initial characters, ie. [1,2,3] -> 1,2,3
+ */
 export const splitGeneral = (text, on) => {
-    text = unshiftRedundantNesting(text);
     let doubleQuotes = 0;
     let singleQuotes = 0;
     let openParens = 0;
@@ -199,6 +201,10 @@ export const splitGeneral = (text, on) => {
         chunks.push(current)
     }
     return chunks;
+}
+
+export const trimAndSplitArray = (text) => {
+    return splitArray(text.slice(1, text.length - 1));
 }
 
 export const splitArray = (text) => {

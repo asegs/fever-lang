@@ -1,10 +1,10 @@
-import {lex, splitArray} from "./prefixer.js";
+import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
 import {createInterface} from 'readline';
+import {typeCloseness} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {builtins} from "./builtins.js";
 import {Morphisms} from "./morphisms.js";
-import {typeCloseness} from "./types.js";
 
 const rl = createInterface({
     input: process.stdin,
@@ -80,7 +80,7 @@ const evaluate = (text, variables, functions, morphisms, goal) => {
     const cleanText = stripRedundantParens(text);
     if (isFunctionCall(text)) {
         const [name, body] = splitIntoNameAndBody(text);
-        const args = splitArray(body).map(e => evaluate(e, variables, functions, morphisms, goal));
+        const args = trimAndSplitArray(body).map(e => evaluate(e, variables, functions, morphisms, goal));
         return callFunction(name, args, functions, morphisms);
     }
 
