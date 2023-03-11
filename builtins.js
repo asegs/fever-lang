@@ -47,6 +47,7 @@ export const builtins = {
                         list.push(a.value[z]);
                     }
                 }
+                //For strings in general, handle the switch between list and string better.
                 return createVar(list, a.type);
             }
         },
