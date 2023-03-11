@@ -283,6 +283,7 @@ export const lexer = (rawText) => {
                     const internal = recursiveBuffer.slice(1, recursiveBuffer.length - 1);
                     let newBuffer = "";
                     const entries = splitArray(internal);
+                    //(Un)wrapped expressions in list literals don't work
                     if (char === ']' || char === '}') {
                         newBuffer = entries.map(e => lexer(e)).join(',');
                     } else {
