@@ -95,6 +95,7 @@ const prompt = () => {
     rl.question(">", (inp) => {
         try {
             interpret(inp, v, builtins, new Morphisms(), goals.EVALUATE);
+            evaluate("show(_)", v, builtins, new Morphisms(), goals.EVALUATE)
         } catch (e) {
             console.log(e)
         }

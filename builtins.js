@@ -139,7 +139,7 @@ export const builtins = {
                 const internalList = list.value.map((item, index) => {
                     variables.enterScope();
                     variables.assignValue('@', item);
-                    variables.assignValue('#', index);
+                    variables.assignValue('#', createVar(index, primitives.NUMBER));
                     variables.assignValue('^', list);
                     const result = evaluate(action.value, variables, functions, morphisms, goals.EVALUATE);
                     variables.exitScope();
@@ -149,56 +149,47 @@ export const builtins = {
                 return createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY));
             }
         },
-        {
-            'arity': 2,
-            'types': [primitives.ANY, createTypedFunction([primitives.ANY, primitives.ANY])],
-            'conditions': [() => true, () => true],
-            'function': (obj, action, variables, functions, parseFunction) => {
-                variables.enterScope();
-                variables.assignValue('@', obj);
-                variables.assignValue('#', 0);
-                variables.assignValue('^', obj);
-                const result = parseFunction(action['body'], variables, functions);
-                variables.exitScope();
-                return result;
-            }
-        },
     ],
     '\\>': [
         {
             'arity': 2,
-            'types': [meta.LIST, createTypedTuple([createTypedFunction([primitives.ANY, primitives.ANY]), primitives.ANY])],
+            'types': [meta.LIST, createTypedTuple([primitives.ANY, primitives.EXPRESSION])],
             'conditions': [() => true, () => true],
-            'function': (list, reducer, variables, functions, parseFunction) => {
-                let acc = reducer.value[1].value;
-                return list.reduce((acc, item, index) => {
+            'function': (list, reduce, variables, functions, morphisms) => {
+                let acc = reduce.value[0];
+                const expr = reduce.value[1].value;
+                const res = list.value.reduce((acc, item, index) => {
                     variables.enterScope();
                     variables.assignValue('@', item);
-                    variables.assignValue('#', index);
+                    variables.assignValue('#', createVar(index, primitives.NUMBER));
                     variables.assignValue('^', list);
                     variables.assignValue('$', acc);
-                    const result = parseFunction(reducer.value[0].value['body'], variables, functions);
+                    const result = evaluate(expr, variables, functions, morphisms, goals.EVALUATE);
                     variables.exitScope();
                     return result;
-                }, acc)
+                }, acc);
+
+                return res;
             }
         }
     ],
     '~>': [
         {
             'arity': 2,
-            'types': [meta.LIST, createTypedFunction([primitives.ANY, primitives.BOOLEAN])],
+            'types': [meta.LIST, primitives.EXPRESSION],
             'conditions': [() => true, () => true],
-            'function': (list, filterer, variables, functions, parseFunction) => {
-                return list.filter((item, index) => {
+            'function': (list, action, variables, functions, morphisms) => {
+                const internalList = list.value.filter((item, index) => {
                     variables.enterScope();
                     variables.assignValue('@', item);
-                    variables.assignValue('#', index);
+                    variables.assignValue('#', createVar(index, primitives.NUMBER));
                     variables.assignValue('^', list);
-                    const result = parseFunction(filterer.value['body'], variables, functions);
+                    const result = evaluate(action.value, variables, functions, morphisms, goals.EVALUATE);
                     variables.exitScope();
-                    return result;
-                })
+                    return result.value;
+                });
+
+                return createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY));
             }
         }
     ],
