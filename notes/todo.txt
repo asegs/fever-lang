@@ -1,0 +1,3 @@
+-assess undeclared variables in expression
+-add functions to function scope/call functions from var table?
+-fix function signatures

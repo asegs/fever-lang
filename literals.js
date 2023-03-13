@@ -82,6 +82,7 @@ export const inferTypeAndValue = (string, vars, functions) => {
         return createVar(string.slice(1, string.length - 1), primitives.EXPRESSION);
     } else if (isSignature(string)) {
         const entries = parseCollectionToItems(string);
+        //Signature is value: list of conditions
         return createVar(entries.map(e => createConditionFromString(e)), meta.SIGNATURE);
     }
 

@@ -1,6 +1,6 @@
-const infixes = ['+','-','*','/','>','<','&','|','<=','>=','->','\\>','~>','=>','==','%']
+const infixes = ['+','-','*','/','>','<','&','|','<=','>=','->','\\>','~>','=>','==','%', '..'];
 
-//Add range .. operator
+//1 means take next, 0 means take this, -1 means not operator
 const unusualCases = {
     '-': (text, idx) => {
         const nextChar = getSurroundingChars(text, idx)[2];
@@ -28,6 +28,10 @@ const unusualCases = {
     '=': (text, idx) => {
         const nextChar = getSurroundingChars(text, idx)[2];
         return nextChar === '=' || nextChar === '>' ? 1 : -1;
+    },
+    '.': (text, idx) => {
+        const nextChar = getSurroundingChars(text, idx)[2];
+        return nextChar === '.' ? 1 : -1;
     }
 
 

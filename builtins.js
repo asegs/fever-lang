@@ -198,7 +198,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a,b) => JSON.stringify(a.value) === JSON.stringify(b.value)
+            'function': (a,b) => createVar(JSON.stringify(a.value) === JSON.stringify(b.value), primitives.BOOLEAN)
         }
     ],
     '%': [
@@ -206,7 +206,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.NUMBER, primitives.NUMBER],
             'conditions': [() => true, () => true],
-            'function': (a,b) => a.value % b.value
+            'function': (a,b) => createVar(a.value % b.value, primitives.NUMBER)
         }
     ],
     '=>': [
@@ -216,12 +216,11 @@ export const builtins = {
             //Expression is expression
             //Function is expression with inputs
             'types': [meta.SIGNATURE, primitives.EXPRESSION],
+            'conditions': [() => true, () => true],
             'function': (signature, expression) => {
                 const funcType = createTypedFunction(signature);
                 return createVar(
-                    {
-                        'body': expression
-                    },
+                    expression,
                     funcType
                 );
             }
@@ -235,6 +234,20 @@ export const builtins = {
             'conditions': [() => true, () => true],
             'function': (name, value, variables) => {
                 variables.assignValue(name.value, value);
+                //Assign to string value of name, wrap name in string at parser level.
+                return value;
+            }
+        },
+        {
+            'arity': 2,
+            'types': [primitives.ANY, meta.FUNCTION],
+            'conditions': [() => true, () => true],
+            'function': (name, value, variables, functions) => {
+                variables.assignValue(name.value, value);
+                if (!(name in functions)) {
+                    functions[name] = [];
+                }
+
                 //Assign to string value of name, wrap name in string at parser level.
                 return value;
             }
@@ -259,6 +272,22 @@ export const builtins = {
             'function': (v) => {
                 console.dir(v, { depth: null });
                 return createVar(v.value, v.type);
+            }
+        }
+    ],
+    '..': [
+        {
+            'arity': 2,
+            'types': [primitives.NUMBER, primitives.NUMBER],
+            'conditions': [() => true, () => true],
+            'function': (a, b) => {
+                const direction = (a.value < b.value) ? 1 : -1;
+                const numbers = [];
+                for (let i = a.value ; i !== b.value ; i += direction) {
+                    numbers.push(createVar(i, primitives.NUMBER));
+                }
+                numbers.push(b);
+                return createVar(numbers, createTypedList(primitives.NUMBER));
             }
         }
     ]

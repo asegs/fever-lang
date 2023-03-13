@@ -102,18 +102,14 @@ export const inferTypeFromString = (rawString) => {
 
 export const inferPatternFromString = (rawString, vars, functions) => {
     const string = rawString.trim();
-
+    return createVar(string, primitives.EXPRESSION);
 }
 
-export const createConditionFromString = (string) => {
+export const createConditionFromString = (string, vars, functions) => {
     const conditionAndType = splitGeneral(string, ':');
-    let type;
-    if (conditionAndType.length === 1) {
-        type = primitives.ANY;
-    } else {
-        type = inferTypeFromString(conditionAndType[1]);
-    }
-
+    const type = conditionAndType.length === 1 ? primitives.ANY : inferTypeFromString(conditionAndType[1]);
+    const condition = inferPatternFromString(conditionAndType[0], vars, functions);
+    return createVar(condition, type);
 }
 
 export const meta = {
