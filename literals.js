@@ -55,6 +55,9 @@ export const inferTypeAndValue = (string, vars, functions) => {
     if (vars.hasVariable(string)) {
         return vars.lookupValue(string);
     }
+    if (string === "[]") {
+        return createVar([], meta.LIST);
+    }
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);
     } else if (isStringLiteral(string)) {
