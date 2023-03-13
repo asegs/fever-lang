@@ -8,25 +8,25 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value + b.value, a.type)
+            'function': ([a, b]) => createVar(a.value + b.value, a.type)
         },
         {
             'arity': 2,
             'types': [meta.LIST, meta.LIST],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value.concat(b.value), a.type)
+            'function': ([a, b]) => createVar(a.value.concat(b.value), a.type)
         },
         {
             'arity': 2,
             'types': [primitives.ANY, meta.LIST],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar([a, ...b.value], b.type)
+            'function': ([a, b]) => createVar([a, ...b.value], b.type)
         },
         {
             'arity': 2,
             'types': [meta.LIST, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar([...a.value, b], a.type)
+            'function': ([a, b]) => createVar([...a.value, b], a.type)
         },
     ],
     '*': [
@@ -34,13 +34,13 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value * b.value, a.type)
+            'function': ([a, b]) => createVar(a.value * b.value, a.type)
         },
         {
             'arity': 2,
             'types': [meta.LIST, primitives.NUMBER],
             'conditions': [() => true, () => true],
-            'function': (a, b) => {
+            'function': ([a, b]) => {
                 const list = [];
                 for (let i = 0 ; i < b.value ; i ++ ) {
                     for (let z = 0 ; z < a.value.length ; z ++ ) {
@@ -55,7 +55,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.NUMBER, meta.LIST],
             'conditions': [() => true, () => true],
-            'function': (a, b) => {
+            'function': ([a, b]) => {
                 const list = [];
                 for (let i = 0 ; i < b.value ; i ++ ) {
                     for (let z = 0 ; z < a.value.length ; z ++ ) {
@@ -71,7 +71,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value - b.value, a.type)
+            'function': ([a, b]) => createVar(a.value - b.value, a.type)
         }
     ],
     '/': [
@@ -79,7 +79,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value / b.value, a.type)
+            'function': ([a, b]) => createVar(a.value / b.value, a.type)
         }
     ],
     '>': [
@@ -87,7 +87,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value > b.value, primitives.BOOLEAN)
+            'function': ([a, b]) => createVar(a.value > b.value, primitives.BOOLEAN)
         }
     ],
     '<': [
@@ -95,7 +95,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value < b.value, primitives.BOOLEAN)
+            'function': ([a, b]) => createVar(a.value < b.value, primitives.BOOLEAN)
         }
     ],
     '&': [
@@ -103,7 +103,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value && b.value, primitives.BOOLEAN)
+            'function': ([a, b]) => createVar(a.value && b.value, primitives.BOOLEAN)
         }
     ],
     '|': [
@@ -111,7 +111,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value || b.value, primitives.BOOLEAN)
+            'function': ([a, b]) => createVar(a.value || b.value, primitives.BOOLEAN)
         }
     ],
     '<=': [
@@ -119,7 +119,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value <= b.value, primitives.BOOLEAN)
+            'function': ([a, b]) => createVar(a.value <= b.value, primitives.BOOLEAN)
         }
     ],
     '>=': [
@@ -127,7 +127,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a, b) => createVar(a.value >= b.value, primitives.BOOLEAN)
+            'function': ([a, b]) => createVar(a.value >= b.value, primitives.BOOLEAN)
         }
     ],
     '->': [
@@ -135,7 +135,7 @@ export const builtins = {
             'arity': 2,
             'types': [meta.LIST, primitives.EXPRESSION],
             'conditions': [() => true, () => true],
-            'function': (list, action, variables, functions, morphisms) => {
+            'function': ([list, action], variables, functions, morphisms) => {
                 const internalList = list.value.map((item, index) => {
                     variables.enterScope();
                     variables.assignValue('@', item);
@@ -155,7 +155,7 @@ export const builtins = {
             'arity': 2,
             'types': [meta.LIST, createTypedTuple([primitives.ANY, primitives.EXPRESSION])],
             'conditions': [() => true, () => true],
-            'function': (list, reduce, variables, functions, morphisms) => {
+            'function': ([list, reduce], variables, functions, morphisms) => {
                 let acc = reduce.value[0];
                 const expr = reduce.value[1].value;
                 const res = list.value.reduce((acc, item, index) => {
@@ -178,7 +178,7 @@ export const builtins = {
             'arity': 2,
             'types': [meta.LIST, primitives.EXPRESSION],
             'conditions': [() => true, () => true],
-            'function': (list, action, variables, functions, morphisms) => {
+            'function': ([list, action], variables, functions, morphisms) => {
                 const internalList = list.value.filter((item, index) => {
                     variables.enterScope();
                     variables.assignValue('@', item);
@@ -198,7 +198,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (a,b) => createVar(JSON.stringify(a.value) === JSON.stringify(b.value), primitives.BOOLEAN)
+            'function': ([a,b]) => createVar(JSON.stringify(a.value) === JSON.stringify(b.value), primitives.BOOLEAN)
         }
     ],
     '%': [
@@ -206,7 +206,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.NUMBER, primitives.NUMBER],
             'conditions': [() => true, () => true],
-            'function': (a,b) => createVar(a.value % b.value, primitives.NUMBER)
+            'function': ([a,b]) => createVar(a.value % b.value, primitives.NUMBER)
         }
     ],
     '=>': [
@@ -217,11 +217,10 @@ export const builtins = {
             //Function is expression with inputs
             'types': [meta.SIGNATURE, primitives.EXPRESSION],
             'conditions': [() => true, () => true],
-            'function': (signature, expression) => {
-                const funcType = createTypedFunction(signature);
+            'function': ([signature, expression]) => {
                 return createVar(
-                    expression,
-                    funcType
+                    [signature, expression],
+                    meta.FUNCTION
                 );
             }
 
@@ -232,9 +231,8 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
-            'function': (name, value, variables) => {
+            'function': ([name, value], variables) => {
                 variables.assignValue(name.value, value);
-                //Assign to string value of name, wrap name in string at parser level.
                 return value;
             }
         },
@@ -242,14 +240,42 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.ANY, meta.FUNCTION],
             'conditions': [() => true, () => true],
-            'function': (name, value, variables, functions) => {
-                variables.assignValue(name.value, value);
+            'function': ([name, func], variables, functions, morphisms) => {
+                variables.assignValue(name.value, func);
                 if (!(name in functions)) {
                     functions[name] = [];
                 }
 
-                //Assign to string value of name, wrap name in string at parser level.
-                return value;
+                const signature = func.value[0];
+                const expression = func.value[1];
+                const sigConditions = signature.value;
+                const size = sigConditions.length;
+
+                const newFunction = {};
+                newFunction['arity'] = size;
+                const types = [];
+                const conditions = [];
+
+                for (let i = 0 ; i < size ; i ++ ) {
+                    //Should handle case where there is no pattern to match!
+                    //Either unknown variable, something from variable table, value, or expression.  This just assumes expression.
+                    //This is just stubbed out now.
+                    //Instead of using ==, use typed match operator?
+                    //Enter scope before performing.
+                    conditions.push((argument, variables, functions, morphisms) => evaluate("true", variables, functions, morphisms, goals.EVALUATE).value);
+                    types.push(sigConditions[i][1]);
+                }
+                newFunction['types'] = types;
+                newFunction['conditions'] = conditions;
+                newFunction['function'] = (args, variables, functions, morphisms) => {
+                    variables.enterScope();
+                    //Get variable name from signature and assign in scope.
+                    const result = evaluate(expression.value, variables, functions, morphisms, goals.EVALUATE);
+                    variables.exitScope();
+                    return result;
+                }
+
+                return func;
             }
         }
     ],
@@ -258,7 +284,7 @@ export const builtins = {
             'arity': 1,
             'types': [primitives.ANY],
             'conditions': [() => true],
-            'function': (v) => {
+            'function': ([v]) => {
                 console.log(recursiveToString(v));
                 return createVar(v.value, v.type);
             }
@@ -269,7 +295,7 @@ export const builtins = {
             'arity': 1,
             'types': [primitives.ANY],
             'conditions': [() => true],
-            'function': (v) => {
+            'function': ([v]) => {
                 console.dir(v, { depth: null });
                 return createVar(v.value, v.type);
             }
@@ -280,7 +306,7 @@ export const builtins = {
             'arity': 2,
             'types': [primitives.NUMBER, primitives.NUMBER],
             'conditions': [() => true, () => true],
-            'function': (a, b) => {
+            'function': ([a, b]) => {
                 const direction = (a.value < b.value) ? 1 : -1;
                 const numbers = [];
                 for (let i = a.value ; i !== b.value ; i += direction) {

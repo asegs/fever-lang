@@ -74,7 +74,7 @@ const callFunction = (name, args, variables, functions, morphisms) => {
     if (bestScore <= 0) {
         throw "No satisfactory match for " + name + ".";
     }
-    return bestCandidate.function(...args, variables, functions, morphisms);
+    return bestCandidate.function(args, variables, functions, morphisms);
 }
 
 export const evaluate = (text, variables, functions, morphisms, goal) => {

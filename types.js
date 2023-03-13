@@ -59,7 +59,6 @@ export const primitives = {
     ANY: createType("ANY", [], {}, false),
     VOID: createType("VOID"),
     EXPRESSION: createType("EXPRESSION", [], {}, false),
-    CONDITION: createType("CONDITION", [], {}, false),
     TYPE: createType("TYPE", [], {}, false),
 }
 
@@ -75,11 +74,12 @@ export const createTypedTuple = (types) => {
     }, true);
 }
 
-//Has body to eval and var names table.
-export const createTypedFunction = (signature) => {
-    return createType("FUNCTION", signature.value, {
-        'match': (t) => t.every((item, index) => typesEqual(item.type, signature.value[index]))
-    }, true);
+export const createTypeVar = (type) => {
+    return createVar(type, primitives.TYPE);
+}
+
+export const createCondition = (pattern, type) => {
+    return createVar([pattern, type], meta.CONDITION);
 }
 
 export const inferTypeFromString = (rawString) => {
@@ -109,15 +109,17 @@ export const createConditionFromString = (string, vars, functions) => {
     const conditionAndType = splitGeneral(string, ':');
     const type = conditionAndType.length === 1 ? primitives.ANY : inferTypeFromString(conditionAndType[1]);
     const condition = inferPatternFromString(conditionAndType[0], vars, functions);
-    return createVar(condition, type);
+    return createCondition(condition, createTypeVar(type));
 }
 
 export const meta = {
-    SIGNATURE: createTypedList(primitives.CONDITION),
+    CONDITION: createTypedTuple(primitives.EXPRESSION, primitives.TYPE),
+    SIGNATURE: createTypedList(this.CONDITION),
     LIST: createTypedList(primitives.ANY),
     STRING: createTypedList(primitives.CHARACTER),
-    FUNCTION: createTypedFunction([primitives.VOID]),
+    FUNCTION: createTypedTuple(this.SIGNATURE, primitives.EXPRESSION),
     TUPLE: createTypedTuple([primitives.ANY]),
+
 
 }
 
