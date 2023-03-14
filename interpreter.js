@@ -108,6 +108,10 @@ export const evaluate = (text, variables, functions, morphisms, goal) => {
             return [result];
         }
 
+        if (Array.isArray(result)) {
+            return findMissing(result);
+        }
+
         return [];
     }
     return result;

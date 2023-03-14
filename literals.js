@@ -87,7 +87,10 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
         if (missing.length === 0) {
             return evaluate(expr, vars, functions, morphisms, goals.EVALUATE);
         }
-        //This is allowing the interpreter to forget that it contains an unknown.
+
+        if (goal === goals.MISSING && missing.length > 0 ) {
+            return missing;
+        }
         return createVar(expr, primitives.EXPRESSION);
     } else if (isSignature(string)) {
         const entries = parseCollectionToItems(string);
