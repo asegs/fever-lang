@@ -249,29 +249,44 @@ export const builtins = {
 
                 const signature = func.value[0];
                 const expression = func.value[1];
-                const sigConditions = signature.value;
-                const size = sigConditions.length;
+                const sigPatterns = signature.value;
+                const size = sigPatterns.length;
 
                 const newFunction = {};
                 newFunction['arity'] = size;
                 const types = [];
                 const conditions = [];
+                const names = [];
 
                 for (let i = 0 ; i < size ; i ++ ) {
+                    const pattern = sigPatterns[i];
+                    const condition = pattern.value[0];
+                    const type = pattern.value[1];
+                    const conditionName = condition.value[0];
+                    const conditionExpression = condition.value[1];
                     //Should handle case where there is no pattern to match!
                     //Either unknown variable, something from variable table, value, or expression.  This just assumes expression.
                     //This is just stubbed out now.
                     //Instead of using ==, use typed match operator?
                     //Enter scope before performing.
                     //Argument should be expression but instead right now it is JS Fever object.
-                    conditions.push((argument, variables, functions, morphisms) => evaluate("true", variables, functions, morphisms, goals.EVALUATE).value);
-                    types.push(sigConditions[i].value[1].value);
+                    names.push(conditionName.value);
+                    conditions.push((argument, variables, functions, morphisms) => {
+                        variables.enterScope()
+                        variables.assignValue(conditionName, argument);
+                        const result = evaluate(conditionExpression, variables, functions, morphisms, goals.EVALUATE).value;
+                        variables.exitScope();
+                        return result;
+                    });
+                    types.push(type.value);
                 }
                 newFunction['types'] = types;
                 newFunction['conditions'] = conditions;
                 newFunction['function'] = (args, variables, functions, morphisms) => {
                     variables.enterScope();
-                    //Get variable name from signature and assign in scope.
+                    for (let i = 0 ; i < args.length ; i ++ ) {
+                        variables.assignValue(names[i], args[i]);
+                    }
                     const result = evaluate(expression.value, variables, functions, morphisms, goals.EVALUATE);
                     variables.exitScope();
                     return result;
