@@ -38,6 +38,7 @@ export const typeCloseness = (testType, comparedTo) => {
     if (testType.baseName === "ANY") {
         return ANY_VALUE;
     }
+
     if (typesEqual(testType, comparedTo)) {
         return 1;
     }
@@ -112,12 +113,15 @@ export const createConditionFromString = (string, vars, functions) => {
     return createCondition(condition, createTypeVar(type));
 }
 
+const CONDITION = createTypedTuple([primitives.EXPRESSION, primitives.TYPE]);
+const SIGNATURE = createTypedList(CONDITION);
+
 export const meta = {
-    CONDITION: createTypedTuple(primitives.EXPRESSION, primitives.TYPE),
-    SIGNATURE: createTypedList(this.CONDITION),
+    CONDITION: CONDITION,
+    SIGNATURE: SIGNATURE,
     LIST: createTypedList(primitives.ANY),
     STRING: createTypedList(primitives.CHARACTER),
-    FUNCTION: createTypedTuple(this.SIGNATURE, primitives.EXPRESSION),
+    FUNCTION: createTypedTuple([SIGNATURE, primitives.EXPRESSION]),
     TUPLE: createTypedTuple([primitives.ANY]),
 
 

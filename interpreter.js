@@ -59,7 +59,7 @@ const callFunction = (name, args, variables, functions, morphisms) => {
         for (let i = 0 ; i < candidateFunction.types.length ; i ++ ) {
             const type = candidateFunction.types[i];
             const condition = candidateFunction.conditions[i];
-            const intScore = typeCloseness(type, args[i].type) * (condition() ? 1 : 0);
+            const intScore = typeCloseness(type, args[i].type) * (condition(args[i], variables, functions, morphisms) ? 1 : 0);
             if (intScore === 0) {
                 score = -1;
                 break;
@@ -77,25 +77,43 @@ const callFunction = (name, args, variables, functions, morphisms) => {
     return bestCandidate.function(args, variables, functions, morphisms);
 }
 
+export const findMissing = (args) => {
+    const missingLeaves = args.filter(arg => 'name' in arg);
+    const arrays = args.filter(arg => Array.isArray(arg));
+    const flattenedLeaves = arrays.flatMap(array => findMissing(array));
+    return missingLeaves.concat(flattenedLeaves);
+}
+
+
+
 export const evaluate = (text, variables, functions, morphisms, goal) => {
     //const cleanText = stripRedundantParens(text);
     const cleanText = text;
     if (isFunctionCall(text)) {
         const [name, body] = splitIntoNameAndBody(text);
         const args = trimAndSplitArray(body).map(e => evaluate(e, variables, functions, morphisms, goal));
-        return callFunction(name, args,variables, functions, morphisms);
+        if (goal === goals.EVALUATE) {
+            return callFunction(name, args, variables, functions, morphisms);
+        } else {
+            return findMissing(args, variables, functions, morphisms);
+        }
     }
 
-    return inferTypeAndValue(cleanText, variables, functions);
+    const result = inferTypeAndValue(cleanText, variables, functions, goal);
+    if (goal === goals.MISSING && ('value' in result) && Array.isArray(result.value)) {
+        return findMissing(result.value);
+    }
+    return result;
 }
 
 const v = new ScopedVars();
+const functions = builtins;
 
 const prompt = () => {
     rl.question(">", (inp) => {
         try {
-            interpret(inp, v, builtins, new Morphisms(), goals.EVALUATE);
-            evaluate("show(_)", v, builtins, new Morphisms(), goals.EVALUATE)
+            interpret(inp, v, functions, new Morphisms(), goals.EVALUATE);
+            evaluate("show(_)", v, functions, new Morphisms(), goals.EVALUATE)
         } catch (e) {
             console.log(e)
         }

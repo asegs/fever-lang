@@ -9,6 +9,7 @@ import {
 } from './types.js'
 import {splitArray, lex} from "./prefixer.js";
 import {ScopedVars} from "./vars.js";
+import {goals} from "./interpreter.js";
 
 const everyCharNumeric = (string) => {
    return string.match(/^-?[0-9]+$/g) || string.match(/^-?[0-9]+\.[0-9]+$/g);
@@ -50,8 +51,7 @@ const parseCollectionToItems = (string) => {
     return splitArray(string.slice(1, string.length - 1));
 }
 
-//Will need to take variable table and maybe function table
-export const inferTypeAndValue = (string, vars, functions) => {
+export const inferTypeAndValue = (string, vars, functions, goal) => {
     if (vars.hasVariable(string)) {
         return vars.lookupValue(string);
     }
@@ -69,7 +69,7 @@ export const inferTypeAndValue = (string, vars, functions) => {
         //Return from vars table.
     } else if (isList(string)) {
         const entries = parseCollectionToItems(string);
-        const items = entries.map(e => inferTypeAndValue(e, vars, functions));
+        const items = entries.map(e => inferTypeAndValue(e, vars, functions, goal));
         if (items.length > 0) {
             const first = items[0];
             if (items.every(i => typesEqual(first.type, i.type))) {
@@ -79,17 +79,23 @@ export const inferTypeAndValue = (string, vars, functions) => {
         return createVar(items, meta.LIST);
     } else if (isTuple(string)) {
         const entries = parseCollectionToItems(string);
-        const items = entries.map(e => inferTypeAndValue(e, vars, functions));
+        const items = entries.map(e => inferTypeAndValue(e, vars, functions, goal));
         return createVar(items, createTypedTuple(items.map(i => i.type)))
     } else if (isExpression(string)) {
         return createVar(string.slice(1, string.length - 1), primitives.EXPRESSION);
     } else if (isSignature(string)) {
         const entries = parseCollectionToItems(string);
-        //Signature is value: list of conditions
         return createVar(entries.map(e => createConditionFromString(e)), meta.SIGNATURE);
     }
 
-    throw "No variable named " + string;
+    if (goal === goals.EVALUATE) {
+        throw "No variable named " + string;
+    } else {
+        return {
+            "type": "VARIABLE",
+            "name": string
+        };
+    }
 }
 
 const vars = new ScopedVars();

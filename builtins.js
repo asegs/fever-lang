@@ -1,4 +1,4 @@
-import {primitives, meta, createTypedFunction, createTypedTuple, createVar, createTypedList} from './types.js'
+import {primitives, meta, createTypedTuple, createVar, createTypedList} from './types.js'
 import {evaluate, goals} from "./interpreter.js";
 
 
@@ -241,9 +241,10 @@ export const builtins = {
             'types': [primitives.ANY, meta.FUNCTION],
             'conditions': [() => true, () => true],
             'function': ([name, func], variables, functions, morphisms) => {
-                variables.assignValue(name.value, func);
-                if (!(name in functions)) {
-                    functions[name] = [];
+                const realName = name.value;
+                variables.assignValue(realName, func);
+                if (!(realName in functions)) {
+                    functions[realName] = [];
                 }
 
                 const signature = func.value[0];
@@ -262,8 +263,9 @@ export const builtins = {
                     //This is just stubbed out now.
                     //Instead of using ==, use typed match operator?
                     //Enter scope before performing.
+                    //Argument should be expression but instead right now it is JS Fever object.
                     conditions.push((argument, variables, functions, morphisms) => evaluate("true", variables, functions, morphisms, goals.EVALUATE).value);
-                    types.push(sigConditions[i][1]);
+                    types.push(sigConditions[i].value[1].value);
                 }
                 newFunction['types'] = types;
                 newFunction['conditions'] = conditions;
@@ -274,6 +276,7 @@ export const builtins = {
                     variables.exitScope();
                     return result;
                 }
+                functions[realName].push(newFunction);
 
                 return func;
             }
