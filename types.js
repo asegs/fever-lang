@@ -167,6 +167,9 @@ export const meta = {
 }
 
 export const recursiveToString = (v) => {
+    if (typeof v.value === "string") {
+        return '"' + v.value + '"';
+    }
     if (Array.isArray(v.value)) {
         const [open, close] = v.type.baseName === "TUPLE" ? ['(',')'] : ['[', ']'];
         return open + v.value.map(i => recursiveToString(i)).join(",") + close;
