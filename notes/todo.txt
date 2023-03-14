@@ -6,4 +6,4 @@
 -functions called during instantiation? because of stupid expression evaluation
 -double parens required for nested function calls like: f = {n:number} => ((f(n-1)) + (f(n-2)))
 -need to handle unknown functions in expressions as well
--rank conditions in terms of specificity as well as types
+-memoization

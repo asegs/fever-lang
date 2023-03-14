@@ -266,6 +266,7 @@ export const builtins = {
                 const types = [];
                 const conditions = [];
                 const names = [];
+                const specificities = [];
 
                 for (let i = 0 ; i < size ; i ++ ) {
                     const pattern = sigPatterns[i];
@@ -273,6 +274,7 @@ export const builtins = {
                     const type = pattern.value[1];
                     const conditionName = condition.value[0];
                     const conditionExpression = condition.value[1];
+                    const conditionSpecificity = condition.value[2];
                     //Should handle case where there is no pattern to match!
                     //Either unknown variable, something from variable table, value, or expression.  This just assumes expression.
                     //This is just stubbed out now.
@@ -280,6 +282,7 @@ export const builtins = {
                     //Enter scope before performing.
                     //Argument should be expression but instead right now it is JS Fever object.
                     names.push(conditionName.value);
+                    specificities.push(conditionSpecificity.value)
                     conditions.push((argument, variables, functions, morphisms) => {
                         variables.enterScope()
                         variables.assignValue(conditionName.value, argument);
@@ -291,6 +294,7 @@ export const builtins = {
                 }
                 newFunction['types'] = types;
                 newFunction['conditions'] = conditions;
+                newFunction['specificities'] = specificities;
                 newFunction['function'] = (args, variables, functions, morphisms) => {
                     variables.enterScope();
                     for (let i = 0 ; i < args.length ; i ++ ) {

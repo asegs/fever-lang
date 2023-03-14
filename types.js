@@ -129,7 +129,7 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms) 
          (b + 3) (expression with known)
          */
         const result = evaluate(string, vars, functions, morphisms, goals.EVALUATE);
-        return createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION));
+        return createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER));
     }
 
     /**
@@ -138,11 +138,11 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms) 
     const name = missing[0].name;
     if (string[0] === '(') {
         // (len(a) % 2 == 0)
-        return createCondition(createVar(name, meta.STRING), createVar(string, primitives.EXPRESSION));
+        return createCondition(createVar(name, meta.STRING), createVar(string, primitives.EXPRESSION), createVar(1, primitives.NUMBER));
     }
 
     // a, won't support [1,2,a] yet, will need to destructure (what if we are actually testing for [1, 2, sublist]?)
-    return createCondition(createVar(name, meta.STRING), createVar("==(" + name + "," + string + ")", primitives.EXPRESSION));
+    return createCondition(createVar(name, meta.STRING), createVar("==(" + name + "," + string + ")", primitives.EXPRESSION), createVar(0.5, primitives.NUMBER));
 }
 
 export const createPatternFromString = (string, vars, functions, morphisms) => {

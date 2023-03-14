@@ -59,7 +59,8 @@ const callFunction = (name, args, variables, functions, morphisms) => {
         for (let i = 0 ; i < candidateFunction.types.length ; i ++ ) {
             const type = candidateFunction.types[i];
             const condition = candidateFunction.conditions[i];
-            const intScore = typeCloseness(type, args[i].type) * (condition(args[i], variables, functions, morphisms) ? 1 : 0);
+            const specificity = 'specificities' in candidateFunction ? candidateFunction.specificities[i] : 1;
+            const intScore = typeCloseness(type, args[i].type) * (condition(args[i], variables, functions, morphisms) ? 1 : 0) * specificity;
             if (intScore === 0) {
                 score = -1;
                 break;
