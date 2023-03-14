@@ -107,6 +107,8 @@ export const evaluate = (text, variables, functions, morphisms, goal) => {
         if ('name' in result) {
             return [result];
         }
+
+        return [];
     }
     return result;
 }

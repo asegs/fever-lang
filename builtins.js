@@ -212,14 +212,23 @@ export const builtins = {
     '=>': [
         {
             'arity': 2,
-            //Default function is only no return, this just takes any expression
-            //Expression is expression
-            //Function is expression with inputs
             'types': [meta.SIGNATURE, primitives.EXPRESSION],
             'conditions': [() => true, () => true],
             'function': ([signature, expression]) => {
                 return createVar(
                     [signature, expression],
+                    meta.FUNCTION
+                );
+            }
+
+        },
+        {
+            'arity': 2,
+            'types': [meta.SIGNATURE, primitives.ANY],
+            'conditions': [() => true, () => true],
+            'function': ([signature, value]) => {
+                return createVar(
+                    [signature, createVar(recursiveToString(value), primitives.EXPRESSION)],
                     meta.FUNCTION
                 );
             }
@@ -273,8 +282,8 @@ export const builtins = {
                     names.push(conditionName.value);
                     conditions.push((argument, variables, functions, morphisms) => {
                         variables.enterScope()
-                        variables.assignValue(conditionName, argument);
-                        const result = evaluate(conditionExpression, variables, functions, morphisms, goals.EVALUATE).value;
+                        variables.assignValue(conditionName.value, argument);
+                        const result = evaluate(conditionExpression.value, variables, functions, morphisms, goals.EVALUATE).value;
                         variables.exitScope();
                         return result;
                     });

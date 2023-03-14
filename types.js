@@ -128,7 +128,7 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms) 
          (b + 3) (expression with known)
          */
         const result = evaluate(string, vars, functions, morphisms, goals.EVALUATE);
-        return createCondition(createVar('__repr', meta.STRING), createVar("==(__repr, " + recursiveToString(result) + ")", primitives.EXPRESSION));
+        return createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION));
     }
 
     /**
