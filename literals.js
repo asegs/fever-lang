@@ -1,5 +1,5 @@
 import {
-    createConditionFromString,
+    createPatternFromString,
     createTypedList,
     createTypedTuple,
     createVar,
@@ -9,7 +9,7 @@ import {
 } from './types.js'
 import {splitArray, lex} from "./prefixer.js";
 import {ScopedVars} from "./vars.js";
-import {goals} from "./interpreter.js";
+import {evaluate, goals} from "./interpreter.js";
 
 const everyCharNumeric = (string) => {
    return string.match(/^-?[0-9]+$/g) || string.match(/^-?[0-9]+\.[0-9]+$/g);
@@ -51,7 +51,7 @@ const parseCollectionToItems = (string) => {
     return splitArray(string.slice(1, string.length - 1));
 }
 
-export const inferTypeAndValue = (string, vars, functions, goal) => {
+export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
     if (vars.hasVariable(string)) {
         return vars.lookupValue(string);
     }
@@ -69,7 +69,7 @@ export const inferTypeAndValue = (string, vars, functions, goal) => {
         //Return from vars table.
     } else if (isList(string)) {
         const entries = parseCollectionToItems(string);
-        const items = entries.map(e => inferTypeAndValue(e, vars, functions, goal));
+        const items = entries.map(e => inferTypeAndValue(e, vars, functions, morphisms, goal));
         if (items.length > 0) {
             const first = items[0];
             if (items.every(i => typesEqual(first.type, i.type))) {
@@ -79,13 +79,18 @@ export const inferTypeAndValue = (string, vars, functions, goal) => {
         return createVar(items, meta.LIST);
     } else if (isTuple(string)) {
         const entries = parseCollectionToItems(string);
-        const items = entries.map(e => inferTypeAndValue(e, vars, functions, goal));
+        const items = entries.map(e => inferTypeAndValue(e, vars, functions, morphisms, goal));
         return createVar(items, createTypedTuple(items.map(i => i.type)))
     } else if (isExpression(string)) {
-        return createVar(string.slice(1, string.length - 1), primitives.EXPRESSION);
+        const expr = string.slice(1, string.length - 1);
+        const missing = evaluate(expr, vars, functions, morphisms, goals.MISSING);
+        if (missing.length === 0) {
+            return evaluate(expr, vars, functions, morphisms, goals.EVALUATE);
+        }
+        return createVar(expr, primitives.EXPRESSION);
     } else if (isSignature(string)) {
         const entries = parseCollectionToItems(string);
-        return createVar(entries.map(e => createConditionFromString(e)), meta.SIGNATURE);
+        return createVar(entries.map(e => createPatternFromString(e, vars, functions, morphisms)), meta.SIGNATURE);
     }
 
     if (goal === goals.EVALUATE) {

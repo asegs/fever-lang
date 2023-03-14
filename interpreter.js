@@ -99,9 +99,14 @@ export const evaluate = (text, variables, functions, morphisms, goal) => {
         }
     }
 
-    const result = inferTypeAndValue(cleanText, variables, functions, goal);
-    if (goal === goals.MISSING && ('value' in result) && Array.isArray(result.value)) {
-        return findMissing(result.value);
+    const result = inferTypeAndValue(cleanText, variables, functions, morphisms, goal);
+    if (goal === goals.MISSING ) {
+        if (('value' in result) && Array.isArray(result.value)) {
+            return findMissing(result.value);
+        }
+        if ('name' in result) {
+            return [result];
+        }
     }
     return result;
 }

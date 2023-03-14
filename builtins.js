@@ -1,4 +1,4 @@
-import {primitives, meta, createTypedTuple, createVar, createTypedList} from './types.js'
+import {primitives, meta, createTypedTuple, createVar, createTypedList, recursiveToString} from './types.js'
 import {evaluate, goals} from "./interpreter.js";
 
 
@@ -322,9 +322,3 @@ export const builtins = {
     ]
 }
 
-const recursiveToString = (v) => {
-    if (Array.isArray(v.value)) {
-        return "[" + v.value.map(i => recursiveToString(i)).join(",") + "]";
-    }
-    return v.value.toString();
-}

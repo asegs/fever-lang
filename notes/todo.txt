@@ -1,3 +1,4 @@
 -add functions to function scope/call functions from var table?
 -fix function signatures
 -support return keyword in signature
+-mark expression as not to be evaluated
