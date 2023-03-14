@@ -88,8 +88,8 @@ export const createPattern = (condition, type) => {
     return createVar([condition, type], meta.PATTERN);
 }
 
-export const createCondition = (name, expr) => {
-    return createVar([name, expr], meta.CONDITION);
+export const createCondition = (name, expr, specificity) => {
+    return createVar([name, expr, specificity], meta.CONDITION);
 }
 
 export const inferTypeFromString = (rawString) => {
@@ -118,6 +118,7 @@ export const inferTypeFromString = (rawString) => {
  (len(a) % 2 == 0) (expression with unknown)
  */
 export const inferConditionFromString = (rawString, vars, functions, morphisms) => {
+    //Add specificities for each of these.
     const string = rawString.trim();
     const missing = evaluate(string, vars, functions, morphisms, goals.MISSING);
     if (missing.length === 0) {
@@ -152,7 +153,7 @@ export const createPatternFromString = (string, vars, functions, morphisms) => {
 }
 
 const STRING = createTypedList(primitives.CHARACTER);
-const CONDITION = createTypedTuple([STRING, primitives.EXPRESSION]);
+const CONDITION = createTypedTuple([STRING, primitives.EXPRESSION, primitives.NUMBER]);
 const PATTERN = createTypedTuple([CONDITION, primitives.TYPE]);
 const SIGNATURE = createTypedList(PATTERN);
 
