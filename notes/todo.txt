@@ -4,4 +4,5 @@
 -mark expression as not to be evaluated
 -track custom type names alongside basename for extra points
 -functions called during instantiation? because of stupid expression evaluation
--strings are trying to be evaluated by parser in constructing functions
+-double parens required for nested function calls like: f = {n:number} => ((f(n-1)) + (f(n-2)))
+-need to handle unknown functions in expressions as well
