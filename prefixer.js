@@ -1,10 +1,6 @@
-import {createInterface} from 'readline';
-const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-const infixes = ['+','-','*','/','>','<','&','|','<=','>=','->','\\>','~>','=>','==','%']
+const infixes = ['+','-','*','/','>','<','&','|','<=','>=','->','\\>','~>','=>','==','%', '..'];
 
+//1 means take next, 0 means take this, -1 means not operator
 const unusualCases = {
     '-': (text, idx) => {
         const nextChar = getSurroundingChars(text, idx)[2];
@@ -32,6 +28,10 @@ const unusualCases = {
     '=': (text, idx) => {
         const nextChar = getSurroundingChars(text, idx)[2];
         return nextChar === '=' || nextChar === '>' ? 1 : -1;
+    },
+    '.': (text, idx) => {
+        const nextChar = getSurroundingChars(text, idx)[2];
+        return nextChar === '.' ? 1 : -1;
     }
 
 
@@ -117,6 +117,49 @@ const preprocess = (text) => {
     return builder;
 }
 
+const pairs = [
+    ['[',']'],
+    ['(',')'],
+    ['{','}']
+]
+
+const pairBackRefs = {
+    ']': '[',
+    '}': '{',
+    ')': '('
+}
+
+const unensconce = (text, pair) => {
+    const [start, end] = pair;
+    if (text[0] === start && text[text.length - 1] === end) {
+        return text.slice(1, text.length - 1);
+    }
+    return text;
+}
+
+export const unshiftRedundantNesting = (text) => {
+    let interestedPair = undefined;
+    while (true) {
+        const before = text;
+        if (interestedPair) {
+            text = unensconce(text, interestedPair);
+        } else {
+            for (const pair of pairs) {
+                text = unensconce(text, pair);
+                if (text.length < before.length) {
+                    interestedPair = pair;
+                }
+            }
+        }
+        if (text.length === before.length) {
+            return text;
+        }
+    }
+}
+
+/**
+ * This requires trimming of the initial characters, ie. [1,2,3] -> 1,2,3
+ */
 export const splitGeneral = (text, on) => {
     let doubleQuotes = 0;
     let singleQuotes = 0;
@@ -165,6 +208,10 @@ export const splitGeneral = (text, on) => {
     return chunks;
 }
 
+export const trimAndSplitArray = (text) => {
+    return splitArray(text.slice(1, text.length - 1));
+}
+
 export const splitArray = (text) => {
     return splitGeneral(text, ',');
 }
@@ -182,7 +229,7 @@ export const splitAssignment = (text) => {
 
 export const lex = (rawText) => {
     const [name, body] = isAssignment(rawText) ? splitAssignment(rawText) : ["_", rawText];
-    return "=(" + name +"," + lexer(body) + ")";
+    return "=(\"" + name +"\"," + lexer(body) + ")";
 }
 
 export const lexer = (rawText) => {
@@ -240,6 +287,7 @@ export const lexer = (rawText) => {
                     const internal = recursiveBuffer.slice(1, recursiveBuffer.length - 1);
                     let newBuffer = "";
                     const entries = splitArray(internal);
+                    //(Un)wrapped expressions in list literals don't work
                     if (char === ']' || char === '}') {
                         newBuffer = entries.map(e => lexer(e)).join(',');
                     } else {
@@ -280,10 +328,3 @@ export const lexer = (rawText) => {
     return reorderStack.join('');
 }
 
-const prompt = () => {
-    rl.question(">", (inp) => {
-        console.log(lex(inp));
-        prompt();
-    })
-}
-prompt();

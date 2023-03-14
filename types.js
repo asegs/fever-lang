@@ -1,4 +1,9 @@
 import {splitGeneral, splitArray} from "./prefixer.js";
+import {evaluate, goals} from "./interpreter.js";
+
+const ANY_VALUE = 0.5;
+
+
 
 export const createType = (baseName, types, methods, meta) => {
     return {
@@ -7,6 +12,16 @@ export const createType = (baseName, types, methods, meta) => {
         'methods': methods,
         'meta': meta
     }
+}
+
+export const primitives = {
+    NUMBER: createType("NUMBER", [], {}, false),
+    BOOLEAN: createType("BOOLEAN", [], {}, false),
+    CHARACTER: createType("CHARACTER",[], {}, false),
+    ANY: createType("ANY", [], {}, false),
+    VOID: createType("VOID"),
+    EXPRESSION: createType("EXPRESSION", [], {}, false),
+    TYPE: createType("TYPE", [], {}, false),
 }
 
 export const createVar = (value, type) => {
@@ -33,6 +48,14 @@ export const typesEqual = (t1, t2) => {
 }
 
 export const typeCloseness = (testType, comparedTo) => {
+    if (testType.baseName === "ANY") {
+        return ANY_VALUE;
+    }
+
+    if (typesEqual(testType, comparedTo)) {
+        return 1;
+    }
+    return 0;
     //Exact match is 1
     //Same base type is something
     //Handle [String, String, Int] never working with [String, String, String] (aside from morphisms)
@@ -43,16 +66,7 @@ export const typeCloseness = (testType, comparedTo) => {
     //Tuple(String, Number, Character) <-> Tuple(String, Character, Character) => 0.8333 (assuming 1 step morphism from number to character)
 }
 
-export const primitives = {
-    NUMBER: createType("NUMBER", [], {}, false),
-    BOOLEAN: createType("BOOLEAN", [], {}, false),
-    CHARACTER: createType("CHARACTER",[], {}, false),
-    ANY: createType("ANY", [], {}, false),
-    VOID: createType("VOID"),
-    EXPRESSION: createType("EXPRESSION", [], {}, false),
-    CONDITION: createType("CONDITION", [], {}, false),
-    TYPE: createType("TYPE", [], {}, false),
-}
+
 
 export const createTypedList = (ofType) => {
     return createType("LIST", [ofType], {
@@ -66,11 +80,16 @@ export const createTypedTuple = (types) => {
     }, true);
 }
 
-//Has body to eval and var names table.
-export const createTypedFunction = (signature) => {
-    return createType("FUNCTION", signature.value, {
-        'match': (t) => t.every((item, index) => typesEqual(item.type, signature.value[index]))
-    }, true);
+export const createTypeVar = (type) => {
+    return createVar(type, primitives.TYPE);
+}
+
+export const createPattern = (condition, type) => {
+    return createVar([condition, type], meta.PATTERN);
+}
+
+export const createCondition = (name, expr) => {
+    return createVar([name, expr], meta.CONDITION);
 }
 
 export const inferTypeFromString = (rawString) => {
@@ -91,30 +110,68 @@ export const inferTypeFromString = (rawString) => {
     return primitives.ANY;
 }
 
-export const inferPatternFromString = (rawString, vars, functions) => {
+/**
+ Patterns can be:
+ a (unknown)
+
+ [_,_3] (later)
+ (len(a) % 2 == 0) (expression with unknown)
+ */
+export const inferConditionFromString = (rawString, vars, functions, morphisms) => {
     const string = rawString.trim();
-
-}
-
-export const createConditionFromString = (string) => {
-    const conditionAndType = splitGeneral(string, ':');
-    let type;
-    if (conditionAndType.length === 1) {
-        type = primitives.ANY;
-    } else {
-        type = inferTypeFromString(conditionAndType[1]);
+    const missing = evaluate(string, vars, functions, morphisms, goals.MISSING);
+    if (missing.length === 0) {
+        /**
+         123
+         [1,2,3]
+         b (known)
+         (b + 3) (expression with known)
+         */
+        const result = evaluate(string, vars, functions, morphisms, goals.EVALUATE);
+        return createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION));
     }
-    console.log(type)
 
+    /**
+     Distinguish between a, [1,2, a] (len(a) % 2 == 0)...could just use parens.
+     */
+    const name = missing[0].name;
+    if (string[0] === '(') {
+        // (len(a) % 2 == 0)
+        return createCondition(createVar(name, meta.STRING), createVar(string, primitives.EXPRESSION));
+    }
+
+    // a, won't support [1,2,a] yet, will need to destructure (what if we are actually testing for [1, 2, sublist]?)
+    return createCondition(createVar(name, meta.STRING), createVar("==(" + name + "," + string + ")", primitives.EXPRESSION));
 }
+
+export const createPatternFromString = (string, vars, functions, morphisms) => {
+    const conditionAndType = splitGeneral(string, ':');
+    const type = conditionAndType.length === 1 ? primitives.ANY : inferTypeFromString(conditionAndType[1]);
+    const condition = inferConditionFromString(conditionAndType[0], vars, functions, morphisms);
+    return createPattern(condition, createTypeVar(type));
+}
+
+const STRING = createTypedList(primitives.CHARACTER);
+const CONDITION = createTypedTuple([STRING, primitives.EXPRESSION]);
+const PATTERN = createTypedTuple([CONDITION, primitives.TYPE]);
+const SIGNATURE = createTypedList(PATTERN);
 
 export const meta = {
-    SIGNATURE: createTypedList(primitives.CONDITION),
+    CONDITION: CONDITION,
+    PATTERN: PATTERN,
+    SIGNATURE: SIGNATURE,
     LIST: createTypedList(primitives.ANY),
-    STRING: createTypedList(primitives.CHARACTER),
-    FUNCTION: createTypedFunction([primitives.VOID]),
+    STRING: STRING,
+    FUNCTION: createTypedTuple([SIGNATURE, primitives.EXPRESSION]),
     TUPLE: createTypedTuple([primitives.ANY]),
+}
 
+export const recursiveToString = (v) => {
+    if (Array.isArray(v.value)) {
+        const [open, close] = v.type.baseName === "TUPLE" ? ['(',')'] : ['[', ']'];
+        return open + v.value.map(i => recursiveToString(i)).join(",") + close;
+    }
+    return v.value.toString();
 }
 
 /**
