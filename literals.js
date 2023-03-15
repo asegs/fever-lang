@@ -52,11 +52,20 @@ const parseCollectionToItems = (string) => {
 }
 
 export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
-    if (vars.hasVariable(string)) {
-        return vars.lookupValue(string);
+    if (goal === goals.MISSING) {
+        if (vars.hasVariableInScope(string)) {
+            return vars.lookupValueInScope(string);
+        }
+    } else {
+        if (vars.hasVariable(string)) {
+            return vars.lookupValue(string);
+        }
     }
     if (string === "[]") {
         return createVar([], meta.LIST);
+    }
+    if (string === '""') {
+        return createVar("", meta.STRING);
     }
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);

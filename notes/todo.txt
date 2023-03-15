@@ -7,3 +7,6 @@
 -double parens required for nested function calls like: f = {n:number} => ((f(n-1)) + (f(n-2)))
 -need to handle unknown functions in expressions as well
 -memoization
+-only enter scope once when evaluating conditions so previous assignments are persisted
+-remove regex limit on var names
+-choose delimiter on show

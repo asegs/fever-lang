@@ -275,12 +275,6 @@ export const builtins = {
                     const conditionName = condition.value[0];
                     const conditionExpression = condition.value[1];
                     const conditionSpecificity = condition.value[2];
-                    //Should handle case where there is no pattern to match!
-                    //Either unknown variable, something from variable table, value, or expression.  This just assumes expression.
-                    //This is just stubbed out now.
-                    //Instead of using ==, use typed match operator?
-                    //Enter scope before performing.
-                    //Argument should be expression but instead right now it is JS Fever object.
                     names.push(conditionName.value);
                     specificities.push(conditionSpecificity.value)
                     conditions.push((argument, variables, functions, morphisms) => {
@@ -345,6 +339,36 @@ export const builtins = {
                 }
                 numbers.push(b);
                 return createVar(numbers, createTypedList(primitives.NUMBER));
+            }
+        }
+    ],
+    'get': [
+        {
+            'arity': 2,
+            'types': [meta.LIST, primitives.NUMBER],
+            'conditions': [() => true, () => true],
+            'function': ([list, num]) => {
+                return list.value[num.value];
+            }
+        }
+    ],
+    'floor': [
+        {
+            'arity': 1,
+            'types': [primitives.NUMBER],
+            'conditions': [() => true],
+            'function': ([num]) => {
+                return createVar(Math.floor(num.value), primitives.NUMBER);
+            }
+        }
+    ],
+    '?': [
+        {
+            'arity': 3,
+            'types': [primitives.BOOLEAN, primitives.ANY, primitives.ANY],
+            'conditions': [() => true, () => true, () => true],
+            'function': ([truth, a, b]) => {
+                return truth.value ? a : b;
             }
         }
     ]

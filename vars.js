@@ -42,6 +42,18 @@ export class ScopedVars {
         throw "Unknown variable";
     }
 
+    hasVariableInScope (name) {
+        return name in this.scopes[this.scopes.length - 1];
+    }
+
+    lookupValueInScope (name) {
+        if (name in this.scopes[this.scopes.length - 1]) {
+            return this.scopes[this.scopes.length - 1][name];
+        }
+
+        throw "Unknown variable"
+    }
+
     flattenToMap () {
         let vars = {};
         for (let i = 0 ; i < this.scopes.length; i ++ ) {
