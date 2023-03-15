@@ -25,6 +25,8 @@ It came to me in a fever dream.
 It works normally in a lot of ways.  Arithmetic and all should just work.  However, order of operations simply isn't respected.
 Sorry, use parentheses.  Expressions are just evaluated in order.
 
+You can run it by cloning this repo and running `node interpreter.js` in the directory.  Please note that this REPL is not up to spec yet and may have some rather offensive behavior.
+
 ```js
 1 + 2 //3
 
