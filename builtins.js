@@ -311,7 +311,20 @@ export const builtins = {
             'conditions': [() => true],
             'function': ([v]) => {
                 console.log(recursiveToString(v));
-                return createVar(v.value, v.type);
+                return v;
+            }
+        },
+        {
+            'arity': 3,
+            'types': [primitives.ANY, meta.STRING, primitives.BOOLEAN],
+            'conditions': [() => true, () => true, () => true],
+            'function': ([v, delimiter, simple]) => {
+                if (simple.value) {
+                    process.stdout.write(v.value.toString() + delimiter.value);
+                } else {
+                    process.stdout.write(recursiveToString(v) + delimiter.value);
+                }
+                return v;
             }
         }
     ],
@@ -369,6 +382,17 @@ export const builtins = {
             'conditions': [() => true, () => true, () => true],
             'function': ([truth, a, b]) => {
                 return truth.value ? a : b;
+            }
+        }
+    ],
+    'nl': [
+        {
+            'arity': 1,
+            'types': [primitives.ANY],
+            'conditions': [() => true],
+            'function': ([ignored]) => {
+                console.log();
+                return ignored;
             }
         }
     ]
