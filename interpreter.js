@@ -1,10 +1,7 @@
-import {lex, trimAndSplitArray} from "./prefixer.js";
+import {handleAssignment, lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
 import {createInterface} from 'readline';
 import {typeCloseness} from "./types.js";
-import {ScopedVars} from "./vars.js";
-import {builtins} from "./builtins.js";
-import {Morphisms} from "./morphisms.js";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -124,7 +121,8 @@ export const prompt = (vars, functions, morphisms) => {
     rl.question(">", (inp) => {
         try {
             interpret(inp, vars, functions, morphisms, goals.EVALUATE);
-            //evaluate("show(_)", vars, functions, morphisms, goals.EVALUATE)
+            const [name, _] = handleAssignment(inp);
+            evaluate("show(" + name + ")", vars, functions, morphisms, goals.EVALUATE)
         } catch (e) {
             console.log(e)
         }

@@ -9,4 +9,7 @@
 -memoization
 -only enter scope once when evaluating conditions so previous assignments are persisted
 -remove regex limit on var names
--choose delimiter on show
+-functions can contain multiple lines
+-register infix in table at runtime?
+-do higher order funcs with for loop so we can see intermediate constructed list
+-truly just implement strings as a list of characters

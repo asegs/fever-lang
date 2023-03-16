@@ -7,14 +7,14 @@ mandel_x_min = -2 * r_scale + r_tx
 mandel_x_max = 0.47 * r_scale + r_tx
 mandel_y_min = -1.12 * r_scale + r_ty
 mandel_y_max = 1.12 * r_scale + r_ty
-iter_limit = 386
+iter_limit = 500
 
 rescale = {a,b,c,d,x} => ((((x - a) * (d - c)) / (b - a)) + c)
 to_scaled_x = {n} => (rescale(0, r_width, mandel_x_min, mandel_x_max, n))
 to_scaled_y = {n} => (rescale(0, r_height, mandel_y_min, mandel_y_max, n))
 palette = {i} => (get([" ","░","▒","▓","▓"], floor(rescale(1, iter_limit, 0, 4, i))))
 mandel_iter = {xo, yo, x, y, i} => (?((((x * x) + (y * y)) <= 4), mandel_iter(xo, yo, ((x * x) - (y * y) + xo), (2 * x * y + yo), (i + 1)), i))
-mandel_iter = {xo, yo, x, y, 386} => 386
+mandel_iter = {xo, yo, x, y, iter_limit} => iter_limit
 render_row = {y_val} => (0..r_width -> (show(palette(mandel_iter(to_scaled_x(@), to_scaled_y(y_val), 0, 0, 0)), "", true)))
 mandelbrot = {row_count} => (0..row_count -> (nl(render_row(@))))
 get(mandelbrot(r_height), 0)

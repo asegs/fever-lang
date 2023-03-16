@@ -1,0 +1,11 @@
+contains = {list:[], item} => (list \> (false, (item == @ | $)))
+len = {list:[]} => (list \> (0, ($ + 1)))
+
+//for primes
+
+is_whole = {n:number} => (floor(n) == n)
+divisible_by = {top:number,bottom:number} => (top % bottom == 0)
+is_prime = {n:number} => false
+is_prime = {((n == 1) | (n == 2)):number} => true
+is_prime = {(is_whole(n) & n > 2):number} => (2..ceil(sqrt(n)) \> (true, (not(divisible_by(n, @)) & $)))
+n_primes = {n:number} => (1..n ~> (is_prime(@)))

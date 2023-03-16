@@ -375,6 +375,16 @@ export const builtins = {
             }
         }
     ],
+    'ceil': [
+        {
+            'arity': 1,
+            'types': [primitives.NUMBER],
+            'conditions': [() => true],
+            'function': ([num]) => {
+                return createVar(Math.ceil(num.value), primitives.NUMBER);
+            }
+        }
+    ],
     '?': [
         {
             'arity': 3,
@@ -393,6 +403,26 @@ export const builtins = {
             'function': ([ignored]) => {
                 console.log();
                 return ignored;
+            }
+        }
+    ],
+    'sqrt': [
+        {
+            'arity': 1,
+            'types': [primitives.NUMBER],
+            'conditions': [(arg) => arg.value >= 0],
+            'function': ([val]) => {
+                return createVar(Math.sqrt(val.value), primitives.NUMBER);
+            }
+        }
+    ],
+    'not': [
+        {
+            'arity': 1,
+            'types': [primitives.BOOLEAN],
+            'conditions': [() => true],
+            'function': ([truth]) => {
+                return createVar(!truth.value, primitives.BOOLEAN);
             }
         }
     ]

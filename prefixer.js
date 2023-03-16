@@ -227,8 +227,12 @@ export const splitAssignment = (text) => {
     return [name, body];
 }
 
+export const handleAssignment = (rawText) => {
+    return isAssignment(rawText) ? splitAssignment(rawText) : ["_", rawText];
+}
+
 export const lex = (rawText) => {
-    const [name, body] = isAssignment(rawText) ? splitAssignment(rawText) : ["_", rawText];
+    const [name, body] = handleAssignment(rawText);
     return "=(\"" + name +"\"," + lexer(body) + ")";
 }
 
