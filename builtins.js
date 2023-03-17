@@ -281,11 +281,8 @@ export const builtins = {
                     names.push(conditionName.value);
                     specificities.push(conditionSpecificity.value)
                     conditions.push((argument, variables, functions, morphisms) => {
-                        variables.enterScope()
                         variables.assignValue(conditionName.value, argument);
-                        const result = evaluate(conditionExpression.value, variables, functions, morphisms, goals.EVALUATE).value;
-                        variables.exitScope();
-                        return result;
+                        return evaluate(conditionExpression.value, variables, functions, morphisms, goals.EVALUATE).value;
                     });
                     types.push(type.value);
                 }

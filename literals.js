@@ -103,7 +103,16 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
         return createVar(expr, primitives.EXPRESSION);
     } else if (isSignature(string)) {
         const entries = parseCollectionToItems(string);
-        return createVar(entries.map(e => createPatternFromString(e, vars, functions, morphisms)), meta.SIGNATURE);
+        const takenVars = new Set();
+        const signatureItems = [];
+        for (let i = 0 ; i < entries.length ; i ++ ) {
+            const [pattern, varName] = createPatternFromString(entries[i], vars, functions, morphisms, takenVars);
+            if (varName !== null) {
+                takenVars.add(varName);
+            }
+            signatureItems.push(pattern);
+        }
+        return createVar(signatureItems, meta.SIGNATURE);
     }
 
     if (goal === goals.EVALUATE) {

@@ -54,6 +54,8 @@ const callFunction = (name, args, variables, functions, morphisms) => {
     let bestScore = 0;
     let bestCandidate = undefined;
     for (const candidateFunction of candidates) {
+        //For the conditions analysis
+        variables.enterScope();
         let score = 0;
         for (let i = 0 ; i < candidateFunction.types.length ; i ++ ) {
             const type = candidateFunction.types[i];
@@ -70,6 +72,7 @@ const callFunction = (name, args, variables, functions, morphisms) => {
             bestScore = score;
             bestCandidate = candidateFunction;
         }
+        variables.exitScope();
     }
     if (bestScore <= 0) {
         throw "No satisfactory match for " + name + ".";

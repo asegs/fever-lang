@@ -117,7 +117,7 @@ export const inferTypeFromString = (rawString) => {
  [_,_3] (later)
  (len(a) % 2 == 0) (expression with unknown)
  */
-export const inferConditionFromString = (rawString, vars, functions, morphisms) => {
+export const inferConditionFromString = (rawString, vars, functions, morphisms, takenVars) => {
     //Add specificities for each of these.
     const string = rawString.trim();
     const missing = evaluate(string, vars, functions, morphisms, goals.MISSING);
@@ -129,30 +129,44 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms) 
          (b + 3) (expression with known)
          */
         const result = evaluate(string, vars, functions, morphisms, goals.EVALUATE);
-        return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER)), result.type];
+        return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER)), result.type, null];
+    }
+
+    const acceptedMissing = missing.filter(item => !takenVars.has(item.name));
+
+    if (acceptedMissing.length === 0) {
+        //Then we have an expression or variable entirely using previous variables.
+        if (string[0] === '(') {
+            //Only reasonable case is (b * 2) where b is defined
+            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + string + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY, null];
+            //b where b is defined
+        } else {
+            //Only reasonable case is (b * 2) where b is defined
+            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + missing[0].name + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY, null];
+        }
     }
 
     /**
-     Distinguish between a, [1,2, a] (len(a) % 2 == 0)...could just use parens.
+     Distinguish between a, [1,2, a] (len(a) % 2 == 0)...let's just use parens.
      */
-    const name = missing[0].name;
+    const name = acceptedMissing[0].name;
     if (string[0] === '(') {
         // (len(a) % 2 == 0)
-        return [createCondition(createVar(name, meta.STRING), createVar(string, primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY];
+        return [createCondition(createVar(name, meta.STRING), createVar(string, primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY, name];
     }
 
     // a, won't support [1,2,a] yet, will need to destructure (what if we are actually testing for [1, 2, sublist]?)
-    return [createCondition(createVar(name, meta.STRING), createVar("==(" + name + "," + string + ")", primitives.EXPRESSION), createVar(0.5, primitives.NUMBER)), primitives.ANY];
+    return [createCondition(createVar(name, meta.STRING), createVar("==(" + name + "," + string + ")", primitives.EXPRESSION), createVar(0.5, primitives.NUMBER)), primitives.ANY, name];
 }
 
-export const createPatternFromString = (string, vars, functions, morphisms) => {
+export const createPatternFromString = (string, vars, functions, morphisms, takenVars) => {
     const conditionAndType = splitGeneral(string, ':');
     let type = conditionAndType.length === 1 ? primitives.ANY : inferTypeFromString(conditionAndType[1]);
-    const [condition, inferredType] = inferConditionFromString(conditionAndType[0], vars, functions, morphisms);
+    const [condition, inferredType, namedVar] = inferConditionFromString(conditionAndType[0], vars, functions, morphisms, takenVars);
     if (type === primitives.ANY) {
         type = inferredType;
     }
-    return createPattern(condition, createTypeVar(type));
+    return [createPattern(condition, createTypeVar(type)), namedVar];
 }
 
 const STRING = createTypedList(primitives.CHARACTER);
