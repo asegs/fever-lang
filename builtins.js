@@ -57,9 +57,9 @@ export const builtins = {
             'conditions': [() => true, () => true],
             'function': ([a, b]) => {
                 const list = [];
-                for (let i = 0 ; i < b.value ; i ++ ) {
-                    for (let z = 0 ; z < a.value.length ; z ++ ) {
-                        list.push(a.value[z]);
+                for (let i = 0 ; i < a.value ; i ++ ) {
+                    for (let z = 0 ; z < b.value.length ; z ++ ) {
+                        list.push(b.value[z]);
                     }
                 }
                 return createVar(list, b.type);

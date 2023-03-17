@@ -11,7 +11,9 @@
 -functions can contain multiple lines
 -register infix in table at runtime?
 -do higher order funcs with for loop so we can see intermediate constructed list
--truly just implement strings as a list of characters
+-truly just implement strings as a list of characters and just write them out as strings
 -catch errors as 0 in condition checking
 -it's really annoying when expressions remain unevaluated, they should pretty much always be evaluated if possible
 -just mark expression expressions with some little token
+-provide a way to invoke a file with args in its own scope
+-don't apply any preprocessing to strings

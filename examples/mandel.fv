@@ -1,4 +1,4 @@
-r_height = 45
+r_height = 8
 r_width = floor(r_height * (4 / 3) * 3)
 r_scale = 0.003
 r_tx = -1.4
@@ -7,7 +7,7 @@ mandel_x_min = -2 * r_scale + r_tx
 mandel_x_max = 0.47 * r_scale + r_tx
 mandel_y_min = -1.12 * r_scale + r_ty
 mandel_y_max = 1.12 * r_scale + r_ty
-iter_limit = 500
+iter_limit = 386
 
 rescale = {a,b,c,d,x} => ((((x - a) * (d - c)) / (b - a)) + c)
 to_scaled_x = {n} => (rescale(0, r_width, mandel_x_min, mandel_x_max, n))
