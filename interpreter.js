@@ -1,4 +1,4 @@
-import {handleAssignment, lex, trimAndSplitArray} from "./prefixer.js";
+import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
 import {createInterface} from 'readline';
 import {typeCloseness} from "./types.js";
@@ -24,6 +24,8 @@ const interpret = (text, variables, functions, morphisms ,goal) => {
     //console.log(lexed)
     return evaluate(lexed, variables, functions, morphisms, goal);
 }
+
+window.interpret = interpret;
 
 const stripRedundantParens = (text) => {
     while (text.startsWith("(") && text.endsWith(")")) {

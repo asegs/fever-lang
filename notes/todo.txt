@@ -17,3 +17,4 @@
 -just mark expression expressions with some little token
 -provide a way to invoke a file with args in its own scope
 -don't apply any preprocessing to strings
+-registering morphisms
