@@ -23,6 +23,9 @@ export class ScopedVars {
     }
 
     hasVariable (name) {
+        if (name === "_") {
+            return false;
+        }
         for (let i = this.scopes.length - 1 ; i >= 0 ; i -- ) {
             const scope = this.scopes[i];
             if (name in scope) {

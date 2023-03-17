@@ -120,6 +120,11 @@ export const inferTypeFromString = (rawString) => {
 export const inferConditionFromString = (rawString, vars, functions, morphisms, takenVars) => {
     //Add specificities for each of these.
     const string = rawString.trim();
+
+    if (string === '_') {
+        return [createCondition(createVar('__repr', meta.STRING), createVar("true", primitives.EXPRESSION), createVar(0.5, primitives.NUMBER)), primitives.ANY, null];
+    }
+
     const missing = evaluate(string, vars, functions, morphisms, goals.MISSING);
     if (missing.length === 0) {
         /**

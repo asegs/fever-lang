@@ -4,6 +4,7 @@ import {createInterface} from 'readline';
 import {typeCloseness} from "./types.js";
 import * as path from "path";
 import * as fs from "fs";
+import {builtins} from "./builtins.js";
 
 const rl = createInterface({
     input: process.stdin,
@@ -123,9 +124,8 @@ export const evaluate = (text, variables, functions, morphisms, goal) => {
 export const prompt = (vars, functions, morphisms) => {
     rl.question(">", (inp) => {
         try {
-            interpret(inp, vars, functions, morphisms, goals.EVALUATE);
-            const [name, _] = handleAssignment(inp);
-            evaluate("show(" + name + ")", vars, functions, morphisms, goals.EVALUATE)
+            const result = interpret(inp, vars, functions, morphisms, goals.EVALUATE);
+            builtins.show[0]['function']([result]);
         } catch (e) {
             console.log(e)
         }
