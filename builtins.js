@@ -1,4 +1,4 @@
-import {primitives, meta, createTypedTuple, createVar, createTypedList, recursiveToString} from './types.js'
+import {createTypedList, createTypedTuple, createVar, meta, primitives, recursiveToString} from './types.js'
 import {evaluate, goals} from "./interpreter.js";
 
 
@@ -136,16 +136,17 @@ export const builtins = {
             'types': [meta.LIST, primitives.EXPRESSION],
             'conditions': [() => true, () => true],
             'function': ([list, action], variables, functions, morphisms) => {
-                const internalList = list.value.map((item, index) => {
+                const internalList = [];
+                for (let i = 0 ; i < list.value.length ; i ++ ) {
+                    const item = list.value[i];
                     variables.enterScope();
                     variables.assignValue('@', item);
-                    variables.assignValue('#', createVar(index, primitives.NUMBER));
-                    variables.assignValue('^', list);
+                    variables.assignValue('#', createVar(i, primitives.NUMBER));
+                    variables.assignValue('^', createVar([...internalList], createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
                     const result = evaluate(action.value, variables, functions, morphisms, goals.EVALUATE);
+                    internalList.push(result);
                     variables.exitScope();
-                    return result;
-                    }
-                );
+                }
                 return createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY));
             }
         },
@@ -158,18 +159,16 @@ export const builtins = {
             'function': ([list, reduce], variables, functions, morphisms) => {
                 let acc = reduce.value[0];
                 const expr = reduce.value[1].value;
-                const res = list.value.reduce((acc, item, index) => {
+                for (let i = 0 ; i < list.value.length ; i ++ ) {
+                    const item = list.value[i];
                     variables.enterScope();
                     variables.assignValue('@', item);
-                    variables.assignValue('#', createVar(index, primitives.NUMBER));
-                    variables.assignValue('^', list);
+                    variables.assignValue('#', createVar(i, primitives.NUMBER));
                     variables.assignValue('$', acc);
-                    const result = evaluate(expr, variables, functions, morphisms, goals.EVALUATE);
+                    acc = evaluate(expr, variables, functions, morphisms, goals.EVALUATE);
                     variables.exitScope();
-                    return result;
-                }, acc);
-
-                return res;
+                }
+                return acc;
             }
         }
     ],
@@ -179,15 +178,19 @@ export const builtins = {
             'types': [meta.LIST, primitives.EXPRESSION],
             'conditions': [() => true, () => true],
             'function': ([list, action], variables, functions, morphisms) => {
-                const internalList = list.value.filter((item, index) => {
+                const internalList = [];
+                for (let i = 0 ; i < list.value.length ; i ++ ) {
+                    const item = list.value[i];
                     variables.enterScope();
                     variables.assignValue('@', item);
-                    variables.assignValue('#', createVar(index, primitives.NUMBER));
-                    variables.assignValue('^', list);
+                    variables.assignValue('#', createVar(i, primitives.NUMBER));
+                    variables.assignValue('^', createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
                     const result = evaluate(action.value, variables, functions, morphisms, goals.EVALUATE);
+                    if (result.value) {
+                        internalList.push(item);
+                    }
                     variables.exitScope();
-                    return result.value;
-                });
+                }
 
                 return createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY));
             }

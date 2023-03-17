@@ -2,3 +2,11 @@ fib = {0} => 0
 fib = {1} => 1
 fib = {n:number} => ((fib(n-1)) + (fib(n-2)))
 fib = {(n < 0)} => false
+
+fib_lookup = {0,_} => 0
+fib_lookup = {1,_} => 1
+fib_lookup = {(n > 1):number, list:[]} => (get(list, n - 2))
+fib_lookup = {n, l} => (111)
+fast_fib = {(n<0):number} => false
+fast_fib = {n:number} => (2..n -> ((fib_lookup((@-1), ^)) + (fib_lookup((@-2), ^))))
+f_fib = {n:number} => (0..1 + fast_fib(n))
