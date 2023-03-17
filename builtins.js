@@ -425,6 +425,16 @@ export const builtins = {
                 return createVar(!truth.value, primitives.BOOLEAN);
             }
         }
-    ]
+    ],
+    'len': [
+        {
+            'arity': 1,
+            'types': [meta.LIST],
+            'conditions': [() => true],
+            'function': ([list]) => {
+                return createVar(list.value.length, primitives.NUMBER);
+            }
+        }
+    ],
 }
 

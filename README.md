@@ -69,7 +69,7 @@ You can apply higher order functions on lists as well.
 ```js
 [1,2,3] -> (@ + 1) //[2,3,4] (@ refers to the current element)
 [1,2,3] -> (@ + #) //[1,3,5] (# refers to the current index)
-[1,2,3] -> (^) //[[1,2,3],[1,2,3],[1,2,3]] (^ refers to the current list)
+[1,2,3] -> (len(^)) //[0,1,2] (^ refers to the current list)
 
 [1,2,3] ~> (# % 2 == 0) //[1,3] (The squiggly "dubious arrow" is a filter operator)
 [1,2,3] \> (0, ($ + @)) //6 (This is a reduce.  The $ is the accumulator, the 0 is the starting value)
@@ -121,6 +121,22 @@ fib(-1) //Oops!
 Let's see if we can catch that last case.
 ```js
 fib = {(a < 0)} => false
+```
+
+Function signatures can also be self-referential.  For example:
+```js
+is_equal = {_,_} => false
+is_equal = {a, a} => true
+is_equal(1,2) //false
+is_equal(1,1) //true
+```
+
+This works for expressions in signatures as well:
+```js
+is_double = {_,_} => false
+is_double = {n, (n * 2)} => true
+is_double(1,1) //false
+is_double(1,2) //true
 ```
 
 Pretty cool!

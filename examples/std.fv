@@ -1,5 +1,4 @@
 contains = {list:[], item} => (list \> (false, (item == @ | $)))
-len = {list:[]} => (list \> (0, ($ + 1)))
 
 //for primes
 
