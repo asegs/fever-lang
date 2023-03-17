@@ -137,12 +137,12 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
     if (acceptedMissing.length === 0) {
         //Then we have an expression or variable entirely using previous variables.
         if (string[0] === '(') {
+            //Only reasonable case is (b * 2) where b is defined
+            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + string + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY, null];
             //b where b is defined
-            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + missing[0].name + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY, null];
         } else {
-            //(b < c) where both are defined
-            //__repr here is ignored
-            return [createCondition(createVar('__repr', meta.STRING), createVar(string, primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY, null];
+            //Only reasonable case is (b * 2) where b is defined
+            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + missing[0].name + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY, null];
         }
     }
 
