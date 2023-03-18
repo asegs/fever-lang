@@ -6,13 +6,8 @@ import {goals, interpret} from "../interpreter.js";
 const variables = new ScopedVars();
 const morphisms = new Morphisms();
 const functions = builtins;
-const results = [];
-
-window.variables = variables;
-window.morphisms = morphisms;
-window.functions = functions;
-window.results = results;
-
+const history = [];
+let historyIndex = 0;
 const interpretInBrowser = (text) => {
     const resultsDiv = document.getElementById("results");
 
@@ -21,7 +16,10 @@ const interpretInBrowser = (text) => {
     inputPara.style.color = "grey";
     inputPara.appendChild(inputNode);
     resultsDiv.appendChild(inputPara);
-    results.push(">" + text);
+    if (history[history.length - 1] !== text) {
+        history.push(text);
+        historyIndex ++;
+    }
     let output;
 
     try {
@@ -31,8 +29,6 @@ const interpretInBrowser = (text) => {
     } catch (e) {
         output = e;
     }
-    results.push(output);
-
     const outputPara = document.createElement("p");
     const outputNode = document.createTextNode(output);
     outputPara.style.color = "white";
@@ -43,19 +39,42 @@ const interpretInBrowser = (text) => {
 
     document.getElementById("line").value = "";
     scrollToBottom("results");
-
 }
 
 window.interpretInBrowser = interpretInBrowser;
 
 const input = document.getElementById("line");
-input.addEventListener("keypress", (event) => {
+input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
         event.preventDefault();
         interpretInBrowser(input.value);
+        historyIndex = history.length;
+    }
+
+    let switchHappened = false;
+
+    if (event.key === "ArrowUp") {
+        if (historyIndex > 0) {
+            historyIndex --;
+            switchHappened = true;
+        }
+    }
+
+    if (event.key === "ArrowDown") {
+        if (historyIndex < history.length) {
+            historyIndex ++;
+            switchHappened = true;
+        }
+    }
+
+    if (switchHappened) {
+        if (historyIndex === history.length) {
+            input.value = "";
+        } else {
+            input.value = history[historyIndex];
+        }
     }
 });
-
 const scrollToBottom = (id) => {
     const element = document.getElementById(id);
     element.scrollTop = element.scrollHeight;
