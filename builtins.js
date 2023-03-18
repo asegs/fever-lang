@@ -436,5 +436,15 @@ export const builtins = {
             }
         }
     ],
+    'stringify': [
+        {
+            'arity': 1,
+            'types': [primitives.ANY],
+            'conditions': [() => true],
+            'function': ([v]) => {
+                return createVar(recursiveToString(v), meta.STRING);
+            }
+        }
+    ],
 }
 
