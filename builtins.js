@@ -28,6 +28,12 @@ export const builtins = {
             'conditions': [() => true, () => true],
             'function': ([a, b]) => createVar([...a.value, b], a.type)
         },
+        {
+            'arity': 2,
+            'types': [primitives.CHARACTER, primitives.NUMBER],
+            'conditions': [() => true, () => true],
+            'function': ([char, shift]) => createVar(String.fromCharCode(char.value.charCodeAt(0) + shift.value), primitives.CHARACTER)
+        },
     ],
     '*': [
         {

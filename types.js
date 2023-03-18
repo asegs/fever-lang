@@ -190,9 +190,6 @@ export const meta = {
 }
 
 export const recursiveToString = (v) => {
-    if (typeof v.value === "string") {
-        return '"' + v.value + '"';
-    }
     if (Array.isArray(v.value)) {
         if (typesEqual(v.type, meta.STRING)) {
             let concatenated = "";
@@ -206,21 +203,3 @@ export const recursiveToString = (v) => {
     }
     return v.value.toString();
 }
-
-/**
- *Signature:
-  {
-  "types": ["LIST"],
-  "value": [
-  {
-  "type": "STRING",
-  "test": () => interpret("len(x) > 5")
-  }
-  ]
-  }
-
- *Function:
- {
- "types"
- }
- */
