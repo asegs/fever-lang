@@ -1,7 +1,8 @@
-import {file, prompt} from "./interpreter.js";
 import {ScopedVars} from "./vars.js";
 import {builtins} from "./builtins.js";
 import {Morphisms} from "./morphisms.js";
+import {file} from "./interactives/file.js";
+import {prompt} from "./interactives/repl.js";
 
 const variables = new ScopedVars();
 const functions = builtins;

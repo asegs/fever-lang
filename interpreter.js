@@ -1,15 +1,6 @@
 import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
-import {createInterface} from 'readline';
 import {typeCloseness} from "./types.js";
-import * as path from "path";
-import * as fs from "fs";
-import {builtins} from "./builtins.js";
-
-const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
 
 export const goals = {
     EVALUATE: Symbol("EVALUATE"),
@@ -18,15 +9,12 @@ export const goals = {
 
 //.. as infix function
 
-const interpret = (text, variables, functions, morphisms ,goal) => {
+export const interpret = (text, variables, functions, morphisms ,goal) => {
     const lexed = lex(text)
     //Uncomment for debugging
     //console.log(lexed)
     return evaluate(lexed, variables, functions, morphisms, goal);
 }
-
-window.interpret = interpret;
-
 const stripRedundantParens = (text) => {
     while (text.startsWith("(") && text.endsWith(")")) {
         text = text.slice(1, text.length - 1);
@@ -121,39 +109,4 @@ export const evaluate = (text, variables, functions, morphisms, goal) => {
         return [];
     }
     return result;
-}
-
-export const prompt = (vars, functions, morphisms) => {
-    rl.question(">", (inp) => {
-        try {
-            const result = interpret(inp, vars, functions, morphisms, goals.EVALUATE);
-            builtins.show[0]['function']([result]);
-        } catch (e) {
-            console.log(e)
-        }
-        prompt(vars, functions, morphisms);
-    })
-}
-
-//Handle comments better later on
-const lineShouldBeEvaluated = (line) => {
-    return line.length > 0 && !line.startsWith("//");
-}
-
-export const file = (inputFile, vars, functions, morphisms) => {
-    const inputPath = path.resolve(inputFile);
-    if (!fs.existsSync(inputPath)) {
-        console.error("No such input file: " + inputPath);
-        process.exit(1);
-    }
-    const file = fs.readFileSync(inputPath,'utf8');
-    file.split('\n').forEach((line, index) => {
-        try {
-            if (lineShouldBeEvaluated(line)) {
-                interpret(line, vars, functions, morphisms, goals.EVALUATE);
-            }
-        } catch (e) {
-            console.log("Error on line " + (index + 1) + ": " + e);
-        }
-    });
 }
