@@ -65,12 +65,12 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
         return createVar([], meta.LIST);
     }
     if (string === '""') {
-        return createVar("", meta.STRING);
+        return createVar([], meta.STRING);
     }
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);
     } else if (isStringLiteral(string)) {
-        return createVar(string.slice(1, string.length - 1), meta.STRING);
+        return createVar(string.slice(1, string.length - 1).split('').map(char => createVar(char, primitives.CHARACTER)), meta.STRING);
     } else if (isWord(string)) {
         if (wordIsBoolean(string)) {
             return createVar(string === "true", primitives.BOOLEAN);

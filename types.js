@@ -194,6 +194,13 @@ export const recursiveToString = (v) => {
         return '"' + v.value + '"';
     }
     if (Array.isArray(v.value)) {
+        if (typesEqual(v.type, meta.STRING)) {
+            let concatenated = "";
+            for (let i = 0 ; i < v.value.length ; i ++ ) {
+                concatenated += v.value[i].value;
+            }
+            return '"' + concatenated + '"';
+        }
         const [open, close] = v.type.baseName === "TUPLE" ? ['(',')'] : ['[', ']'];
         return open + v.value.map(i => recursiveToString(i)).join(",") + close;
     }
