@@ -1,11 +1,7 @@
-import {ScopedVars} from "../vars.js";
-import {Morphisms} from "../morphisms.js";
-import {builtins} from "../builtins.js";
-import {goals, interpret} from "../interpreter.js";
+import {goals, instance, interpret} from "../interpreter.js";
 
-const variables = new ScopedVars();
-const morphisms = new Morphisms();
-const functions = builtins;
+const [variables, functions, morphisms] = instance();
+
 const history = [];
 let historyIndex = 0;
 const interpretInBrowser = (text) => {
