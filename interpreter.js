@@ -1,6 +1,9 @@
 import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
 import {typeCloseness} from "./types.js";
+import {ScopedVars} from "./vars.js";
+import {Morphisms} from "./morphisms.js";
+import {builtins, standardLib} from "./builtins.js";
 
 export const goals = {
     EVALUATE: Symbol("EVALUATE"),
@@ -109,4 +112,17 @@ export const evaluate = (text, variables, functions, morphisms, goal) => {
         return [];
     }
     return result;
+}
+
+export const instance = () => {
+    const variables = new ScopedVars();
+    const functions = builtins;
+    const morphisms = new Morphisms();
+
+    standardLib.forEach(line => {
+        interpret(line, variables, functions, morphisms, goals.EVALUATE);
+    });
+
+    return [variables, functions, morphisms];
+
 }

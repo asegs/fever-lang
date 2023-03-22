@@ -1,12 +1,8 @@
-import {ScopedVars} from "./vars.js";
-import {builtins} from "./builtins.js";
-import {Morphisms} from "./morphisms.js";
 import {file} from "./interactives/file.js";
 import {prompt} from "./interactives/repl.js";
+import {instance} from "./interpreter.js";
 
-const variables = new ScopedVars();
-const functions = builtins;
-const morphisms = new Morphisms();
+const [variables, functions, morphisms] = instance();
 
 if (process.argv.length > 2) {
     for (let i = 2 ; i < process.argv.length ; i ++ ) {

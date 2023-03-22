@@ -192,14 +192,19 @@ export const meta = {
 export const recursiveToString = (v) => {
     if (Array.isArray(v.value)) {
         if (typesEqual(v.type, meta.STRING)) {
-            let concatenated = "";
-            for (let i = 0 ; i < v.value.length ; i ++ ) {
-                concatenated += v.value[i].value;
-            }
-            return '"' + concatenated + '"';
+            return '"' + charListToJsString(v) + '"';
         }
         const [open, close] = v.type.baseName === "TUPLE" ? ['(',')'] : ['[', ']'];
         return open + v.value.map(i => recursiveToString(i)).join(",") + close;
     }
     return v.value.toString();
+}
+
+//Could definitely tune performance!
+export const charListToJsString = (v) => {
+    let concatenated = "";
+    for (let i = 0 ; i < v.value.length ; i ++ ) {
+        concatenated += v.value[i].value;
+    }
+    return concatenated;
 }

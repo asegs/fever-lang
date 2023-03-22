@@ -1,4 +1,12 @@
-import {createTypedList, createTypedTuple, createVar, meta, primitives, recursiveToString} from './types.js'
+import {
+    charListToJsString,
+    createTypedList,
+    createTypedTuple,
+    createVar,
+    meta,
+    primitives,
+    recursiveToString
+} from './types.js'
 import {evaluate, goals} from "./interpreter.js";
 
 
@@ -250,7 +258,7 @@ export const builtins = {
             'types': [primitives.ANY, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': ([name, value], variables) => {
-                variables.assignValue(name.value, value);
+                variables.assignValue(charListToJsString(name), value);
                 return value;
             }
         },
@@ -259,7 +267,7 @@ export const builtins = {
             'types': [primitives.ANY, meta.FUNCTION],
             'conditions': [() => true, () => true],
             'function': ([name, func], variables, functions, morphisms) => {
-                const realName = name.value;
+                const realName = charListToJsString(name);
                 variables.assignValue(realName, func);
                 if (!(realName in functions)) {
                     functions[realName] = [];
@@ -453,4 +461,10 @@ export const builtins = {
         }
     ],
 }
+
+export const standardLib = [
+    "contains = {list:[], item} => (list \\> (false, (item == @ | $)))",
+    "is_whole = {n:number} => (floor(n) == n)",
+    "sum = {list:[]} => (list \\> (0, ($ + @)))"
+]
 
