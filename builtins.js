@@ -492,7 +492,17 @@ export const standardLib = [
     "tail = {list:[]} => (slice(list,1))",
     "set_add = {list:[], (contains(list, item))} => (list)",
     "set_add = {list:[], item} => (list + item)",
-    "unique = {list:[]} => (list \\> ([], (set_add($, @))))"
+    "unique = {list:[]} => (list \\> ([], (set_add($, @))))",
+    "halve = {list:[]} => ([(slice(list,0,floor(len(list) / 2))), (slice(list, floor(len(list) / 2 )))])",
+    "merge = {[], l2:[]} => (l2)",
+    "merge = {l1:[], []} => (l1)",
+    "merge = {l1:[], ((get(l1,0)) < (get(l2,0))):[]} => ((get(l1,0)) + (merge(tail(l1),l2)))",
+    "merge = {l1:[], l2:[]} => ((get(l2,0)) + (merge(l1,tail(l2))))",
+    "sort = {(len(arr) <= 1):[]} => (arr)",
+    "sort = {arr:[]} => (merge(sort(get(halve(arr),0)), sort(get(halve(arr),1))))",
+    "reverse = {list:[]} => (list -> (get(list, len(list) - # - 1)))"
+
+
 
 ]
 
