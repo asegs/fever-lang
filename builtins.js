@@ -296,7 +296,11 @@ export const builtins = {
                     specificities.push(conditionSpecificity.value)
                     conditions.push((argument, variables, functions, morphisms) => {
                         variables.assignValue(conditionName.value, argument);
-                        return evaluate(conditionExpression.value, variables, functions, morphisms, goals.EVALUATE).value;
+                        try {
+                            return evaluate(conditionExpression.value, variables, functions, morphisms, goals.EVALUATE).value;
+                        } catch (e) {
+                            return false;
+                        }
                     });
                     types.push(type.value);
                 }
@@ -465,6 +469,19 @@ export const builtins = {
 export const standardLib = [
     "contains = {list:[], item} => (list \\> (false, (item == @ | $)))",
     "is_whole = {n:number} => (floor(n) == n)",
-    "sum = {list:[]} => (list \\> (0, ($ + @)))"
+    "sum = {list:[]} => (list \\> (0, ($ + @)))",
+    "min = {a:number, (a<=b):number} => (a)",
+    "min = {_:number, b: number} => (b)",
+    "min = {(len(list) > 0):[]} => (list \\> ((get(list,0)), (?((@ < $), @, $))))",
+    "max = {a:number, (a >= b):number} => (a)",
+    "max = {_:number, b:number} => (b)",
+    "max = {(len(list) > 0):[]} => (list \\> ((get(list,0)), (?((@ > $), @, $))))",
+    "slice = {list:[], from:number} => (list ~> (# >= from))",
+    "in_range = {target:number, (lower <= target):number, (target < higher):number} => true",
+    "in_range = {_:number, _:number, _: number} => false",
+    "slice = {list:[], from:number, to:number} => (list ~> (in_range(#, from, to)))",
+    "head = {(len(list) > 0):[]} => (get(list,0))",
+    "tail = {list:[]} => (slice(list,1))"
+
 ]
 

@@ -191,7 +191,7 @@ export const meta = {
 
 export const recursiveToString = (v) => {
     if (Array.isArray(v.value)) {
-        if (typesEqual(v.type, meta.STRING)) {
+        if (v.type.types[0] === primitives.CHARACTER) {
             return '"' + charListToJsString(v) + '"';
         }
         const [open, close] = v.type.baseName === "TUPLE" ? ['(',')'] : ['[', ']'];

@@ -12,9 +12,12 @@
 -register infix in table at runtime?
 -do higher order funcs with for loop so we can see intermediate constructed list
 -truly just implement strings as a list of characters and just write them out as strings
--catch errors as 0 in condition checking
 -it's really annoying when expressions remain unevaluated, they should pretty much always be evaluated if possible
 -just mark expression expressions with some little token
 -provide a way to invoke a file with args in its own scope
 -don't apply any preprocessing to strings
 -registering morphisms
+- [1, 2 + 5] -> No variable named +(2,5), easy fix, evaluate functions in literal parser if they are being evaluated and match function pattern
+- if missing evaluates all variables, it will evaluate chained expressions that reuse the same variable name eagerly
+- if it doesn't, it can't evaluate expressions that use outer scope variables
+- weight should go specific value > expression > type > any
