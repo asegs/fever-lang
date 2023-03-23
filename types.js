@@ -3,6 +3,13 @@ import {evaluate, goals} from "./interpreter.js";
 
 const ANY_VALUE = 0.5;
 
+const patternWeights = {
+    ANY: 0.5,
+    EXPRESSION: 1,
+    TYPE: 1,
+    VALUE: 1.2
+}
+
 
 
 export const createType = (baseName, types, methods, meta) => {
@@ -122,7 +129,7 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
     const string = rawString.trim();
 
     if (string === '_') {
-        return [createCondition(createVar('__repr', meta.STRING), createVar("true", primitives.EXPRESSION), createVar(0.5, primitives.NUMBER)), primitives.ANY, null];
+        return [createCondition(createVar('__repr', meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
     }
 
     const missing = evaluate(string, vars, functions, morphisms, goals.MISSING);
@@ -134,7 +141,7 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
          (b + 3) (expression with known)
          */
         const result = evaluate(string, vars, functions, morphisms, goals.EVALUATE);
-        return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER)), result.type, null];
+        return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), result.type, null];
     }
 
     const acceptedMissing = missing.filter(item => !takenVars.has(item.name));
@@ -143,11 +150,11 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
         //Then we have an expression or variable entirely using previous variables.
         if (string[0] === '(') {
             //Only reasonable case is (b * 2) where b is defined
-            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + string + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY, null];
+            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + string + ")", primitives.EXPRESSION), createVar(patternWeights.EXPRESSION, primitives.NUMBER)), primitives.ANY, null];
             //b where b is defined
         } else {
             //Only reasonable case is (b * 2) where b is defined
-            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + missing[0].name + ")", primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY, null];
+            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + missing[0].name + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), primitives.ANY, null];
         }
     }
 
@@ -157,11 +164,11 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
     const name = acceptedMissing[0].name;
     if (string[0] === '(') {
         // (len(a) % 2 == 0)
-        return [createCondition(createVar(name, meta.STRING), createVar(string, primitives.EXPRESSION), createVar(1, primitives.NUMBER)), primitives.ANY, name];
+        return [createCondition(createVar(name, meta.STRING), createVar(string, primitives.EXPRESSION), createVar(patternWeights.EXPRESSION, primitives.NUMBER)), primitives.ANY, name];
     }
 
     // a, won't support [1,2,a] yet, will need to destructure (what if we are actually testing for [1, 2, sublist]?)
-    return [createCondition(createVar(name, meta.STRING), createVar("==(" + name + "," + string + ")", primitives.EXPRESSION), createVar(0.5, primitives.NUMBER)), primitives.ANY, name];
+    return [createCondition(createVar(name, meta.STRING), createVar("==(" + name + "," + string + ")", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, name];
 }
 
 export const createPatternFromString = (string, vars, functions, morphisms, takenVars) => {

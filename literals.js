@@ -9,7 +9,7 @@ import {
 } from './types.js'
 import {splitArray, lex} from "./prefixer.js";
 import {ScopedVars} from "./vars.js";
-import {evaluate, goals} from "./interpreter.js";
+import {evaluate, goals, findMissing} from "./interpreter.js";
 
 const everyCharNumeric = (string) => {
    return string.match(/^-?[0-9]+$/g) || string.match(/^-?[0-9]+\.[0-9]+$/g);
@@ -79,6 +79,12 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
     } else if (isList(string)) {
         const entries = parseCollectionToItems(string);
         const items = entries.map(e => inferTypeAndValue(e, vars, functions, morphisms, goal));
+        if (goals.MISSING === goal) {
+            const missing = findMissing(items);
+            if (missing.length > 0) {
+                return missing;
+            }
+        }
         if (items.length > 0) {
             const first = items[0];
             if (items.every(i => typesEqual(first.type, i.type))) {
@@ -89,6 +95,12 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
     } else if (isTuple(string)) {
         const entries = parseCollectionToItems(string);
         const items = entries.map(e => inferTypeAndValue(e, vars, functions, morphisms, goal));
+        if (goals.MISSING === goal) {
+            const missing = findMissing(items);
+            if (missing.length > 0) {
+                return missing;
+            }
+        }
         return createVar(items, createTypedTuple(items.map(i => i.type)))
     } else if (isExpression(string)) {
         const expr = string.slice(1, string.length - 1);

@@ -381,6 +381,14 @@ export const builtins = {
             'function': ([list, num]) => {
                 return list.value[num.value];
             }
+        },
+        {
+            'arity': 2,
+            'types': [meta.TUPLE, primitives.NUMBER],
+            'conditions': [() => true, () => true],
+            'function': ([tuple, num]) => {
+                return tuple.value[num.value];
+            }
         }
     ],
     'floor': [

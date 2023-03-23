@@ -21,3 +21,6 @@
 - if missing evaluates all variables, it will evaluate chained expressions that reuse the same variable name eagerly
 - if it doesn't, it can't evaluate expressions that use outer scope variables
 - weight should go specific value > expression > type > any
+- in error message, write out least specific test that satisfactory match checks for
+- better generic formulation of a tuple, right now it is just tuple(any)
+- just auto evaluate everything unless it is explicitly tagged as tbd

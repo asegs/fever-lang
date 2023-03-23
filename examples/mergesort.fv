@@ -1,8 +1,8 @@
-halve = {list:[]} => (((slice(list,0,floor(len(list) / 2))), (slice(list, floor(len(list) / 2 )))))
+halve = {list:[]} => ([(slice(list,0,floor(len(list) / 2))), (slice(list, floor(len(list) / 2 )))])
 merge = {[], l2:[]} => (l2)
 merge = {l1:[], []} => (l1)
 merge = {l1:[], ((get(l1,0)) < (get(l2,0))):[]} => ((get(l1,0)) + (merge(tail(l1),l2)))
 merge = {l1:[], l2:[]} => ((get(l2,0)) + (merge(l1,tail(l2))))
-mergesort = {(len(arr) == 1):[]} => (arr)
+mergesort = {(len(arr) <= 1):[]} => (arr)
 mergesort = {arr:[]} => (merge(mergesort(get(halve(arr),0)), mergesort(get(halve(arr),1))))
 
