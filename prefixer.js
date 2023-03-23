@@ -79,10 +79,17 @@ const notQuoted = (s, d) => {
 }
 
 const preprocess = (text) => {
+    let singleQuotes = 0;
+    let doubleQuotes = 0;
     let builder = "";
     for (let i = 0 ; i < text.length ; i ++ ) {
         const [prev, char, next] = getSurroundingChars(text, i);
-        if (char in unusualCases) {
+        if (char === '"') {
+            doubleQuotes ++;
+        } else if (char === "'") {
+            singleQuotes ++;
+        }
+        if (notQuoted(singleQuotes, doubleQuotes) && char in unusualCases) {
             const score = unusualCases[char](text, i);
             if (score >= 0) {
                 if (prev !== null && prev !== ' ') {
@@ -102,7 +109,7 @@ const preprocess = (text) => {
             } else {
                 builder += char;
             }
-        } else if (infixes.includes(char)) {
+        } else if (notQuoted(singleQuotes, doubleQuotes) && infixes.includes(char)) {
             if (prev !== null && prev !== ' ') {
                 builder += ' ';
             }
@@ -216,6 +223,7 @@ export const splitArray = (text) => {
     return splitGeneral(text, ',');
 }
 
+//Would rather be anything but whitespace, parens, quotes, brackets/braces
 export const isAssignment = (text) => {
     return /^[a-zA-Z_]+[_0-9a-zA-Z]* *=.*$/gm.test(text);
 }
