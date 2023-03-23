@@ -19,3 +19,5 @@
 - in error message, write out least specific test that satisfactory match checks for
 - better generic formulation of a tuple, right now it is just tuple(any)
 - just auto evaluate everything unless it is explicitly tagged as tbd
+- type declaration syntax
+- type variables in list signatures??

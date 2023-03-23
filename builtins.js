@@ -489,7 +489,10 @@ export const standardLib = [
     "in_range = {_:number, _:number, _: number} => false",
     "slice = {list:[], from:number, to:number} => (list ~> (in_range(#, from, to)))",
     "head = {(len(list) > 0):[]} => (get(list,0))",
-    "tail = {list:[]} => (slice(list,1))"
+    "tail = {list:[]} => (slice(list,1))",
+    "set_add = {list:[], (contains(list, item))} => (list)",
+    "set_add = {list:[], item} => (list + item)",
+    "unique = {list:[]} => (list \\> ([], (set_add($, @))))"
 
 ]
 
