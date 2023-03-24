@@ -8,8 +8,9 @@ const interpretInBrowser = (text) => {
     const resultsDiv = document.getElementById("results");
 
     const inputPara = document.createElement("p");
-    const inputNode = document.createTextNode(">" + text);
+    const inputNode = document.createTextNode("> " + text);
     inputPara.style.color = "grey";
+    inputPara.style.fontSize = "24px";
     inputPara.appendChild(inputNode);
     resultsDiv.appendChild(inputPara);
     if (history[history.length - 1] !== text) {
@@ -28,13 +29,14 @@ const interpretInBrowser = (text) => {
     const outputPara = document.createElement("p");
     const outputNode = document.createTextNode(output);
     outputPara.style.color = "white";
+    outputPara.style.fontSize = "24px";
     outputPara.appendChild(outputNode);
 
     resultsDiv.appendChild(inputPara);
     resultsDiv.appendChild(outputPara);
 
     document.getElementById("line").value = "";
-    scrollToBottom("results");
+    scrollToBottom("terminal");
 }
 
 window.interpretInBrowser = interpretInBrowser;
@@ -71,6 +73,12 @@ input.addEventListener("keydown", (event) => {
         }
     }
 });
+input.focus();
+input.onblur = () => {
+    setTimeout(() => {
+        input.focus();
+    }, 1);
+}
 const scrollToBottom = (id) => {
     const element = document.getElementById(id);
     element.scrollTop = element.scrollHeight;

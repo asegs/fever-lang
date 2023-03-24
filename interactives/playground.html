@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 100%; background-color: black">
 <head>
     <meta charset="UTF-8">
     <title>Sweat Lodge</title>
 </head>
 <script src="playground.js" type="module"></script>
-<body>
-<div id="results" style="background-color: black; padding: 10px; min-height: 400px; max-height: 400px; overflow-y: scroll">
-
+<body style="height: 95%">
+<div id="terminal" style="background-color: black; padding: 10px; height: 100%; overflow-y: scroll; margin: 0">
+<div id="results">
+<p style="color: white; font-size: 24px">Tossing and turning, you come into the sweat lodge.</p>
+    <p style="color: white; font-size: 32px">Fever</p>
 </div>
-<input  style="width: 80%; margin-top: 50px; font-size: 24px" id="line" type="text" />
+    <label for="line" style="color: white; font-size: 24px">></label>
+    <input  style="width: 80%; font-size: 24px; color: white; background-color: black; border: none; outline: none" id="line" type="text" />
+</div>
+</body>
 </html>
