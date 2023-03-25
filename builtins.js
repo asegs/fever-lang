@@ -361,7 +361,7 @@ export const builtins = {
         {
             'arity': 2,
             'types': [primitives.NUMBER, primitives.NUMBER],
-            'conditions': [() => true, () => true],
+            'conditions': [(num) => Number.isInteger(num.value), (num) => Number.isInteger(num.value)],
             'function': ([a, b]) => {
                 const direction = (a.value < b.value) ? 1 : -1;
                 const numbers = [];

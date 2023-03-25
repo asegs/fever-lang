@@ -21,3 +21,5 @@
 - just auto evaluate everything unless it is explicitly tagged as tbd
 - type declaration syntax
 - type variables in list signatures??
+- named types as assignment to signature
+- passing functions as arguments, not individual pattern instances, could simply go by function names
