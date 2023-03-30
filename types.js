@@ -1,7 +1,12 @@
 import {splitGeneral, splitArray} from "./prefixer.js";
 import {evaluate, goals} from "./interpreter.js";
 
-const ANY_VALUE = 0.5;
+
+const typeWeights = {
+    ANY: 0.5,
+    NOMINAL: 1.2,
+    EQUIVALENT: 1
+}
 
 const patternWeights = {
     ANY: 0.5,
@@ -12,13 +17,19 @@ const patternWeights = {
 
 
 
-export const createType = (baseName, types, methods, meta) => {
-    return {
+export const createType = (baseName, types, methods, meta, name) => {
+    const type = {
         'baseName': baseName,
         'types': types,
         'methods': methods,
         'meta': meta
+    };
+
+    if (name) {
+        type['alias'] = name;
     }
+
+    return type;
 }
 
 export const primitives = {
@@ -42,6 +53,7 @@ export const typesEqual = (t1, t2) => {
     if (t1 === primitives.ANY || t2 === primitives.ANY) {
         return true;
     }
+
     if (!t1.meta && !t2.meta) {
         return t1.baseName === t2.baseName;
     }
@@ -49,18 +61,29 @@ export const typesEqual = (t1, t2) => {
         return false;
     }
     if (t1.types.length !== t2.types.length) {
-        return false;
+        //Empty tuple is stand in for any tuple
+        return t1.baseName === "TUPLE" && t1.types.length === 0;
+
     }
+
     return t1.types.every((item, index) => typesEqual(item, t2.types[index]));
 }
 
 export const typeCloseness = (testType, comparedTo) => {
     if (testType.baseName === "ANY") {
-        return ANY_VALUE;
+        return typeWeights.ANY;
     }
 
+
+    if ('alias' in testType && 'alias' in comparedTo) {
+        if (testType['alias'] === comparedTo['alias']) {
+            return typeWeights.NOMINAL;
+        }
+    }
+
+
     if (typesEqual(testType, comparedTo)) {
-        return 1;
+        return typeWeights.EQUIVALENT;
     }
     return 0;
     //Exact match is 1
@@ -75,16 +98,16 @@ export const typeCloseness = (testType, comparedTo) => {
 
 
 
-export const createTypedList = (ofType) => {
+export const createTypedList = (ofType, name) => {
     return createType("LIST", [ofType], {
         'match': (l) => l.every(item => typesEqual(item.type, ofType))
-    }, true);
+    }, true, name);
 }
 
-export const createTypedTuple = (types) => {
+export const createTypedTuple = (types, name) => {
     return createType("TUPLE", types, {
         'match': (t) => t.every((item, index) => typesEqual(item.type, types[index]))
-    }, true);
+    }, true, name);
 }
 
 export const createTypeVar = (type) => {
@@ -181,10 +204,10 @@ export const createPatternFromString = (string, vars, functions, morphisms, take
     return [createPattern(condition, createTypeVar(type)), namedVar];
 }
 
-const STRING = createTypedList(primitives.CHARACTER);
-const CONDITION = createTypedTuple([STRING, primitives.EXPRESSION, primitives.NUMBER]);
-const PATTERN = createTypedTuple([CONDITION, primitives.TYPE]);
-const SIGNATURE = createTypedList(PATTERN);
+const STRING = createTypedList(primitives.CHARACTER, "STRING");
+const CONDITION = createTypedTuple([STRING, primitives.EXPRESSION, primitives.NUMBER], "CONDITION");
+const PATTERN = createTypedTuple([CONDITION, primitives.TYPE], "PATTERN");
+const SIGNATURE = createTypedList(PATTERN, "SIGNATURE");
 
 export const meta = {
     CONDITION: CONDITION,
@@ -192,8 +215,8 @@ export const meta = {
     SIGNATURE: SIGNATURE,
     LIST: createTypedList(primitives.ANY),
     STRING: STRING,
-    FUNCTION: createTypedTuple([SIGNATURE, primitives.EXPRESSION]),
-    TUPLE: createTypedTuple([primitives.ANY]),
+    FUNCTION: createTypedTuple([SIGNATURE, primitives.EXPRESSION], "FUNCTION"),
+    TUPLE: createTypedTuple([]),
 }
 
 export const recursiveToString = (v) => {

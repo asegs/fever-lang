@@ -67,6 +67,9 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
     if (string === '""') {
         return createVar([], meta.STRING);
     }
+    if (string === '()') {
+        return createVar([], meta.TUPLE);
+    }
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);
     } else if (isStringLiteral(string)) {
