@@ -281,39 +281,16 @@ export const builtins = {
             ([name, func], variables, functions, morphisms) => {
                 const realName = charListToJsString(name);
                 variables.assignValue(realName, func);
-                if (!(realName in functions)) {
-                    functions[realName] = [];
-                }
 
                 const signature = func.value[0];
                 const expression = func.value[1];
-                const sigPatterns = signature.value;
-                const size = sigPatterns.length;
+                const size = signature.value.length;
 
-                const types = [];
-                const conditions = [];
-                const names = [];
-                const specificities = [];
+                const types = typesFromSignature(signature);
+                const conditions = conditionsFromSignature(signature);
+                const names = namesFromSignature(signature);
+                const specificities = specificitiesFromSignature(signature);
 
-                for (let i = 0 ; i < size ; i ++ ) {
-                    const pattern = sigPatterns[i];
-                    const condition = pattern.value[0];
-                    const type = pattern.value[1];
-                    const conditionName = condition.value[0];
-                    const conditionExpression = condition.value[1];
-                    const conditionSpecificity = condition.value[2];
-                    names.push(conditionName.value);
-                    specificities.push(conditionSpecificity.value)
-                    conditions.push((argument, variables, functions, morphisms) => {
-                        variables.assignValue(conditionName.value, argument);
-                        try {
-                            return evaluate(conditionExpression.value, variables, functions, morphisms, goals.EVALUATE).value;
-                        } catch (e) {
-                            return false;
-                        }
-                    });
-                    types.push(type.value);
-                }
                 const operation = (args, variables, functions, morphisms) => {
                     variables.enterScope();
                     for (let i = 0 ; i < args.length ; i ++ ) {
@@ -323,13 +300,17 @@ export const builtins = {
                     variables.exitScope();
                     return result;
                 }
-                functions[realName].push(newFunction(
-                    size,
-                    types,
-                    conditions,
-                    operation,
-                    specificities
-                ));
+                registerNewFunction(
+                    realName,
+                    functions,
+                    newFunction(
+                        size,
+                        types,
+                        conditions,
+                        operation,
+                        specificities
+                    )
+                );
 
                 return func;
             }
@@ -340,8 +321,7 @@ export const builtins = {
             [() => true, () => true],
             ([name, signature], variables) => {
                 variables.assignValue(charListToJsString(name), signature);
-                const items = signature.value;
-                const types = items.map(i => i.value[1].value);
+                const types = typesFromSignature(signature);
                 const newType = createTypedTuple(types, name);
                 meta[name] = newType;
                 //Implement constructor that applies conditions to inputs
@@ -531,7 +511,45 @@ export const standardLib = [
     "reverse = {list:[]} => (list -> (get(list, len(list) - # - 1)))"
 ]
 
-const registerNewFunction = (name, functionObject) => {
+const typesFromSignature = (signature) => {
+    return signature.value.map(i => i.value[1].value);
+}
 
+const conditionsFromSignature = (signature) => {
+    const conditions = [];
+
+    const sigPatterns = signature.value;
+    const size = sigPatterns.length;
+    for (let i = 0 ; i < size ; i ++ ) {
+        const pattern = sigPatterns[i];
+        const condition = pattern.value[0];
+        const conditionName = condition.value[0];
+        const conditionExpression = condition.value[1];
+        conditions.push((argument, variables, functions, morphisms) => {
+            variables.assignValue(conditionName.value, argument);
+            try {
+                return evaluate(conditionExpression.value, variables, functions, morphisms, goals.EVALUATE).value;
+            } catch (e) {
+                return false;
+            }
+        });
+    }
+    return conditions;
+}
+
+const namesFromSignature = (signature) => {
+    return signature.value.map(i => i.value[0].value[0].value);
+}
+
+const specificitiesFromSignature = (signature) => {
+    return signature.value.map(i => i.value[0].value[2].value);
+}
+
+const registerNewFunction = (name, functions, functionObject) => {
+    if (!(name in functions)) {
+        functions[name] = [];
+    }
+
+    functions[name].push(functionObject);
 }
 
