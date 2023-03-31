@@ -23,3 +23,8 @@
 - type variables in list signatures??
 - named types as assignment to signature
 - passing functions as arguments, not individual pattern instances, could simply go by function names
+- type object instead of global
+- create auto constructor function, like: set = {list:[]}, new_set([1,2,3])
+- useless unless we can do: set = {(unique(list)):[]} and have it call unique on list
+- or that could be a validation and require it to be unique, but that is boring
+- we could do some magic, create function: set_list(s:set) which returns the list element and also generate new_set which calls list

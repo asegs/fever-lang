@@ -255,7 +255,7 @@ export const builtins = {
     '=': [
         {
             'arity': 2,
-            'types': [primitives.ANY, primitives.ANY],
+            'types': [meta.STRING, primitives.ANY],
             'conditions': [() => true, () => true],
             'function': ([name, value], variables) => {
                 variables.assignValue(charListToJsString(name), value);
@@ -264,7 +264,7 @@ export const builtins = {
         },
         {
             'arity': 2,
-            'types': [primitives.ANY, meta.FUNCTION],
+            'types': [meta.STRING, meta.FUNCTION],
             'conditions': [() => true, () => true],
             'function': ([name, func], variables, functions, morphisms) => {
                 const realName = charListToJsString(name);
@@ -319,6 +319,17 @@ export const builtins = {
                 functions[realName].push(newFunction);
 
                 return func;
+            }
+        },
+        {
+            'arity': 2,
+            'types': [meta.STRING, meta.SIGNATURE],
+            'conditions': [() => true, () => true],
+            'function': ([name, signature], variables) => {
+                variables.assignValue(charListToJsString(name), signature);
+                const items = signature.value;
+
+                return signature;
             }
         }
     ],

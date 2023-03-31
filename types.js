@@ -4,7 +4,7 @@ import {evaluate, goals} from "./interpreter.js";
 
 const typeWeights = {
     ANY: 0.5,
-    NOMINAL: 1.2,
+    NOMINAL: 1.1,
     EQUIVALENT: 1
 }
 
@@ -127,6 +127,15 @@ export const inferTypeFromString = (rawString) => {
     for (const [, prim] of Object.entries(primitives)) {
         if (string.toLowerCase() === prim.baseName.toLowerCase()) {
             return prim;
+        }
+        if ('alias' in prim && (string.toLowerCase() === prim.alias.toLowerCase())) {
+            return prim;
+        }
+    }
+
+    for (const [, m] of Object.entries(meta)) {
+        if ('alias' in m && (string.toLowerCase() === m.alias.toLowerCase())) {
+            return m;
         }
     }
     if (string[0] === '[') {
