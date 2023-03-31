@@ -29,3 +29,4 @@
 - or that could be a validation and require it to be unique, but that is boring
 - we could do some magic, create function: set_list(s:set) which returns the list element and also generate new_set which calls list
 - condition is (name, expr, spec).  in set = {list:[]} we just need name, in set = {(unique(list)):[]} we need name and expr, we have them!!
+- write out alias non-string objects to console by their alias...just something to deal with noisy printouts
