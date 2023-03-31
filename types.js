@@ -157,7 +157,6 @@ export const inferTypeFromString = (rawString) => {
  (len(a) % 2 == 0) (expression with unknown)
  */
 export const inferConditionFromString = (rawString, vars, functions, morphisms, takenVars) => {
-    //Add specificities for each of these.
     const string = rawString.trim();
 
     if (string === '_') {
