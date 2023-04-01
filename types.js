@@ -17,11 +17,10 @@ const patternWeights = {
 
 
 
-export const createType = (baseName, types, methods, meta, name) => {
+export const createType = (baseName, types, meta, name) => {
     const type = {
         'baseName': baseName,
         'types': types,
-        'methods': methods,
         'meta': meta
     };
 
@@ -33,13 +32,13 @@ export const createType = (baseName, types, methods, meta, name) => {
 }
 
 export const primitives = {
-    NUMBER: createType("NUMBER", [], {}, false),
-    BOOLEAN: createType("BOOLEAN", [], {}, false),
-    CHARACTER: createType("CHARACTER",[], {}, false),
-    ANY: createType("ANY", [], {}, false),
+    NUMBER: createType("NUMBER", [], false),
+    BOOLEAN: createType("BOOLEAN", [], false),
+    CHARACTER: createType("CHARACTER",[],  false),
+    ANY: createType("ANY", [],  false),
     VOID: createType("VOID"),
-    EXPRESSION: createType("EXPRESSION", [], {}, false),
-    TYPE: createType("TYPE", [], {}, false),
+    EXPRESSION: createType("EXPRESSION", [],  false),
+    TYPE: createType("TYPE", [],  false),
 }
 
 export const createVar = (value, type) => {
@@ -49,40 +48,37 @@ export const createVar = (value, type) => {
     }
 }
 
-export const typesEqual = (t1, t2) => {
-    if (t1 === primitives.ANY || t2 === primitives.ANY) {
+export const typeAssignableFrom = (child, parent) => {
+    if (parent === primitives.ANY) {
         return true;
     }
 
-    if (!t1.meta && !t2.meta) {
-        return t1.baseName === t2.baseName;
-    }
-    if (t1.baseName !== t2.baseName) {
-        return false;
-    }
-    if (t1.types.length !== t2.types.length) {
-        //Empty tuple is stand in for any tuple
-        return t1.baseName === "TUPLE" && t1.types.length === 0;
-
+    if (!child.meta && !parent.meta) {
+        return child.baseName === parent.baseName;
     }
 
-    return t1.types.every((item, index) => typesEqual(item, t2.types[index]));
+    if (child.types.length !== parent.types.length) {
+        return parent.baseName === "TUPLE" && parent.types.length === 0;
+    }
+
+    return child.types.every((item, index) => typeAssignableFrom(item, parent.types[index]));
 }
 
-export const typeCloseness = (testType, comparedTo) => {
-    if (testType.baseName === "ANY") {
+export const typeSatisfaction = (child, parent) => {
+    if (parent.baseName === "ANY") {
         return typeWeights.ANY;
     }
 
 
-    if ('alias' in testType && 'alias' in comparedTo) {
-        if (testType['alias'] === comparedTo['alias']) {
+    if ('alias' in child && 'alias' in parent) {
+        if (child['alias'] === parent['alias']) {
             return typeWeights.NOMINAL;
         }
     }
 
 
-    if (typesEqual(testType, comparedTo)) {
+    //Could go recursive here to get partial matches, some nominal, some any, some equivalent.
+    if (typeAssignableFrom(child, parent)) {
         return typeWeights.EQUIVALENT;
     }
     return 0;
@@ -99,15 +95,11 @@ export const typeCloseness = (testType, comparedTo) => {
 
 
 export const createTypedList = (ofType, name) => {
-    return createType("LIST", [ofType], {
-        'match': (l) => l.every(item => typesEqual(item.type, ofType))
-    }, true, name);
+    return createType("LIST", [ofType], true, name);
 }
 
 export const createTypedTuple = (types, name) => {
-    return createType("TUPLE", types, {
-        'match': (t) => t.every((item, index) => typesEqual(item.type, types[index]))
-    }, true, name);
+    return createType("TUPLE", types, true, name);
 }
 
 export const createTypeVar = (type) => {

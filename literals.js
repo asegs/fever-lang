@@ -4,8 +4,7 @@ import {
     createTypedTuple,
     createVar,
     meta,
-    primitives,
-    typesEqual
+    primitives, typeAssignableFrom
 } from './types.js'
 import {splitArray, lex} from "./prefixer.js";
 import {ScopedVars} from "./vars.js";
@@ -90,7 +89,7 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
         }
         if (items.length > 0) {
             const first = items[0];
-            if (items.every(i => typesEqual(first.type, i.type))) {
+            if (items.every(i => typeAssignableFrom(i.type, first.type))) {
                 return createVar(items, createTypedList(first.type));
             }
         }
