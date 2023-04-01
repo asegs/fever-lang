@@ -140,3 +140,28 @@ is_double(1,2) //true
 ```
 
 Pretty cool!
+
+
+While types can be inferred, Fever supports nominal typing derived from named tuples.
+When a type is created, a constructor is registered in the right scope by adding "new_" to the type name.
+
+```js
+coord = {x:number, y:number}
+location = new_coord(1,2) //(1,2)
+
+f = {_:coord} => true
+f = {_} => false
+
+f(location) //true
+f((1,2)) //false
+```
+
+One novel feature is implicit constructors.  You can define a normal signature like:
+
+```js
+set = {(unique(l)):[]}
+
+item = new_set([1,2,2]) //([1,2])
+```
+
+You can see that the given expression is applied to the argument before constructing the object.

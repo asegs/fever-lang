@@ -70,6 +70,15 @@ export const typeSatisfaction = (child, parent) => {
         return typeWeights.ANY;
     }
 
+    if ('alias' in parent) {
+        if ('alias' in child) {
+            if (child['alias'] === parent['alias']) {
+                return typeWeights.NOMINAL;
+            }
+        }
+        return 0;
+    }
+
 
     if ('alias' in child && 'alias' in parent) {
         if (child['alias'] === parent['alias']) {
