@@ -145,6 +145,8 @@ Pretty cool!
 While types can be inferred, Fever supports nominal typing derived from named tuples.
 When a type is created, a constructor is registered in the right scope by adding "new_" to the type name.
 
+Getters are also generated.
+
 ```js
 coord = {x:number, y:number}
 location = new_coord(1,2) //(1,2)
@@ -154,6 +156,9 @@ f = {_} => false
 
 f(location) //true
 f((1,2)) //false
+
+coord_x(location) //1
+coord_y(location) //2
 ```
 
 One novel feature is implicit constructors.  You can define a normal signature like:

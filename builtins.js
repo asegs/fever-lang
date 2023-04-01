@@ -332,6 +332,20 @@ export const builtins = {
                 for (let i = 0 ; i < size ; i ++ ) {
                     const condition = signature.value[i].value[0].value;
                     const name = condition[0];
+
+                    registerNewFunction(
+                        realName + "_" + name.value,
+                        functions,
+                        newFunction(
+                            1,
+                            [newType],
+                            [() => true],
+                            ([ofType]) => {
+                                return ofType.value[i];
+                            }
+                        )
+                    )
+
                     const expression = condition[1];
                     if (expression.value.startsWith('==')) {
                         permutations.push(arg => arg);
