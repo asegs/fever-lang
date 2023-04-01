@@ -4,6 +4,7 @@ import {evaluate, goals} from "./interpreter.js";
 
 const typeWeights = {
     ANY: 0.5,
+    BASE_TUPLE: 0.75,
     NOMINAL: 1.1,
     EQUIVALENT: 1
 }
@@ -76,12 +77,26 @@ export const typeSatisfaction = (child, parent) => {
         }
     }
 
-
-    //Could go recursive here to get partial matches, some nominal, some any, some equivalent.
-    if (typeAssignableFrom(child, parent)) {
-        return typeWeights.EQUIVALENT;
+    if (!child.meta && !parent.meta) {
+        return (child.baseName === parent.baseName) ? typeWeights.NOMINAL : 0;
     }
-    return 0;
+
+    if (child.types.length !== parent.types.length) {
+        return (parent.baseName === "TUPLE" && parent.types.length === 0) ? typeWeights.BASE_TUPLE : 0;
+    }
+
+    let combinedScore = 0;
+
+    for (let i = 0 ; i < child.types.length ; i ++ ) {
+        const satisfaction = typeSatisfaction(child.types[i], parent.types[i]);
+        if (satisfaction === 0) {
+            return 0;
+        }
+
+        combinedScore += satisfaction;
+    }
+
+    return combinedScore / child.types.length;
     //Exact match is 1
     //Same base type is something
     //Handle [String, String, Int] never working with [String, String, String] (aside from morphisms)
