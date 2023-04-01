@@ -319,11 +319,65 @@ export const builtins = {
             2,
             [meta.STRING, meta.SIGNATURE],
             [() => true, () => true],
-            ([name, signature], variables) => {
-                variables.assignValue(charListToJsString(name), signature);
+            ([name, signature], variables, functions) => {
+                const realName = charListToJsString(name);
+                variables.assignValue(realName, signature);
                 const types = typesFromSignature(signature);
-                const newType = createTypedTuple(types, name);
-                meta[name] = newType;
+                const size = types.length;
+                const newType = createTypedTuple(types, realName);
+                meta[realName] = newType;
+
+                const permutations = [];
+
+                for (let i = 0 ; i < size ; i ++ ) {
+                    const condition = signature.value[i].value[0].value;
+                    const name = condition[0];
+                    const expression = condition[1];
+                    if (expression.value.startsWith('==')) {
+                        permutations.push(arg => arg);
+                        continue;
+                    }
+
+                    //Conditions table is still putting out raw strings, not lists!
+                    permutations.push(
+                        (arg, variables, functions, morphisms) => {
+                            variables.enterScope();
+                            variables.assignValue(name.value, arg);
+                            const result = evaluate(expression.value, variables, functions, morphisms, goals.EVALUATE);
+                            variables.exitScope();
+                            return result;
+                        }
+                    );
+                }
+
+
+                //Apply relevant condition to each arg if not simple var name.
+                const operation = (args, variables, functions, morphisms) => {
+                    const mutatedArgs = [];
+
+                    for (let i = 0 ; i < size ; i ++) {
+                        mutatedArgs.push(permutations[i](args[i], variables, functions, morphisms));
+                    }
+                    return createVar(mutatedArgs, newType);
+                }
+
+                const conditions = [];
+
+                for (let i = 0 ; i < size ; i ++ ) {
+                    conditions.push(() => true);
+                }
+
+                registerNewFunction(
+                    "new_" + realName,
+                    functions,
+                    newFunction(
+                        size,
+                        types,
+                        conditions,
+                        operation
+                    )
+                );
+
                 //Implement constructor that applies conditions to inputs
                 //Implement getters for each property in global scope
                 return signature;
@@ -341,15 +395,20 @@ export const builtins = {
             }
         ),
         newFunction(
-            3,
-            [primitives.ANY, meta.STRING, primitives.BOOLEAN],
-            [() => true, () => true, () => true],
-            ([v, delimiter, simple]) => {
-                if (simple.value) {
-                    process.stdout.write(v.value.toString() + delimiter.value);
-                } else {
-                    process.stdout.write(recursiveToString(v) + delimiter.value);
-                }
+            2,
+            [primitives.ANY, meta.STRING],
+            [() => true, () => true],
+            ([v, delimiter]) => {
+                process.stdout.write(recursiveToString(v) + delimiter.value);
+                return v;
+            }
+        ),
+        newFunction(
+            2,
+            [meta.STRING, meta.STRING],
+            [() => true, () => true],
+            ([v, delimiter]) => {
+                process.stdout.write(charListToJsString(v) + delimiter.value);
                 return v;
             }
         )
@@ -480,6 +539,19 @@ export const builtins = {
             }
         )
     ],
+    'type': [
+        newFunction(
+            1,
+            [primitives.ANY],
+            [() => true],
+            ([v]) => {
+                if ('alias' in v.type) {
+                    return createVar(v.type.alias, meta.STRING);
+                }
+                return createVar(v.type.baseName, meta.STRING);
+             }
+        )
+    ]
 }
 
 export const standardLib = [

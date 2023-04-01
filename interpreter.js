@@ -1,6 +1,6 @@
 import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
-import {typeCloseness} from "./types.js";
+import {typeSatisfaction} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
 import {builtins, standardLib} from "./builtins.js";
@@ -55,7 +55,7 @@ const callFunction = (name, args, variables, functions, morphisms) => {
             const type = candidateFunction.types[i];
             const condition = candidateFunction.conditions[i];
             const specificity = 'specificities' in candidateFunction ? candidateFunction.specificities[i] : 1;
-            const intScore = typeCloseness(type, args[i].type) * (condition(args[i], variables, functions, morphisms) ? 1 : 0) * specificity;
+            const intScore = typeSatisfaction(args[i].type, type) * (condition(args[i], variables, functions, morphisms) ? 1 : 0) * specificity;
             if (intScore === 0) {
                 score = -1;
                 break;
