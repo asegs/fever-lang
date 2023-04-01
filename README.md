@@ -25,6 +25,9 @@ It came to me in a fever dream.
 It works normally in a lot of ways.  Arithmetic and all should just work.  However, order of operations simply isn't respected.
 Sorry, use parentheses.  Expressions are just evaluated in order.
 
+You can visit the Sweat Lodge, an in-browser Fever REPL here:
+https://asegs.github.io/fever-lang/interactives/playground.html
+
 You can run it by cloning this repo and running `node fever.js` in the directory.  As arguments you may pass in additional Fever files to be run and loaded into scope in order, such as `node fever.js examples/std.fv`.
 
 ```js
