@@ -395,15 +395,20 @@ export const builtins = {
             }
         ),
         newFunction(
-            3,
-            [primitives.ANY, meta.STRING, primitives.BOOLEAN],
-            [() => true, () => true, () => true],
-            ([v, delimiter, simple]) => {
-                if (simple.value) {
-                    process.stdout.write(v.value.toString() + delimiter.value);
-                } else {
-                    process.stdout.write(recursiveToString(v) + delimiter.value);
-                }
+            2,
+            [primitives.ANY, meta.STRING],
+            [() => true, () => true],
+            ([v, delimiter]) => {
+                process.stdout.write(recursiveToString(v) + delimiter.value);
+                return v;
+            }
+        ),
+        newFunction(
+            2,
+            [meta.STRING, meta.STRING],
+            [() => true, () => true],
+            ([v, delimiter]) => {
+                process.stdout.write(charListToJsString(v) + delimiter.value);
                 return v;
             }
         )
