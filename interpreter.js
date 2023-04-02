@@ -55,7 +55,13 @@ const callFunction = (name, args, variables, functions, morphisms) => {
             const type = candidateFunction.types[i];
             const condition = candidateFunction.conditions[i];
             const specificity = 'specificities' in candidateFunction ? candidateFunction.specificities[i] : 1;
-            const intScore = typeSatisfaction(args[i].type, type) * (condition(args[i], variables, functions, morphisms) ? 1 : 0) * specificity;
+            const typeScore = typeSatisfaction(args[i].type, type);
+            if (typeScore === 0) {
+                score = -1;
+                break;
+            }
+
+            const intScore = typeScore * (condition(args[i], variables, functions, morphisms) ? 1 : 0) * specificity;
             if (intScore === 0) {
                 score = -1;
                 break;

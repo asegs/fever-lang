@@ -321,7 +321,6 @@ export const builtins = {
             [() => true, () => true],
             ([name, signature], variables, functions) => {
                 const realName = charListToJsString(name);
-                variables.assignValue(realName, signature);
                 const types = typesFromSignature(signature);
                 const size = types.length;
                 const newType = createTypedTuple(types, realName);
@@ -366,7 +365,7 @@ export const builtins = {
 
 
                 //Apply relevant condition to each arg if not simple var name.
-                const operation = (args, variables, functions, morphisms) => {
+                const operation = ([,...args], variables, functions, morphisms) => {
                     const mutatedArgs = [];
 
                     for (let i = 0 ; i < size ; i ++) {
@@ -382,19 +381,19 @@ export const builtins = {
                 }
 
                 registerNewFunction(
-                    "new_" + realName,
+                    "new",
                     functions,
                     newFunction(
-                        size,
-                        types,
-                        conditions,
+                        size + 1,
+                        [primitives.TYPE, ...types],
+                        [() => true, ...conditions],
                         operation
                     )
                 );
 
-                //Implement constructor that applies conditions to inputs
-                //Implement getters for each property in global scope
-                return signature;
+                const typeVar = createVar(newType, primitives.TYPE);
+                variables.assignValue(realName, typeVar);
+                return typeVar;
             }
         )
     ],
@@ -570,6 +569,9 @@ export const builtins = {
 
 export const standardLib = [
     "contains = {list:[], item} => (list \\> (false, (item == @ | $)))",
+    "unique_add = {list:[], (contains(list, item))} => (list)",
+    "unique_add = {list:[], item} => (list + item)",
+    "unique = {list:[]} => (list \\> ([], (unique_add($,@))))",
     "is_whole = {n:number} => (floor(n) == n)",
     "sum = {list:[]} => (list \\> (0, ($ + @)))",
     "min = {a:number, (a<=b):number} => (a)",
@@ -584,9 +586,9 @@ export const standardLib = [
     "slice = {list:[], from:number, to:number} => (list ~> (in_range(#, from, to)))",
     "head = {(len(list) > 0):[]} => (get(list,0))",
     "tail = {list:[]} => (slice(list,1))",
-    "set_add = {list:[], (contains(list, item))} => (list)",
-    "set_add = {list:[], item} => (list + item)",
-    "unique = {list:[]} => (list \\> ([], (set_add($, @))))",
+    "set = {(unique(entries)):[]}",
+    "contains = {s:set, item} => (contains(set_entries(s), item))",
+    "add = {s:set, item} => (new(set,set_entries(s) + item))",
     "halve = {list:[]} => ([(slice(list,0,floor(len(list) / 2))), (slice(list, floor(len(list) / 2 )))])",
     "merge = {[], l2:[]} => (l2)",
     "merge = {l1:[], []} => (l1)",
