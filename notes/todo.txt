@@ -1,7 +1,6 @@
 -add functions to function scope/call functions from var table?
 -support return keyword in signature
 -mark expression as not to be evaluated
--track custom type names alongside basename for extra points
 -functions called during instantiation? because of stupid expression evaluation
 -double parens required for nested function calls like: f = {n:number} => ((f(n-1)) + (f(n-2)))
 -need to handle unknown functions in expressions as well
@@ -18,12 +17,11 @@
 - if it doesn't, it can't evaluate expressions that use outer scope variables
 - in error message, write out least specific test that satisfactory match checks for
 - just auto evaluate everything unless it is explicitly tagged as tbd
-- type variables in list signatures??
+- type variables in list signatures??  easy generics, ie. {a:T, b:[T]}
 - passing functions as arguments, not individual pattern instances, could simply go by function names
 - type object instead of global
 - or that could be a validation and require it to be unique, but that is boring
 - write out alias non-string objects to console by their alias...just something to deal with noisy printouts
 - list subtypes after higher order functions
 - rewrite infix operator functions with english names, + => add, etc.  This would make overriding easier
-- naming type with just one property makes a named alias for that type, ie. set = {list:[]} makes a typed list with alias set.
-- how does that handle numbers and primitives?  could be only for meta types...
+- when mapping aliased lists, recreate with new on mapping on other end

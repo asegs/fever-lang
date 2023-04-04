@@ -323,7 +323,8 @@ export const builtins = {
                 const realName = charListToJsString(name);
                 const types = typesFromSignature(signature);
                 const size = types.length;
-                const newType = createTypedTuple(types, realName);
+                const isListAlias = size === 1 && types[0].baseName === "LIST";
+                const newType = isListAlias ? createTypedList(types[0].types[0], realName) :createTypedTuple(types, realName);
                 meta[realName] = newType;
 
                 const permutations = [];
@@ -371,7 +372,7 @@ export const builtins = {
                     for (let i = 0 ; i < size ; i ++) {
                         mutatedArgs.push(permutations[i](args[i], variables, functions, morphisms));
                     }
-                    return createVar(mutatedArgs, newType);
+                    return isListAlias ? createVar(mutatedArgs[0].value, newType) : createVar(mutatedArgs, newType);
                 }
 
                 const conditions = [];
@@ -589,8 +590,7 @@ export const standardLib = [
     "head = {(len(list) > 0):[]} => (get(list,0))",
     "tail = {list:[]} => (slice(list,1))",
     "set = {(unique(entries)):[]}",
-    "contains = {s:set, item} => (contains(set_entries(s), item))",
-    "add = {s:set, item} => (new(set,set_entries(s) + item))",
+    "add = {s:set, item} => (new(set, s + item))",
     "halve = {list:[]} => ([(slice(list,0,floor(len(list) / 2))), (slice(list, floor(len(list) / 2 )))])",
     "merge = {[], l2:[]} => (l2)",
     "merge = {l1:[], []} => (l1)",

@@ -156,6 +156,11 @@ export const inferTypeFromString = (rawString) => {
             return m;
         }
     }
+
+    if (string === "#") {
+        return primitives.NUMBER;
+    }
+
     if (string[0] === '[') {
         const internalType = inferTypeFromString(string.slice(1, string.length - 1));
         return createTypedList(internalType);
