@@ -25,3 +25,4 @@
 - list subtypes after higher order functions
 - rewrite infix operator functions with english names, + => add, etc.  This would make overriding easier
 - when mapping aliased lists, recreate with new on mapping on other end
+- morphisms could take [char] to [#]

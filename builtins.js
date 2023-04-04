@@ -567,6 +567,14 @@ export const builtins = {
                 return createVar(v.type.baseName, meta.STRING);
              }
         )
+    ],
+    'ord': [
+        newFunction(
+            1,
+            [primitives.CHARACTER],
+            [() => true],
+            ([c]) => createVar(c.value.charCodeAt(0), primitives.NUMBER)
+        )
     ]
 }
 
@@ -598,7 +606,9 @@ export const standardLib = [
     "merge = {l1:[], l2:[]} => ((get(l2,0)) + (merge(l1,tail(l2))))",
     "sort = {(len(arr) <= 1):[]} => (arr)",
     "sort = {arr:[]} => (merge(sort(get(halve(arr),0)), sort(get(halve(arr),1))))",
-    "reverse = {list:[]} => (list -> (get(list, len(list) - # - 1)))"
+    "reverse = {list:[]} => (list -> (get(list, len(list) - # - 1)))",
+    "sum = {str:string} => (str \\> (0, ($ + ord(@))))",
+    "hash = {str:string, mod:#} => (sum(str) % mod)"
 ]
 
 const typesFromSignature = (signature) => {
