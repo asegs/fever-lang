@@ -54,6 +54,15 @@ export const typeAssignableFrom = (child, parent) => {
         return true;
     }
 
+    if ('alias' in parent) {
+        if ('alias' in child) {
+            if (child['alias'] === parent['alias']) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     if (!child.meta && !parent.meta) {
         return child.baseName === parent.baseName;
     }
@@ -77,13 +86,6 @@ export const typeSatisfaction = (child, parent) => {
             }
         }
         return 0;
-    }
-
-
-    if ('alias' in child && 'alias' in parent) {
-        if (child['alias'] === parent['alias']) {
-            return typeWeights.NOMINAL;
-        }
     }
 
     if (!child.meta && !parent.meta) {

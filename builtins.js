@@ -5,7 +5,7 @@ import {
     createVar,
     meta,
     primitives,
-    recursiveToString
+    recursiveToString, typeAssignableFrom
 } from './types.js'
 import {evaluate, goals} from "./interpreter.js";
 
@@ -386,7 +386,9 @@ export const builtins = {
                     newFunction(
                         size + 1,
                         [primitives.TYPE, ...types],
-                        [() => true, ...conditions],
+                        [(arg) => {
+                            return typeAssignableFrom(arg.value, newType);
+                        }, ...conditions],
                         operation
                     )
                 );
