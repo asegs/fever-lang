@@ -1,7 +1,7 @@
 import {
     charListToJsString,
     createTypedList,
-    createTypedTuple,
+    createTypedTuple, createTypeVar,
     createVar, isAlias,
     meta,
     primitives,
@@ -19,6 +19,8 @@ const newFunction = (arity, types, conditions, functionOperation, specificities)
 
     if (specificities) {
         func['specificities'] = specificities;
+    } else {
+        func['specificities'] = Array(arity).fill(0.5);
     }
 
     return func;
@@ -176,14 +178,12 @@ export const builtins = {
                     variables.exitScope();
                 }
 
-                let result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
+                const result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
 
                 if (isAlias(list.type)) {
-                    try {
-                        result = callFunction('new', [createVar(list.type, primitives.TYPE), result], variables, functions, morphisms);
-                    } catch (e) {
-                        console.log(e)
-                        //
+                    const created = newOfType(result.type, [result], variables, functions, morphisms);
+                    if (created) {
+                        return created;
                     }
                 }
                 return result;
@@ -231,14 +231,12 @@ export const builtins = {
                     variables.exitScope();
                 }
 
-                let result = createVar(internalList, list.type);
+                const result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
 
                 if (isAlias(list.type)) {
-                    try {
-                        result = callFunction('new', [createVar(list.type, primitives.TYPE), result], variables, functions, morphisms);
-                    } catch (e) {
-                        console.log(e)
-                        //
+                    const created = newOfType(result.type, [result], variables, functions, morphisms);
+                    if (created) {
+                        return created;
                     }
                 }
                 return result;
@@ -411,7 +409,8 @@ export const builtins = {
                         [(arg) => {
                             return typeAssignableFrom(arg.value, newType);
                         }, ...conditions],
-                        operation
+                        operation,
+                        Array(size + 1).fill(1)
                     )
                 );
 
@@ -474,7 +473,8 @@ export const builtins = {
                 }
                 numbers.push(b);
                 return createVar(numbers, createTypedList(primitives.NUMBER));
-            }
+            },
+            [1,1]
         )
     ],
     'get': [
@@ -543,7 +543,8 @@ export const builtins = {
             [(arg) => arg.value >= 0],
             ([val]) => {
                 return createVar(Math.sqrt(val.value), primitives.NUMBER);
-            }
+            },
+            [1]
         )
     ],
     'not': [
@@ -672,5 +673,15 @@ const registerNewFunction = (name, functions, functionObject) => {
     }
 
     functions[name].push(functionObject);
+}
+
+const newOfType = (t, args, vars, functions, morphisms) => {
+    const typeVar = createTypeVar(t);
+    try {
+        return callFunction("new", [typeVar, ...args], vars, functions, morphisms);
+    }
+    catch (e) {
+        return null;
+    }
 }
 

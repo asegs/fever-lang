@@ -1,6 +1,6 @@
 import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
-import {typeSatisfaction} from "./types.js";
+import {typeAssignableFrom, typeSatisfaction, meta, createVar} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
 import {builtins, standardLib} from "./builtins.js";
@@ -74,6 +74,30 @@ export const callFunction = (name, args, variables, functions, morphisms) => {
         }
         variables.exitScope();
     }
+
+    //Auto-operations on tuples
+    //Best match was maybe an ANY for condition and type
+    if (bestScore / args.length <= 0.25) {
+        //All arguments are tuples
+        if (args.every(entry => entry.type.baseName === "TUPLE")) {
+            const tupleSize = args[0].value.length;
+            //All tuples are the same size
+            if (args.every(arg => arg.value.length === tupleSize)) {
+                try {
+                    const result = [];
+                    for (let i = 0 ; i < tupleSize ; i ++ ) {
+                        result.push(callFunction(name, args.map(arg => arg.value[i]), variables, functions, morphisms));
+                    }
+                    return createVar(result,args[0].type)
+                } catch (e) {
+                    console.log(e);
+                    //It was worth a shot...
+                }
+            }
+        }
+    }
+
+
     if (bestScore <= 0) {
         throw "No satisfactory match for " + name + ".";
     }
