@@ -150,6 +150,8 @@ You can instantiate a type with the `new` function.
 
 Getters are also generated.
 
+In general, if no specific method is declared for something that operates on tuples, we recursively call that method on the tuple.
+
 ```js
 coord = {x:number, y:number}
 location = new(coord,1,2) //(1,2)
@@ -162,6 +164,9 @@ f((1,2)) //false
 
 coord_x(location) //1
 coord_y(location) //2
+
+second_location = new(coord,2,4)
+location + second_location // (3,6)
 ```
 
 One novel feature is implicit constructors.  You can define a normal signature like:

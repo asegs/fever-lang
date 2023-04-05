@@ -90,7 +90,6 @@ export const callFunction = (name, args, variables, functions, morphisms) => {
                     }
                     return createVar(result,args[0].type)
                 } catch (e) {
-                    console.log(e);
                     //It was worth a shot...
                 }
             }
