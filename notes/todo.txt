@@ -24,3 +24,5 @@
 - write out alias non-string objects to console by their alias...just something to deal with noisy printouts
 - list subtypes after higher order functions
 - morphisms could take [char] to [#]
+- if no definition of a function is defined for a compound type, try calling that function recursively on each of its members
+- for example, coord = {x:#,y:#}, no add, so we add each of its x and y and construct a new entry
