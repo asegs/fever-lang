@@ -223,9 +223,12 @@ export const splitArray = (text) => {
     return splitGeneral(text, ',');
 }
 
+const assignmentRegex = new RegExp(/^[^\s()0-9"'[\]][^\s()"'[\]]* ?=[^=].*$/gm);
+
 //Would rather be anything but whitespace, parens, quotes, brackets/braces
 export const isAssignment = (text) => {
-    return /^[a-zA-Z_]+[_0-9a-zA-Z]* *=.*$/gm.test(text);
+    assignmentRegex.lastIndex = 0;
+    return assignmentRegex.test(text);
 }
 
 export const splitAssignment = (text) => {

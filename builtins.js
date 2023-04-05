@@ -2,12 +2,12 @@ import {
     charListToJsString,
     createTypedList,
     createTypedTuple,
-    createVar,
+    createVar, isAlias,
     meta,
     primitives,
     recursiveToString, typeAssignableFrom
 } from './types.js'
-import {evaluate, goals} from "./interpreter.js";
+import {callFunction, evaluate, goals} from "./interpreter.js";
 
 const newFunction = (arity, types, conditions, functionOperation, specificities) => {
     const func = {
@@ -175,7 +175,18 @@ export const builtins = {
                     internalList.push(result);
                     variables.exitScope();
                 }
-                return createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY));
+
+                let result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
+
+                if (isAlias(list.type)) {
+                    try {
+                        result = callFunction('new', [createVar(list.type, primitives.TYPE), result], variables, functions, morphisms);
+                    } catch (e) {
+                        console.log(e)
+                        //
+                    }
+                }
+                return result;
             }
         )
     ],
@@ -220,7 +231,17 @@ export const builtins = {
                     variables.exitScope();
                 }
 
-                return createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY));
+                let result = createVar(internalList, list.type);
+
+                if (isAlias(list.type)) {
+                    try {
+                        result = callFunction('new', [createVar(list.type, primitives.TYPE), result], variables, functions, morphisms);
+                    } catch (e) {
+                        console.log(e)
+                        //
+                    }
+                }
+                return result;
             }
         )
     ],
@@ -278,7 +299,7 @@ export const builtins = {
             2,
             [meta.STRING, meta.FUNCTION],
             [() => true, () => true],
-            ([name, func], variables, functions, morphisms) => {
+            ([name, func], variables, functions) => {
                 const realName = charListToJsString(name);
                 variables.assignValue(realName, func);
 
@@ -561,7 +582,7 @@ export const builtins = {
             [primitives.ANY],
             [() => true],
             ([v]) => {
-                if ('alias' in v.type) {
+                if (isAlias(v.type)) {
                     return createVar(v.type.alias, meta.STRING);
                 }
                 return createVar(v.type.baseName, meta.STRING);

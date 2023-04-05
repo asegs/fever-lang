@@ -169,7 +169,8 @@ One novel feature is implicit constructors.  You can define a normal signature l
 ```js
 set = {(unique(l)):[]}
 
-item = new(set,[1,2,2]) //([1,2])
+item = new(set,[1,2,2]) //[1,2]
 ```
 
 You can see that the given expression is applied to the argument before constructing the object.
+Also, when you define single list types like this, they will be registered not as a typed tuple but as a named list type.

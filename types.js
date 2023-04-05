@@ -54,8 +54,8 @@ export const typeAssignableFrom = (child, parent) => {
         return true;
     }
 
-    if ('alias' in parent) {
-        if ('alias' in child) {
+    if (isAlias(parent)) {
+        if (isAlias(child)) {
             if (child['alias'] === parent['alias']) {
                 return true;
             }
@@ -79,8 +79,8 @@ export const typeSatisfaction = (child, parent) => {
         return typeWeights.ANY;
     }
 
-    if ('alias' in parent) {
-        if ('alias' in child) {
+    if (isAlias(parent)) {
+        if (isAlias(child)) {
             if (child['alias'] === parent['alias']) {
                 return typeWeights.NOMINAL;
             }
@@ -146,13 +146,13 @@ export const inferTypeFromString = (rawString) => {
         if (string.toLowerCase() === prim.baseName.toLowerCase()) {
             return prim;
         }
-        if ('alias' in prim && (string.toLowerCase() === prim.alias.toLowerCase())) {
+        if (isAlias(prim) && (string.toLowerCase() === prim.alias.toLowerCase())) {
             return prim;
         }
     }
 
     for (const [, m] of Object.entries(meta)) {
-        if ('alias' in m && (string.toLowerCase() === m.alias.toLowerCase())) {
+        if (isAlias(m) && (string.toLowerCase() === m.alias.toLowerCase())) {
             return m;
         }
     }
@@ -268,4 +268,8 @@ export const charListToJsString = (v) => {
         concatenated += v.value[i].value;
     }
     return concatenated;
+}
+
+export const isAlias = (t) => {
+    return 'alias' in t;
 }

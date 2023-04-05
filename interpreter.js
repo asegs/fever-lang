@@ -34,7 +34,7 @@ const splitIntoNameAndBody = (text) => {
     return [text.slice(0, firstParen), text.slice(firstParen)]
 }
 
-const callFunction = (name, args, variables, functions, morphisms) => {
+export const callFunction = (name, args, variables, functions, morphisms) => {
     if (!(name in functions)) {
         throw "Unknown function " + name + " invoked."
     }
