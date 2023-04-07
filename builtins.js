@@ -401,12 +401,6 @@ export const builtins = {
                     return isListAlias ? createVar(mutatedArgs[0].value, newType) : createVar(mutatedArgs, newType);
                 }
 
-                const conditions = [];
-
-                for (let i = 0 ; i < size ; i ++ ) {
-                    conditions.push(() => true);
-                }
-
                 registerNewFunction(
                     "new",
                     functions,
@@ -417,7 +411,7 @@ export const builtins = {
                         {
                             'conditions': [(arg) => {
                                 return typeAssignableFrom(arg.value, newType);
-                            }, ...conditions],
+                            }, ...Array(size).fill(() => true)],
                             'specificities': Array(size + 1).fill(1)
                         }
                     )
@@ -534,7 +528,6 @@ export const builtins = {
         newFunction(
             1,
             [primitives.ANY],
-            [() => true],
             ([ignored]) => {
                 console.log();
                 return ignored;
