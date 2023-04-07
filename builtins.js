@@ -353,7 +353,7 @@ export const builtins = {
                     const name = condition[0];
 
                     registerNewFunction(
-                        realName + "_" + name.value,
+                        name.value,
                         functions,
                         newFunction(
                             1,
