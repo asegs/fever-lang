@@ -43,6 +43,13 @@ export const builtins = {
         ),
         newFunction(
             2,
+            [meta.STRING, meta.STRING],
+            [() => true, () => true],
+            ([a, b]) => createVar(a.value.concat(b.value), a.type)
+
+        ),
+        newFunction(
+            2,
             [primitives.ANY, meta.LIST],
             [() => true, () => true],
             ([a, b]) => createVar([a, ...b.value], b.type)

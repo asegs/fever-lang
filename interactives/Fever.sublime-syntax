@@ -6,16 +6,15 @@ file_extensions: [ fv ]
 
 contexts:
   signature:
-    - match: '(:#)'
+    - match: '(:)(.*?)(?=,|})'
       captures:
-        0: text.fever
-    - match: '(.)'
-      captures:
-        0: text.fever
+        0: entity.name.type.fever
+        1: text.fever
   main:
     - match: 'true|false'
       captures:
         0: constant.language.fever
+
     - match: '(\b[a-z][a-z0-9_]*)\('
       captures:
         0: punctuation.section.parens.begin.fever
@@ -49,6 +48,7 @@ contexts:
           pop: true
           captures:
             0: punctuation.section.braces.end.fever
+        - include: signature
         - include: main
         - match: '(.)'
           captures:

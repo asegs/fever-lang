@@ -20,5 +20,3 @@ mandel_iter = {xo, yo, x, y, iter_limit} => iter_limit
 render_row = {y_val} => (0..r_width -> (show(palette(mandel_iter(to_scaled_x(@), to_scaled_y(y_val), 0, 0, 0)), "")))
 mandelbrot = {row_count} => (0..row_count -> (nl(render_row(@))))
 get(mandelbrot(r_height), 0)
-
-
