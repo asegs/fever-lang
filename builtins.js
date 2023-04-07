@@ -200,7 +200,7 @@ export const builtins = {
                         return created;
                     }
                 }
-                return result;
+                return res;
             }
 
         )
