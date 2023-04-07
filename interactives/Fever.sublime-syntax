@@ -1,0 +1,109 @@
+%YAML 1.2
+---
+name: fever
+scope: source.fever
+file_extensions: [ fv ]
+
+contexts:
+  signature:
+    - match: '(:#)'
+      captures:
+        0: text.fever
+    - match: '(.)'
+      captures:
+        0: text.fever
+  main:
+    - match: 'true|false'
+      captures:
+        0: constant.language.fever
+    - match: '(\b[a-z][a-z0-9_]*)\('
+      captures:
+        0: punctuation.section.parens.begin.fever
+        1: entity.name.function.fever
+      push:
+        - match: '(\))'
+          pop: true
+          captures:
+            0: punctuation.section.parens.end.fever
+        - include: main
+        - match: '(,)'
+          captures:
+            0: punctuation.fever
+        - match: '(.)'
+          captures:
+            0: text.fever
+    - match: '(\b[a-z][a-z0-9_]*)'
+      captures:
+        0: keyword.fever
+    - match: '(@|#|^)'
+      captures:
+        0: variable.other.constant.fever
+    - match: '(\b\d+)'
+      captures:
+        0: constant.numeric.fever
+    - match: '(\{)'
+      captures:
+        0: punctuation.section.braces.begin.fever
+      push:
+        - match: '(\})'
+          pop: true
+          captures:
+            0: punctuation.section.braces.end.fever
+        - include: main
+        - match: '(.)'
+          captures:
+            0: text.fever
+    - match: '(\")'
+      captures:
+        0: markup.quote.fever
+      push:
+        - match: '(\")'
+          pop: true
+          captures:
+            0: markup.quote.fever
+        - match: '(.)'
+          captures:
+            0: string.quoted.double.fever
+    - match: '(\()'
+      captures:
+        0: punctuation.section.parens.begin.fever
+      push:
+        - match: '(\))'
+          pop: true
+          captures:
+            0: punctuation.section.parens.end.fever
+        - include: main
+        - match: '(,)'
+          captures:
+            0: punctuation.fever
+        - match: '(.)'
+          captures:
+            0: text.fever
+    - match: '(\[)'
+      captures:
+        0: punctuation.section.brackets.begin.fever
+      push:
+        - match: '(\])'
+          pop: true
+          captures:
+            0: punctuation.section.braces.end.fever
+        - include: main
+    - match: '(//.*)'
+      captures:
+        0: comment.fever
+    - match: '(=>|<=|\*|\+|/|-|~>|\\>|\.\.|\.|->|>|\?|<|&|\||>=|==|%)'
+      captures:
+        0: keyword.operator.fever
+    - match: '(=)'
+      captures:
+        0: keyword.operator.assignment.fever
+    - match: '(,)'
+      captures:
+        0: punctuation.separator.fever
+    - match: '([^\s])'
+      captures:
+        0: invalid.fever
+    - match: '(.)'
+      captures:
+        0: text.fever
+

@@ -162,8 +162,8 @@ f = {_} => false
 f(location) //true
 f((1,2)) //false
 
-coord_x(location) //1
-coord_y(location) //2
+x(location) //1
+y(location) //2
 
 second_location = new(coord,2,4)
 location + second_location // (3,6)
