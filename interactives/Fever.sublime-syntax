@@ -25,12 +25,6 @@ contexts:
           captures:
             0: punctuation.section.parens.end.fever
         - include: main
-        - match: '(,)'
-          captures:
-            0: punctuation.fever
-        - match: '(.)'
-          captures:
-            0: text.fever
     - match: '(\b[a-z][a-z0-9_]*)'
       captures:
         0: keyword.fever

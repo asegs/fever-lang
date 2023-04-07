@@ -435,7 +435,8 @@ export const builtins = {
             ([v]) => {
                 console.log(recursiveToString(v));
                 return v;
-            }
+            },
+            [1]
         ),
         newFunction(
             2,
