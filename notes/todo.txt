@@ -22,7 +22,6 @@
 - type object instead of global
 - or that could be a validation and require it to be unique, but that is boring
 - write out alias non-string objects to console by their alias...just something to deal with noisy printouts
-- list subtypes after higher order functions
 - morphisms could take [char] to [#]
 - tests to ensure changes didn't break functionality
 - list[] > any, in general going deep on types should be considered worth more than early any
