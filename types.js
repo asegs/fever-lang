@@ -198,9 +198,19 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
             //ie. type 1 is: {name: string, price:#}
             //and type 2 is: {name: string, size: #}
             // Even though declaring type 1 introduced name as a function, we will never want to match function equality
-        const result = evaluate(string, vars, functions, morphisms, goals.EVALUATE);
-        return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), result.type, null];
-    }
+        let isPreviouslyDeclaredFunction = false;
+        if (!string.startsWith('(')) {
+            const consideredValue = vars.getOrNull(string);
+            if (consideredValue && isAlias(consideredValue.type) && consideredValue.type.alias === 'FUNCTION') {
+                isPreviouslyDeclaredFunction = true;
+                missing.push({'name': string, 'type': 'VARIABLE'});
+            }
+        }
+        if (!isPreviouslyDeclaredFunction) {
+            const result = evaluate(string, vars, functions, morphisms, goals.EVALUATE);
+            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), result.type, null];
+        }
+       }
 
     const acceptedMissing = missing.filter(item => !takenVars.has(item.name));
 
