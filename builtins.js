@@ -307,6 +307,11 @@ export const builtins = {
             ([name, func], variables, functions) => {
                 const realName = charListToJsString(name);
 
+                if (func.value === 0) {
+                    variables.assignValue(realName, func);
+                    return func;
+                }
+
                 const signature = func.value[0];
                 const expression = func.value[1];
                 const size = signature.value.length;
