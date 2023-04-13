@@ -306,7 +306,6 @@ export const builtins = {
             [meta.STRING, meta.FUNCTION],
             ([name, func], variables, functions) => {
                 const realName = charListToJsString(name);
-                variables.assignValue(realName, func);
 
                 const signature = func.value[0];
                 const expression = func.value[1];
@@ -328,7 +327,7 @@ export const builtins = {
                 }
                 registerNewFunction(
                     realName,
-                    functions,
+                    variables,
                     newFunction(
                         size,
                         types,
@@ -362,7 +361,7 @@ export const builtins = {
 
                     registerNewFunction(
                         name.value,
-                        functions,
+                        variables,
                         newFunction(
                             1,
                             [newType],
@@ -403,7 +402,7 @@ export const builtins = {
 
                 registerNewFunction(
                     "new",
-                    functions,
+                    variables,
                     newFunction(
                         size + 1,
                         [primitives.TYPE, ...types],
@@ -629,6 +628,15 @@ export const standardLib = [
     "hash = {str:string, mod:#} => (sum(str) % mod)"
 ]
 
+export const registerBuiltins = (variables) => {
+    for (const functionName of Object.keys(builtins)) {
+        const patterns = builtins[functionName];
+        for (const pattern of patterns) {
+            registerNewFunction(functionName, variables, pattern);
+        }
+    }
+}
+
 const typesFromSignature = (signature) => {
     return signature.value.map(i => i.value[1].value);
 }
@@ -663,12 +671,17 @@ const specificitiesFromSignature = (signature) => {
     return signature.value.map(i => i.value[0].value[2].value);
 }
 
-const registerNewFunction = (name, functions, functionObject) => {
-    if (!(name in functions)) {
-        functions[name] = [];
+const registerNewFunction = (name, variables, functionObject) => {
+    const named = variables.getOrNull(name);
+    if (!named) {
+        const newFunc = createVar(0, meta.FUNCTION);
+        newFunc['invocations'] = [functionObject];
+        variables.assignValue(name, newFunc);
+        return;
     }
 
-    functions[name].push(functionObject);
+
+    named.invocations.push(functionObject);
 }
 
 const newOfType = (t, args, vars, functions, morphisms) => {

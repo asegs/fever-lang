@@ -1,9 +1,9 @@
 import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
-import {typeAssignableFrom, typeSatisfaction, meta, createVar} from "./types.js";
+import {typeSatisfaction, createVar, isAlias} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
-import {builtins, standardLib} from "./builtins.js";
+import {builtins, registerBuiltins, standardLib} from "./builtins.js";
 
 export const goals = {
     EVALUATE: Symbol("EVALUATE"),
@@ -35,11 +35,16 @@ const splitIntoNameAndBody = (text) => {
 }
 
 export const callFunction = (name, args, variables, functions, morphisms) => {
-    if (!(name in functions)) {
+    const named = variables.getOrNull(name);
+    if (!named) {
         throw "Unknown function " + name + " invoked."
     }
 
-    const func = functions[name];
+    if (!isAlias(named.type) || named.type.alias !== "FUNCTION") {
+        return named;
+    }
+
+    const func = named['invocations'];
     const candidates = func.filter(f => f.arity === args.length);
 
     if (candidates.length === 0) {
@@ -147,6 +152,8 @@ export const instance = () => {
     const variables = new ScopedVars();
     const functions = builtins;
     const morphisms = new Morphisms();
+
+    registerBuiltins(variables);
 
     standardLib.forEach(line => {
         interpret(line, variables, functions, morphisms, goals.EVALUATE);

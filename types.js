@@ -194,6 +194,10 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
          b (known)
          (b + 3) (expression with known)
          */
+            // Catch case where it's just a function, we want to be able to redefine function names.
+            //ie. type 1 is: {name: string, price:#}
+            //and type 2 is: {name: string, size: #}
+            // Even though declaring type 1 introduced name as a function, we will never want to match function equality
         const result = evaluate(string, vars, functions, morphisms, goals.EVALUATE);
         return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), result.type, null];
     }
