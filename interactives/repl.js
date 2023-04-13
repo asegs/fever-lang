@@ -7,14 +7,14 @@ const rl = createInterface({
     output: process.stdout
 });
 
-export const prompt = (vars, functions, morphisms) => {
+export const prompt = (vars, morphisms) => {
     rl.question(">", (inp) => {
         try {
-            const result = interpret(inp, vars, functions, morphisms, goals.EVALUATE);
+            const result = interpret(inp, vars, morphisms, goals.EVALUATE);
             builtins.show[0]['function']([result]);
         } catch (e) {
             console.log(e)
         }
-        prompt(vars, functions, morphisms);
+        prompt(vars, morphisms);
     })
 }

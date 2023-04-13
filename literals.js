@@ -50,7 +50,7 @@ const parseCollectionToItems = (string) => {
     return splitArray(string.slice(1, string.length - 1));
 }
 
-export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
+export const inferTypeAndValue = (string, vars, morphisms, goal) => {
     if (goal === goals.MISSING) {
         if (vars.hasVariableInScope(string)) {
             return vars.lookupValueInScope(string);
@@ -80,7 +80,7 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
         //Return from vars table.
     } else if (isList(string)) {
         const entries = parseCollectionToItems(string);
-        const items = entries.map(e => inferTypeAndValue(e, vars, functions, morphisms, goal));
+        const items = entries.map(e => inferTypeAndValue(e, vars, morphisms, goal));
         if (goals.MISSING === goal) {
             const missing = findMissing(items);
             if (missing.length > 0) {
@@ -96,7 +96,7 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
         return createVar(items, meta.LIST);
     } else if (isTuple(string)) {
         const entries = parseCollectionToItems(string);
-        const items = entries.map(e => inferTypeAndValue(e, vars, functions, morphisms, goal));
+        const items = entries.map(e => inferTypeAndValue(e, vars, morphisms, goal));
         if (goals.MISSING === goal) {
             const missing = findMissing(items);
             if (missing.length > 0) {
@@ -106,9 +106,9 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
         return createVar(items, createTypedTuple(items.map(i => i.type)))
     } else if (isExpression(string)) {
         const expr = string.slice(1, string.length - 1);
-        const missing = evaluate(expr, vars, functions, morphisms, goals.MISSING);
+        const missing = evaluate(expr, vars, morphisms, goals.MISSING);
         if (missing.length === 0) {
-            return evaluate(expr, vars, functions, morphisms, goals.EVALUATE);
+            return evaluate(expr, vars, morphisms, goals.EVALUATE);
         }
 
         if (goal === goals.MISSING && missing.length > 0 ) {
@@ -120,7 +120,7 @@ export const inferTypeAndValue = (string, vars, functions, morphisms, goal) => {
         const takenVars = new Set();
         const signatureItems = [];
         for (let i = 0 ; i < entries.length ; i ++ ) {
-            const [pattern, varName] = createPatternFromString(entries[i], vars, functions, morphisms, takenVars);
+            const [pattern, varName] = createPatternFromString(entries[i], vars, morphisms, takenVars);
             if (varName !== null) {
                 takenVars.add(varName);
             }

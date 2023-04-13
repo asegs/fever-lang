@@ -163,7 +163,7 @@ export const builtins = {
         newFunction(
             2,
             [meta.LIST, primitives.EXPRESSION],
-            ([list, action], variables, functions, morphisms) => {
+            ([list, action], variables, morphisms) => {
                 const internalList = [];
                 for (let i = 0 ; i < list.value.length ; i ++ ) {
                     const item = list.value[i];
@@ -171,7 +171,7 @@ export const builtins = {
                     variables.assignValue('@', item);
                     variables.assignValue('#', createVar(i, primitives.NUMBER));
                     variables.assignValue('^', createVar([...internalList], createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
-                    const result = evaluate(action.value, variables, functions, morphisms, goals.EVALUATE);
+                    const result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
                     internalList.push(result);
                     variables.exitScope();
                 }
@@ -179,7 +179,7 @@ export const builtins = {
                 const result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
 
                 if (isAlias(list.type)) {
-                    const created = newOfType(result.type, [result], variables, functions, morphisms);
+                    const created = newOfType(result.type, [result], variables, morphisms);
                     if (created) {
                         return created;
                     }
@@ -190,12 +190,12 @@ export const builtins = {
         newFunction(
             2,
             [meta.LIST, primitives.ANY],
-            ([list, result],variables, functions, morphisms) => {
+            ([list, result],variables, morphisms) => {
                 const results = list.value.map(ignored => result);
                 const res = createVar(results, createTypedList((results.length > 0 ? results[0].type : primitives.ANY), list.type.alias));
 
                 if (isAlias(res.type)) {
-                    const created = newOfType(res.type, [res], variables, functions, morphisms);
+                    const created = newOfType(res.type, [res], variables, morphisms);
                     if (created) {
                         return created;
                     }
@@ -209,7 +209,7 @@ export const builtins = {
         newFunction(
             2,
             [meta.LIST, createTypedTuple([primitives.ANY, primitives.EXPRESSION])],
-            ([list, reduce], variables, functions, morphisms) => {
+            ([list, reduce], variables, morphisms) => {
                 let acc = reduce.value[0];
                 const expr = reduce.value[1].value;
                 for (let i = 0 ; i < list.value.length ; i ++ ) {
@@ -218,7 +218,7 @@ export const builtins = {
                     variables.assignValue('@', item);
                     variables.assignValue('#', createVar(i, primitives.NUMBER));
                     variables.assignValue('$', acc);
-                    acc = evaluate(expr, variables, functions, morphisms, goals.EVALUATE);
+                    acc = evaluate(expr, variables, morphisms, goals.EVALUATE);
                     variables.exitScope();
                 }
                 return acc;
@@ -229,7 +229,7 @@ export const builtins = {
         newFunction(
             2,
             [meta.LIST, primitives.EXPRESSION],
-            ([list, action], variables, functions, morphisms) => {
+            ([list, action], variables, morphisms) => {
                 const internalList = [];
                 for (let i = 0 ; i < list.value.length ; i ++ ) {
                     const item = list.value[i];
@@ -237,7 +237,7 @@ export const builtins = {
                     variables.assignValue('@', item);
                     variables.assignValue('#', createVar(i, primitives.NUMBER));
                     variables.assignValue('^', createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
-                    const result = evaluate(action.value, variables, functions, morphisms, goals.EVALUATE);
+                    const result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
                     if (result.value) {
                         internalList.push(item);
                     }
@@ -247,7 +247,7 @@ export const builtins = {
                 const result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
 
                 if (isAlias(list.type)) {
-                    const created = newOfType(result.type, [result], variables, functions, morphisms);
+                    const created = newOfType(result.type, [result], variables, morphisms);
                     if (created) {
                         return created;
                     }
@@ -304,7 +304,7 @@ export const builtins = {
         newFunction(
             2,
             [meta.STRING, meta.FUNCTION],
-            ([name, func], variables, functions) => {
+            ([name, func], variables) => {
                 const realName = charListToJsString(name);
 
                 if (func.value === 0) {
@@ -321,12 +321,12 @@ export const builtins = {
                 const names = namesFromSignature(signature);
                 const specificities = specificitiesFromSignature(signature);
 
-                const operation = (args, variables, functions, morphisms) => {
+                const operation = (args, variables, morphisms) => {
                     variables.enterScope();
                     for (let i = 0 ; i < args.length ; i ++ ) {
                         variables.assignValue(names[i], args[i]);
                     }
-                    const result = evaluate(expression.value, variables, functions, morphisms, goals.EVALUATE);
+                    const result = evaluate(expression.value, variables, morphisms, goals.EVALUATE);
                     variables.exitScope();
                     return result;
                 }
@@ -350,7 +350,7 @@ export const builtins = {
         newFunction(
             2,
             [meta.STRING, meta.SIGNATURE],
-            ([name, signature], variables, functions) => {
+            ([name, signature], variables) => {
                 const realName = charListToJsString(name);
                 const types = typesFromSignature(signature);
                 const size = types.length;
@@ -384,10 +384,10 @@ export const builtins = {
 
                     //Conditions table is still putting out raw strings, not lists!
                     permutations.push(
-                        (arg, variables, functions, morphisms) => {
+                        (arg, variables, morphisms) => {
                             variables.enterScope();
                             variables.assignValue(name.value, arg);
-                            const result = evaluate(expression.value, variables, functions, morphisms, goals.EVALUATE);
+                            const result = evaluate(expression.value, variables, morphisms, goals.EVALUATE);
                             variables.exitScope();
                             return result;
                         }
@@ -396,11 +396,11 @@ export const builtins = {
 
 
                 //Apply relevant condition to each arg if not simple var name.
-                const operation = ([,...args], variables, functions, morphisms) => {
+                const operation = ([,...args], variables, morphisms) => {
                     const mutatedArgs = [];
 
                     for (let i = 0 ; i < size ; i ++) {
-                        mutatedArgs.push(permutations[i](args[i], variables, functions, morphisms));
+                        mutatedArgs.push(permutations[i](args[i], variables, morphisms));
                     }
                     return isListAlias ? createVar(mutatedArgs[0].value, newType) : createVar(mutatedArgs, newType);
                 }
@@ -656,10 +656,10 @@ const conditionsFromSignature = (signature) => {
         const condition = pattern.value[0];
         const conditionName = condition.value[0];
         const conditionExpression = condition.value[1];
-        conditions.push((argument, variables, functions, morphisms) => {
+        conditions.push((argument, variables, morphisms) => {
             variables.assignValue(conditionName.value, argument);
             try {
-                return evaluate(conditionExpression.value, variables, functions, morphisms, goals.EVALUATE).value;
+                return evaluate(conditionExpression.value, variables, morphisms, goals.EVALUATE).value;
             } catch (e) {
                 return false;
             }
@@ -689,10 +689,10 @@ const registerNewFunction = (name, variables, functionObject) => {
     named.invocations.push(functionObject);
 }
 
-const newOfType = (t, args, vars, functions, morphisms) => {
+const newOfType = (t, args, vars, morphisms) => {
     const typeVar = createTypeVar(t);
     try {
-        return callFunction("new", [typeVar, ...args], vars, functions, morphisms);
+        return callFunction("new", [typeVar, ...args], vars, morphisms);
     }
     catch (e) {
         return null;

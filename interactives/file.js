@@ -7,7 +7,7 @@ const lineShouldBeEvaluated = (line) => {
     return line.length > 0 && !line.startsWith("//");
 }
 
-export const file = (inputFile, vars, functions, morphisms) => {
+export const file = (inputFile, vars, morphisms) => {
     const inputPath = path.resolve(inputFile);
     if (!fs.existsSync(inputPath)) {
         console.error("No such input file: " + inputPath);
@@ -17,7 +17,7 @@ export const file = (inputFile, vars, functions, morphisms) => {
     file.split('\n').forEach((line, index) => {
         try {
             if (lineShouldBeEvaluated(line)) {
-                interpret(line, vars, functions, morphisms, goals.EVALUATE);
+                interpret(line, vars, morphisms, goals.EVALUATE);
             }
         } catch (e) {
             console.log("Error on line " + (index + 1) + ": " + e);

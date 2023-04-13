@@ -179,14 +179,14 @@ export const inferTypeFromString = (rawString) => {
  [_,_3] (later)
  (len(a) % 2 == 0) (expression with unknown)
  */
-export const inferConditionFromString = (rawString, vars, functions, morphisms, takenVars) => {
+export const inferConditionFromString = (rawString, vars, morphisms, takenVars) => {
     const string = rawString.trim();
 
     if (string === '_') {
         return [createCondition(createVar('__repr', meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
     }
 
-    const missing = evaluate(string, vars, functions, morphisms, goals.MISSING);
+    const missing = evaluate(string, vars, morphisms, goals.MISSING);
     if (missing.length === 0) {
         /**
          123
@@ -207,7 +207,7 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
             }
         }
         if (!isPreviouslyDeclaredFunction) {
-            const result = evaluate(string, vars, functions, morphisms, goals.EVALUATE);
+            const result = evaluate(string, vars, morphisms, goals.EVALUATE);
             return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), result.type, null];
         }
        }
@@ -239,10 +239,10 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
     return [createCondition(createVar(name, meta.STRING), createVar("==(" + name + "," + string + ")", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, name];
 }
 
-export const createPatternFromString = (string, vars, functions, morphisms, takenVars) => {
+export const createPatternFromString = (string, vars, morphisms, takenVars) => {
     const conditionAndType = splitGeneral(string, ':');
     let type = conditionAndType.length === 1 ? primitives.ANY : inferTypeFromString(conditionAndType[1]);
-    const [condition, inferredType, namedVar] = inferConditionFromString(conditionAndType[0], vars, functions, morphisms, takenVars);
+    const [condition, inferredType, namedVar] = inferConditionFromString(conditionAndType[0], vars, morphisms, takenVars);
     if (type === primitives.ANY) {
         type = inferredType;
     }

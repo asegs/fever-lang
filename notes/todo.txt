@@ -25,3 +25,4 @@
 - morphisms could take [char] to [#]
 - tests to ensure changes didn't break functionality
 - list[] > any, in general going deep on types should be considered worth more than early any
+- handle missing function names as well as variables in evaluate missing
