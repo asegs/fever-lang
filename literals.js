@@ -72,7 +72,7 @@ export const inferTypeAndValue = (string, vars, morphisms, goal) => {
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);
     } else if (isStringLiteral(string)) {
-        return createVar(string.slice(1, string.length - 1).split('').map(char => createVar(char, primitives.CHARACTER)), meta.STRING);
+        return feverStringFromJsString(string.slice(1, string.length - 1));
     } else if (isWord(string)) {
         if (wordIsBoolean(string)) {
             return createVar(string === "true", primitives.BOOLEAN);
@@ -139,7 +139,9 @@ export const inferTypeAndValue = (string, vars, morphisms, goal) => {
     }
 }
 
-const vars = new ScopedVars();
+export const feverStringFromJsString = (jsString) => {
+    return createVar(jsString.split('').map(char => createVar(char, primitives.CHARACTER)), meta.STRING);
+}
 
 // console.log(inferTypeAndValue(lex("3"), vars))
 // console.log(inferTypeAndValue(lex("3.5"), vars))

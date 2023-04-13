@@ -8,6 +8,7 @@ import {
     recursiveToString, typeAssignableFrom
 } from './types.js'
 import {callFunction, evaluate, goals} from "./interpreter.js";
+import {feverStringFromJsString} from "./literals.js";
 
 const newFunction = (arity, types, functionOperation, args) => {
     const func = {
@@ -330,7 +331,7 @@ export const builtins = {
                     variables.exitScope();
                     return result;
                 }
-                registerNewFunction(
+                return registerNewFunction(
                     realName,
                     variables,
                     newFunction(
@@ -343,8 +344,6 @@ export const builtins = {
                         }
                     )
                 );
-
-                return func;
             }
         ),
         newFunction(
@@ -431,8 +430,8 @@ export const builtins = {
         newFunction(
             1,
             [primitives.ANY],
-            ([v]) => {
-                console.log(recursiveToString(v));
+            ([v], variables, morphisms) => {
+                console.log(charListToJsString(callFunction('stringify', [v], variables, morphisms)));
                 return v;
             },
             {
@@ -575,8 +574,16 @@ export const builtins = {
             1,
             [primitives.ANY],
             ([v]) => {
-                return createVar(recursiveToString(v), meta.STRING);
+                return feverStringFromJsString(recursiveToString(v));
             }
+        ),
+        newFunction(
+            1,
+            [meta.FUNCTION],
+            ([func]) => {
+                return feverStringFromJsString(func.invocations.length + " patterns");
+            }
+
         )
     ],
     'type': [
@@ -682,7 +689,7 @@ const registerNewFunction = (name, variables, functionObject) => {
         const newFunc = createVar(0, meta.FUNCTION);
         newFunc['invocations'] = [functionObject];
         variables.assignValue(name, newFunc);
-        return;
+        return newFunc;
     }
 
 
