@@ -337,7 +337,8 @@ export const builtins = {
                             'conditions': conditions,
                             'specificities': specificities
                         }
-                    )
+                    ),
+                    func
                 );
             }
         ),
@@ -572,7 +573,7 @@ export const builtins = {
                 return feverStringFromJsString(recursiveToString(v));
             },
             {
-                'specificities': [1]
+                'specificities': [0.6]
             }
         ),
         newFunction(
@@ -582,7 +583,7 @@ export const builtins = {
                 return feverStringFromJsString(func.invocations.length + " patterns");
             },
             {
-                'specificities': [1]
+                'specificities': [0.6]
             }
 
         )
@@ -684,10 +685,17 @@ const specificitiesFromSignature = (signature) => {
     return signature.value.map(i => i.value[0].value[2].value);
 }
 
-const registerNewFunction = (name, variables, functionObject) => {
+const registerNewFunction = (name, variables, functionObject, rawCase) => {
+    let newCase;
+
+    if (rawCase) {
+        newCase = rawCase;
+    } else {
+        newCase = generateCaseFromNative(functionObject);
+    }
     const named = variables.getOrNull(name);
     if (!named) {
-        const newFunc = createVar(0, meta.FUNCTION);
+        const newFunc = createVar([newCase], meta.FUNCTION);
         newFunc['invocations'] = [functionObject];
         variables.assignValue(name, newFunc);
         return newFunc;
@@ -695,7 +703,40 @@ const registerNewFunction = (name, variables, functionObject) => {
 
 
     named.invocations.push(functionObject);
+    named.value.push(newCase);
     return named;
+}
+
+const generateCaseFromNative = (functionObject) => {
+    const types = functionObject['types'];
+    const conditions = functionObject['conditions'];
+
+    const patterns = [];
+    for (let i = 0 ; i < types.length ; i ++ ) {
+        const type = types[i];
+        const condition = conditions[i];
+        const pattern = {
+            'value': [
+                {
+                    'value': [
+
+                    ],
+                    'type': meta.CONDITION
+                },
+                createVar(type, primitives.TYPE)
+            ],
+            'type': meta.PATTERN
+        }
+        patterns.push(pattern);
+    }
+
+    return createVar(
+        [
+            createVar(patterns, meta.SIGNATURE),
+            createVar('<natively defined function>', primitives.EXPRESSION)
+        ],
+        meta.CASE
+    );
 }
 
 const newOfType = (t, args, vars, morphisms) => {
