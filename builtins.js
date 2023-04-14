@@ -278,7 +278,7 @@ export const builtins = {
             ([signature, expression]) => {
                 return createVar(
                     [signature, expression],
-                    meta.FUNCTION
+                    meta.CASE
                 );
             }
         ),
@@ -288,7 +288,7 @@ export const builtins = {
             ([signature, value]) => {
                 return createVar(
                     [signature, createVar(recursiveToString(value), primitives.EXPRESSION)],
-                    meta.FUNCTION
+                    meta.CASE
                 );
             }
         )
@@ -304,14 +304,9 @@ export const builtins = {
         ),
         newFunction(
             2,
-            [meta.STRING, meta.FUNCTION],
+            [meta.STRING, meta.CASE],
             ([name, func], variables) => {
                 const realName = charListToJsString(name);
-
-                if (func.value === 0) {
-                    variables.assignValue(realName, func);
-                    return func;
-                }
 
                 const signature = func.value[0];
                 const expression = func.value[1];
@@ -694,6 +689,7 @@ const registerNewFunction = (name, variables, functionObject) => {
 
 
     named.invocations.push(functionObject);
+    return named;
 }
 
 const newOfType = (t, args, vars, morphisms) => {

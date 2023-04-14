@@ -253,6 +253,9 @@ const STRING = createTypedList(primitives.CHARACTER, "STRING");
 const CONDITION = createTypedTuple([STRING, primitives.EXPRESSION, primitives.NUMBER], "CONDITION");
 const PATTERN = createTypedTuple([CONDITION, primitives.TYPE], "PATTERN");
 const SIGNATURE = createTypedList(PATTERN, "SIGNATURE");
+const CASE = createTypedTuple([SIGNATURE, primitives.EXPRESSION], "CASE");
+//These also have a special invocations property!
+const FUNCTION = createTypedList(CASE, 'FUNCTION');
 
 export const meta = {
     CONDITION: CONDITION,
@@ -260,7 +263,8 @@ export const meta = {
     SIGNATURE: SIGNATURE,
     LIST: createTypedList(primitives.ANY),
     STRING: STRING,
-    FUNCTION: createTypedTuple([SIGNATURE, primitives.EXPRESSION], "FUNCTION"),
+    CASE: CASE,
+    FUNCTION: FUNCTION,
     TUPLE: createTypedTuple([]),
 }
 
