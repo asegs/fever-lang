@@ -707,10 +707,13 @@ const registerNewFunction = (name, variables, functionObject, rawCase) => {
     return named;
 }
 
+const nativeFunctionMessage = '<natively defined function>';
+
 const generateCaseFromNative = (functionObject) => {
     const types = functionObject['types'];
     const conditions = functionObject['conditions'];
     const specificities = functionObject['specificities'];
+    const names = argNamesFromFunction(functionObject['function'].toString());
 
     const patterns = [];
     for (let i = 0 ; i < types.length ; i ++ ) {
@@ -720,8 +723,8 @@ const generateCaseFromNative = (functionObject) => {
             [
                 createVar(
                     [
-                        createVar('real missing variable, maybe...', meta.STRING),
-                        createVar(condition.toString() === '() => true' ? '' : '<natively defined function>', primitives.EXPRESSION),
+                        createVar(names[i], meta.STRING),
+                        createVar(condition.toString() === '() => true' ? '' : nativeFunctionMessage, primitives.EXPRESSION),
                         createVar(specificities[i], primitives.NUMBER)
                     ],
                     meta.CONDITION
@@ -736,7 +739,7 @@ const generateCaseFromNative = (functionObject) => {
     return createVar(
         [
             createVar(patterns, meta.SIGNATURE),
-            createVar('<natively defined function>', primitives.EXPRESSION)
+            createVar(nativeFunctionMessage, primitives.EXPRESSION)
         ],
         meta.CASE
     );
@@ -750,5 +753,33 @@ const newOfType = (t, args, vars, morphisms) => {
     catch (e) {
         return null;
     }
+}
+
+const argNamesFromFunction = (functionBody) => {
+    const args = [];
+    let stack = "";
+    let inDestructure = false;
+    for (const letter of functionBody) {
+        if (inDestructure) {
+            switch (letter) {
+                case ']':
+                    args.push(stack);
+                    return args;
+                case ',':
+                    args.push(stack);
+                    break;
+                default:
+                    stack += letter;
+                    break;
+            }
+        } else if (letter === '[') {
+            inDestructure = true;
+        }
+    }
+    return args;
+}
+
+const serializeFunction = (f) => {
+    //Handle no condition text for both generated and written
 }
 
