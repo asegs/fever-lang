@@ -710,23 +710,26 @@ const registerNewFunction = (name, variables, functionObject, rawCase) => {
 const generateCaseFromNative = (functionObject) => {
     const types = functionObject['types'];
     const conditions = functionObject['conditions'];
+    const specificities = functionObject['specificities'];
 
     const patterns = [];
     for (let i = 0 ; i < types.length ; i ++ ) {
         const type = types[i];
         const condition = conditions[i];
-        const pattern = {
-            'value': [
-                {
-                    'value': [
-
+        const pattern = createVar(
+            [
+                createVar(
+                    [
+                        createVar('real missing variable, maybe...', meta.STRING),
+                        createVar(condition.toString() === '() => true' ? '' : '<natively defined function>', primitives.EXPRESSION),
+                        createVar(specificities[i], primitives.NUMBER)
                     ],
-                    'type': meta.CONDITION
-                },
+                    meta.CONDITION
+                ),
                 createVar(type, primitives.TYPE)
             ],
-            'type': meta.PATTERN
-        }
+            meta.PATTERN
+        )
         patterns.push(pattern);
     }
 
