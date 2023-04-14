@@ -26,3 +26,4 @@
 - tests to ensure changes didn't break functionality
 - list[] > any, in general going deep on types should be considered worth more than early any
 - handle missing function names as well as variables in evaluate missing
+- we need to differentiate between case {x} => (x + 1) and function (invocations, type: list[case]), remember that invocations is not a traditional value
