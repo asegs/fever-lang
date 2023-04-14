@@ -570,6 +570,9 @@ export const builtins = {
             [primitives.ANY],
             ([v]) => {
                 return feverStringFromJsString(recursiveToString(v));
+            },
+            {
+                'specificities': [1]
             }
         ),
         newFunction(
@@ -577,6 +580,9 @@ export const builtins = {
             [meta.FUNCTION],
             ([func]) => {
                 return feverStringFromJsString(func.invocations.length + " patterns");
+            },
+            {
+                'specificities': [1]
             }
 
         )
