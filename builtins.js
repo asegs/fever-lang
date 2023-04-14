@@ -457,7 +457,7 @@ export const builtins = {
             [primitives.ANY],
             ([v]) => {
                 console.dir(v, { depth: null });
-                return createVar(v.value, v.type);
+                return v;
             }
         )
     ],
