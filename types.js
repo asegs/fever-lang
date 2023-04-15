@@ -2,14 +2,14 @@ import {splitGeneral, splitArray} from "./prefixer.js";
 import {evaluate, goals} from "./interpreter.js";
 
 
-const typeWeights = {
+export const typeWeights = {
     ANY: 0.5,
     BASE_TUPLE: 0.75,
     NOMINAL: 1.1,
     EQUIVALENT: 1
 }
 
-const patternWeights = {
+export const patternWeights = {
     ANY: 0.5,
     EXPRESSION: 1,
     TYPE: 1,

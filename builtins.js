@@ -783,16 +783,16 @@ const argNamesFromFunction = (functionBody) => {
 const serializeCase = (c) => {
     let caseText = "(";
     const [signature, expression] = c.value;
-    const patterns = signature.value;
-    for (let i = 0 ; i < patterns.length ; i ++) {
-        const pattern = patterns[i];
+    const rankedPatterns = simpleRankPatterns(signature.value);
+    for (let i = 0 ; i < rankedPatterns.length ; i ++) {
+        const pattern = rankedPatterns[i];
         const [condition, type] = pattern.value;
         const [varName, conditionExpr] = condition.value;
         caseText += conditionExpr.value === 'true' ? varName.value : conditionExpr.value;
         if (type.value.baseName !== 'ANY') {
             caseText += ':' + (isAlias(type.value) ? type.value.alias : type.value.baseName.toLowerCase());
         }
-        if (i < patterns.length - 1) {
+        if (i < rankedPatterns.length - 1) {
             caseText += ',';
         } else {
             caseText += ') => '
@@ -806,5 +806,12 @@ const serializeCase = (c) => {
 
 const serializeFunction = (f) => {
     return f.value.map(c => serializeCase(c)).join('\n');
+}
+
+const simpleRankPatterns = (patterns) => {
+    return patterns.sort((p1, p2) => {
+        let p1Spec = 1;
+        //Rank by specificity * type weight from types
+    });
 }
 
