@@ -580,7 +580,7 @@ export const builtins = {
             1,
             [meta.FUNCTION],
             ([func]) => {
-                return feverStringFromJsString(func.invocations.length + " patterns");
+                return feverStringFromJsString(serializeFunction(func));
             },
             {
                 'specificities': [0.6]
@@ -724,7 +724,7 @@ const generateCaseFromNative = (functionObject) => {
                 createVar(
                     [
                         createVar(names[i], meta.STRING),
-                        createVar(condition.toString() === '() => true' ? '' : nativeFunctionMessage, primitives.EXPRESSION),
+                        createVar(condition.toString() === '() => true' ? 'true' : nativeFunctionMessage, primitives.EXPRESSION),
                         createVar(specificities[i], primitives.NUMBER)
                     ],
                     meta.CONDITION
@@ -767,6 +767,7 @@ const argNamesFromFunction = (functionBody) => {
                     return args;
                 case ',':
                     args.push(stack);
+                    stack = '';
                     break;
                 default:
                     stack += letter;
@@ -779,7 +780,31 @@ const argNamesFromFunction = (functionBody) => {
     return args;
 }
 
+const serializeCase = (c) => {
+    let caseText = "(";
+    const [signature, expression] = c.value;
+    const patterns = signature.value;
+    for (let i = 0 ; i < patterns.length ; i ++) {
+        const pattern = patterns[i];
+        const [condition, type] = pattern.value;
+        const [varName, conditionExpr] = condition.value;
+        caseText += conditionExpr.value === 'true' ? varName.value : conditionExpr.value;
+        if (type.value.baseName !== 'ANY') {
+            caseText += ':' + (isAlias(type.value) ? type.value.alias : type.value.baseName.toLowerCase());
+        }
+        if (i < patterns.length - 1) {
+            caseText += ',';
+        } else {
+            caseText += ') => '
+        }
+    }
+    caseText += expression.value;
+
+    return caseText;
+
+}
+
 const serializeFunction = (f) => {
-    //Handle no condition text for both generated and written
+    return f.value.map(c => serializeCase(c)).join('\n');
 }
 

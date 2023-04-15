@@ -183,7 +183,7 @@ export const inferConditionFromString = (rawString, vars, morphisms, takenVars) 
     const string = rawString.trim();
 
     if (string === '_') {
-        return [createCondition(createVar('__repr', meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
+        return [createCondition(createVar('_', meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
     }
 
     const missing = evaluate(string, vars, morphisms, goals.MISSING);
@@ -236,7 +236,7 @@ export const inferConditionFromString = (rawString, vars, morphisms, takenVars) 
     }
 
     // a, won't support [1,2,a] yet, will need to destructure (what if we are actually testing for [1, 2, sublist]?)
-    return [createCondition(createVar(name, meta.STRING), createVar("==(" + name + "," + string + ")", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, name];
+    return [createCondition(createVar(name, meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, name];
 }
 
 export const createPatternFromString = (string, vars, morphisms, takenVars) => {
