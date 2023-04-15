@@ -372,7 +372,7 @@ export const builtins = {
                     )
 
                     const expression = condition[1];
-                    if (expression.value.startsWith('==')) {
+                    if (expression.value.startsWith('==') || expression.value === 'true') {
                         permutations.push(arg => arg);
                         continue;
                     }
