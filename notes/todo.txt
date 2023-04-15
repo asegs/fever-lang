@@ -30,3 +30,4 @@
 - track cases of fever functions in function object and just put in "native function" object when it is written in JS
 - have better type to string function
 - sort definitions by specificity when printing out
+- why ranking patterns instead of whole functions?

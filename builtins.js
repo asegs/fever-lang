@@ -5,7 +5,7 @@ import {
     createVar, isAlias,
     meta,
     primitives,
-    recursiveToString, typeAssignableFrom
+    recursiveToString, typeAssignableFrom, typeWeights
 } from './types.js'
 import {callFunction, evaluate, goals} from "./interpreter.js";
 import {feverStringFromJsString} from "./literals.js";
@@ -783,16 +783,16 @@ const argNamesFromFunction = (functionBody) => {
 const serializeCase = (c) => {
     let caseText = "(";
     const [signature, expression] = c.value;
-    const rankedPatterns = simpleRankPatterns(signature.value);
-    for (let i = 0 ; i < rankedPatterns.length ; i ++) {
-        const pattern = rankedPatterns[i];
+    const patterns = signature.value;
+    for (let i = 0 ; i < patterns.length ; i ++) {
+        const pattern = patterns[i];
         const [condition, type] = pattern.value;
         const [varName, conditionExpr] = condition.value;
         caseText += conditionExpr.value === 'true' ? varName.value : conditionExpr.value;
         if (type.value.baseName !== 'ANY') {
             caseText += ':' + (isAlias(type.value) ? type.value.alias : type.value.baseName.toLowerCase());
         }
-        if (i < rankedPatterns.length - 1) {
+        if (i < patterns.length - 1) {
             caseText += ',';
         } else {
             caseText += ') => '
@@ -805,13 +805,48 @@ const serializeCase = (c) => {
 }
 
 const serializeFunction = (f) => {
-    return f.value.map(c => serializeCase(c)).join('\n');
+    const rankedCases = simpleRankCases(f.value);
+    return rankedCases.map(c => serializeCase(c)).join('\n');
 }
 
-const simpleRankPatterns = (patterns) => {
-    return patterns.sort((p1, p2) => {
-        let p1Spec = 1;
-        //Rank by specificity * type weight from types
+const simpleRankCases = (cases) => {
+    return cases.sort((c1, c2) => {
+        let c1Spec = 0;
+        let c2Spec = 0;
+
+        const c1Patterns = c1.value[0].value;
+        const c2Patterns = c2.value[0].value;
+
+        for (let i = 0; i < c1Patterns.length; i++) {
+            const [c1Condition, c1Type] = c1Patterns[i].value;
+            c1Spec += (simpleTypeSpec(c1Type.value) * c1Condition.value[2].value);
+        }
+
+        c1Spec = c1Spec / c1Patterns.length;
+
+        for (let i = 0; i < c2Patterns.length; i++) {
+            const [c2Condition, c2Type] = c2Patterns[i].value;
+            c2Spec += (simpleTypeSpec(c2Type.value) * c2Condition.value[2].value);
+        }
+
+        c2Spec = c2Spec / c2Patterns.length;
+
+        return c2Spec - c1Spec;
     });
 }
 
+const simpleTypeSpec = (t) => {
+    if (t.baseName === 'ANY') {
+        return typeWeights.ANY;
+    }
+
+    if (t.baseName === 'TUPLE' && t.types.length === 0) {
+        return typeWeights.BASE_TUPLE;
+    }
+
+    if (isAlias(t)) {
+        return typeWeights.NOMINAL;
+    }
+
+    return typeWeights.EQUIVALENT;
+}
