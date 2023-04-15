@@ -1,9 +1,9 @@
 import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
-import {typeAssignableFrom, typeSatisfaction, meta, createVar} from "./types.js";
+import {typeSatisfaction, createVar, isAlias} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
-import {builtins, standardLib} from "./builtins.js";
+import {builtins, registerBuiltins, standardLib} from "./builtins.js";
 
 export const goals = {
     EVALUATE: Symbol("EVALUATE"),
@@ -12,11 +12,11 @@ export const goals = {
 
 //.. as infix function
 
-export const interpret = (text, variables, functions, morphisms ,goal) => {
+export const interpret = (text, variables, morphisms ,goal) => {
     const lexed = lex(text)
     //Uncomment for debugging
     //console.log(lexed)
-    return evaluate(lexed, variables, functions, morphisms, goal);
+    return evaluate(lexed, variables, morphisms, goal);
 }
 const stripRedundantParens = (text) => {
     while (text.startsWith("(") && text.endsWith(")")) {
@@ -34,12 +34,17 @@ const splitIntoNameAndBody = (text) => {
     return [text.slice(0, firstParen), text.slice(firstParen)]
 }
 
-export const callFunction = (name, args, variables, functions, morphisms) => {
-    if (!(name in functions)) {
+export const callFunction = (name, args, variables, morphisms) => {
+    const named = variables.getOrNull(name);
+    if (!named) {
         throw "Unknown function " + name + " invoked."
     }
 
-    const func = functions[name];
+    if (!isAlias(named.type) || named.type.alias !== "FUNCTION") {
+        return named;
+    }
+
+    const func = named['invocations'];
     const candidates = func.filter(f => f.arity === args.length);
 
     if (candidates.length === 0) {
@@ -61,7 +66,7 @@ export const callFunction = (name, args, variables, functions, morphisms) => {
                 break;
             }
 
-            const intScore = typeScore * (condition(args[i], variables, functions, morphisms) ? 1 : 0) * specificity;
+            const intScore = typeScore * (condition(args[i], variables, morphisms) ? 1 : 0) * specificity;
             if (intScore === 0) {
                 score = -1;
                 break;
@@ -86,7 +91,7 @@ export const callFunction = (name, args, variables, functions, morphisms) => {
                 try {
                     const result = [];
                     for (let i = 0 ; i < tupleSize ; i ++ ) {
-                        result.push(callFunction(name, args.map(arg => arg.value[i]), variables, functions, morphisms));
+                        result.push(callFunction(name, args.map(arg => arg.value[i]), variables, morphisms));
                     }
                     return createVar(result,args[0].type)
                 } catch (e) {
@@ -100,7 +105,7 @@ export const callFunction = (name, args, variables, functions, morphisms) => {
     if (bestScore <= 0) {
         throw "No satisfactory match for " + name + ".";
     }
-    return bestCandidate.function(args, variables, functions, morphisms);
+    return bestCandidate.function(args, variables, morphisms);
 }
 
 export const findMissing = (args) => {
@@ -112,20 +117,25 @@ export const findMissing = (args) => {
 
 
 
-export const evaluate = (text, variables, functions, morphisms, goal) => {
+export const evaluate = (text, variables, morphisms, goal) => {
     //const cleanText = stripRedundantParens(text);
     const cleanText = text;
     if (isFunctionCall(text)) {
         const [name, body] = splitIntoNameAndBody(text);
-        const args = trimAndSplitArray(body).map(e => evaluate(e, variables, functions, morphisms, goal));
+        const args = trimAndSplitArray(body).map(e => evaluate(e, variables, morphisms, goal));
         if (goal === goals.EVALUATE) {
-            return callFunction(name, args, variables, functions, morphisms);
+            return callFunction(name, args, variables, morphisms);
         } else {
-            return findMissing(args, variables, functions, morphisms);
+            if (variables.hasVariable(name)) {
+                return findMissing(args, variables, morphisms);
+            } else {
+                return findMissing([{'name': name, 'type': 'FUNCTION'}, ...args], variables, morphisms);
+            }
+
         }
     }
 
-    const result = inferTypeAndValue(cleanText, variables, functions, morphisms, goal);
+    const result = inferTypeAndValue(cleanText, variables, morphisms, goal);
     if (goal === goals.MISSING ) {
         if (('value' in result) && Array.isArray(result.value)) {
             return findMissing(result.value);
@@ -145,13 +155,14 @@ export const evaluate = (text, variables, functions, morphisms, goal) => {
 
 export const instance = () => {
     const variables = new ScopedVars();
-    const functions = builtins;
     const morphisms = new Morphisms();
 
+    registerBuiltins(variables);
+
     standardLib.forEach(line => {
-        interpret(line, variables, functions, morphisms, goals.EVALUATE);
+        interpret(line, variables, morphisms, goals.EVALUATE);
     });
 
-    return [variables, functions, morphisms];
+    return [variables, morphisms];
 
 }

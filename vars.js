@@ -45,6 +45,17 @@ export class ScopedVars {
         throw "Unknown variable";
     }
 
+    getOrNull (name) {
+        for (let i = this.scopes.length - 1 ; i >= 0 ; i -- ) {
+            const scope = this.scopes[i];
+            if (name in scope) {
+                return scope[name];
+            }
+        }
+
+        return null;
+    }
+
     hasVariableInScope (name) {
         return name in this.scopes[this.scopes.length - 1];
     }

@@ -1,6 +1,6 @@
-import {goals, instance, interpret} from "../interpreter.js";
+import {callFunction, goals, instance, interpret} from "../interpreter.js";
 
-const [variables, functions, morphisms] = instance();
+const [variables, morphisms] = instance();
 
 const history = [];
 let historyIndex = 0;
@@ -20,8 +20,8 @@ const interpretInBrowser = (text) => {
     let output;
 
     try {
-        const result = interpret(text, variables, functions, morphisms, goals.EVALUATE);
-        output = functions['stringify'][0]['function']([result]).value;
+        const result = interpret(text, variables, morphisms, goals.EVALUATE);
+        output = callFunction('stringify', [result], variables, morphisms);
 
     } catch (e) {
         output = e;

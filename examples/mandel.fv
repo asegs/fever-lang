@@ -1,5 +1,3 @@
-show("hello")
-
 r_height = 8
 r_width = floor(r_height * (4 / 3) * 3)
 r_scale = 0.003

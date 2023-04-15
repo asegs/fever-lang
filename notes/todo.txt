@@ -25,3 +25,9 @@
 - morphisms could take [char] to [#]
 - tests to ensure changes didn't break functionality
 - list[] > any, in general going deep on types should be considered worth more than early any
+- handle missing function names as well as variables in evaluate missing
+- we need to differentiate between case {x} => (x + 1) and function (invocations, type: list[case]), remember that invocations is not a traditional value
+- track cases of fever functions in function object and just put in "native function" object when it is written in JS
+- have better type to string function
+- sort definitions by specificity when printing out
+- why ranking patterns instead of whole functions?

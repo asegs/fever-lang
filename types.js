@@ -2,14 +2,14 @@ import {splitGeneral, splitArray} from "./prefixer.js";
 import {evaluate, goals} from "./interpreter.js";
 
 
-const typeWeights = {
+export const typeWeights = {
     ANY: 0.5,
     BASE_TUPLE: 0.75,
     NOMINAL: 1.1,
     EQUIVALENT: 1
 }
 
-const patternWeights = {
+export const patternWeights = {
     ANY: 0.5,
     EXPRESSION: 1,
     TYPE: 1,
@@ -179,14 +179,14 @@ export const inferTypeFromString = (rawString) => {
  [_,_3] (later)
  (len(a) % 2 == 0) (expression with unknown)
  */
-export const inferConditionFromString = (rawString, vars, functions, morphisms, takenVars) => {
+export const inferConditionFromString = (rawString, vars, morphisms, takenVars) => {
     const string = rawString.trim();
 
     if (string === '_') {
-        return [createCondition(createVar('__repr', meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
+        return [createCondition(createVar('_', meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
     }
 
-    const missing = evaluate(string, vars, functions, morphisms, goals.MISSING);
+    const missing = evaluate(string, vars, morphisms, goals.MISSING);
     if (missing.length === 0) {
         /**
          123
@@ -194,9 +194,23 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
          b (known)
          (b + 3) (expression with known)
          */
-        const result = evaluate(string, vars, functions, morphisms, goals.EVALUATE);
-        return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), result.type, null];
-    }
+            // Catch case where it's just a function, we want to be able to redefine function names.
+            //ie. type 1 is: {name: string, price:#}
+            //and type 2 is: {name: string, size: #}
+            // Even though declaring type 1 introduced name as a function, we will never want to match function equality
+        let isPreviouslyDeclaredFunction = false;
+        if (!string.startsWith('(')) {
+            const consideredValue = vars.getOrNull(string);
+            if (consideredValue && isAlias(consideredValue.type) && consideredValue.type.alias === 'FUNCTION') {
+                isPreviouslyDeclaredFunction = true;
+                missing.push({'name': string, 'type': 'VARIABLE'});
+            }
+        }
+        if (!isPreviouslyDeclaredFunction) {
+            const result = evaluate(string, vars, morphisms, goals.EVALUATE);
+            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), result.type, null];
+        }
+       }
 
     const acceptedMissing = missing.filter(item => !takenVars.has(item.name));
 
@@ -222,13 +236,13 @@ export const inferConditionFromString = (rawString, vars, functions, morphisms, 
     }
 
     // a, won't support [1,2,a] yet, will need to destructure (what if we are actually testing for [1, 2, sublist]?)
-    return [createCondition(createVar(name, meta.STRING), createVar("==(" + name + "," + string + ")", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, name];
+    return [createCondition(createVar(name, meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, name];
 }
 
-export const createPatternFromString = (string, vars, functions, morphisms, takenVars) => {
+export const createPatternFromString = (string, vars, morphisms, takenVars) => {
     const conditionAndType = splitGeneral(string, ':');
     let type = conditionAndType.length === 1 ? primitives.ANY : inferTypeFromString(conditionAndType[1]);
-    const [condition, inferredType, namedVar] = inferConditionFromString(conditionAndType[0], vars, functions, morphisms, takenVars);
+    const [condition, inferredType, namedVar] = inferConditionFromString(conditionAndType[0], vars, morphisms, takenVars);
     if (type === primitives.ANY) {
         type = inferredType;
     }
@@ -239,6 +253,9 @@ const STRING = createTypedList(primitives.CHARACTER, "STRING");
 const CONDITION = createTypedTuple([STRING, primitives.EXPRESSION, primitives.NUMBER], "CONDITION");
 const PATTERN = createTypedTuple([CONDITION, primitives.TYPE], "PATTERN");
 const SIGNATURE = createTypedList(PATTERN, "SIGNATURE");
+const CASE = createTypedTuple([SIGNATURE, primitives.EXPRESSION], "CASE");
+//These also have a special invocations property!
+const FUNCTION = createTypedList(CASE, 'FUNCTION');
 
 export const meta = {
     CONDITION: CONDITION,
@@ -246,7 +263,8 @@ export const meta = {
     SIGNATURE: SIGNATURE,
     LIST: createTypedList(primitives.ANY),
     STRING: STRING,
-    FUNCTION: createTypedTuple([SIGNATURE, primitives.EXPRESSION], "FUNCTION"),
+    CASE: CASE,
+    FUNCTION: FUNCTION,
     TUPLE: createTypedTuple([]),
 }
 
