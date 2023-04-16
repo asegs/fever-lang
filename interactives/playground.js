@@ -1,4 +1,5 @@
 import {callFunction, goals, instance, interpret} from "../interpreter.js";
+import {charListToJsString} from "../types.js";
 
 const [variables, morphisms] = instance();
 
@@ -21,7 +22,7 @@ const interpretInBrowser = (text) => {
 
     try {
         const result = interpret(text, variables, morphisms, goals.EVALUATE);
-        output = callFunction('stringify', [result], variables, morphisms);
+        output = charListToJsString(callFunction('stringify', [result], variables, morphisms));
 
     } catch (e) {
         output = e;
