@@ -1,0 +1,18 @@
+queen = {row:#,col:#}
+rows = {queens:[]} => (queens -> (row(@)))
+cols = {queens:[]} => (queens -> (col(@)))
+
+can_capture_row = {queens:[], q:queen} => (contains(rows(queens),row(q)))
+can_capture_col = {queens:[], q:queen} => (contains(cols(queens),col(q)))
+q_can_capture_diag = {q1:queen, q2: queen} => ((abs(row(q1-q2))) == (abs(col(q1-q2))))
+can_capture_diag = {queens:[], q:queen} => (queens \> (false, ($ | q_can_capture_diag(@,q))))
+
+can_capture = {queens:[], q:queen} => (can_capture_row(queens,q) | can_capture_col(queens,q) | can_capture_diag(queens, q))
+
+solve = {n:number, queens:[], (can_capture(queens,test)):queen} => false
+solve = {n:number,(len(queens) == n):[], (not(can_capture(queens,test))):queen} => (queens + test)
+solve = {n:number, queens:[], test:queen} => (0..n \> (false, (solve(n, queens + test, new(queen,len(queens) + 1, @))), true))
+solve = {n:number} => (solve(n-1, [], new(queen, 0,0)))
+
+
+show(solve(8))
