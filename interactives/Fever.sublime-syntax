@@ -28,7 +28,7 @@ contexts:
     - match: '(\b[a-z][a-z0-9_]*)'
       captures:
         0: keyword.fever
-    - match: '(@|#|^)'
+    - match: '(@|#|^|\$)'
       captures:
         0: variable.other.constant.fever
     - match: '(\b\d+)'
@@ -58,6 +58,17 @@ contexts:
         - match: '(.)'
           captures:
             0: string.quoted.double.fever
+    - match: '(\'')'
+      captures:
+        0: markup.quote.fever
+      push:
+        - match: '(\'')'
+          pop: true
+          captures:
+            0: markup.quote.fever
+        - match: '(.)'
+          captures:
+            0: string.quoted.single.fever
     - match: '(\()'
       captures:
         0: punctuation.section.parens.begin.fever
@@ -67,12 +78,6 @@ contexts:
           captures:
             0: punctuation.section.parens.end.fever
         - include: main
-        - match: '(,)'
-          captures:
-            0: punctuation.fever
-        - match: '(.)'
-          captures:
-            0: text.fever
     - match: '(\[)'
       captures:
         0: punctuation.section.brackets.begin.fever
