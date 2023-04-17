@@ -165,28 +165,23 @@ export const builtins = {
             2,
             [meta.LIST, primitives.EXPRESSION],
             ([list, action], variables, morphisms) => {
-                const internalList = [];
-                for (let i = 0 ; i < list.value.length ; i ++ ) {
-                    const item = list.value[i];
-                    variables.enterScope();
-                    variables.assignValue('@', item);
-                    variables.assignValue('#', createVar(i, primitives.NUMBER));
-                    variables.assignValue('^', createVar([...internalList], createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
-                    const result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
-                    internalList.push(result);
-                    variables.exitScope();
-                }
-
-                const result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
-
-                if (isAlias(list.type)) {
-                    const created = newOfType(result.type, [result], variables, morphisms);
-                    if (created) {
-                        return created;
-                    }
-                }
-                return result;
+                return namedMap(list, action, variables, morphisms, ['@','#','^']);
             }
+        ),
+        // [1,2,3] -> (['item','index','intermediate'], (item + 1))
+        newFunction(
+            2,
+            [meta.LIST, createTypedTuple([createTypedList(meta.STRING), primitives.EXPRESSION])],
+            ([list, namedAction], variables, morphisms) => {
+                const [names, action] = namedAction.value;
+                const nameTable = ['@','#','^'];
+                const providedNames = names.value;
+                for (let i = 0 ; i < Math.min(3, providedNames.length) ; i ++ ) {
+                    nameTable[i] = charListToJsString(providedNames[i]);
+                }
+                return namedMap(list, action, variables, morphisms, nameTable);
+            }
+
         ),
         newFunction(
             2,
@@ -211,18 +206,42 @@ export const builtins = {
             2,
             [meta.LIST, createTypedTuple([primitives.ANY, primitives.EXPRESSION])],
             ([list, reduce], variables, morphisms) => {
-                let acc = reduce.value[0];
-                const expr = reduce.value[1].value;
-                for (let i = 0 ; i < list.value.length ; i ++ ) {
-                    const item = list.value[i];
-                    variables.enterScope();
-                    variables.assignValue('@', item);
-                    variables.assignValue('#', createVar(i, primitives.NUMBER));
-                    variables.assignValue('$', acc);
-                    acc = evaluate(expr, variables, morphisms, goals.EVALUATE);
-                    variables.exitScope();
+                const [acc, reduction] = reduce.value;
+                return namedReduce(list, acc, reduction, variables, morphisms, ['@','#', '$'], false);
+            }
+        ),
+        newFunction(
+            2,
+            [meta.LIST, createTypedTuple([createTypedList(meta.STRING), primitives.ANY, primitives.EXPRESSION])],
+            ([list, namedReduction], variables, morphisms) => {
+                const [names, acc, reduction] = namedReduction.value;
+                const nameTable = ['@','#','$'];
+                const providedNames = names.value;
+                for (let i = 0 ; i < Math.min(3, providedNames.length) ; i ++ ) {
+                    nameTable[i] = charListToJsString(providedNames[i]);
                 }
-                return acc;
+                return namedReduce(list, acc, reduction, variables, morphisms, nameTable, false);
+            }
+        ),
+        newFunction(
+            2,
+            [meta.LIST, createTypedTuple([primitives.ANY, primitives.EXPRESSION, primitives.BOOLEAN])],
+            ([list, reduce], variables, morphisms) => {
+                const [acc, reduction, flag] = reduce.value;
+                return namedReduce(list, acc, reduction, variables, morphisms, ['@','#', '$'], flag.value);
+            }
+        ),
+        newFunction(
+            2,
+            [meta.LIST, createTypedTuple([createTypedList(meta.STRING), primitives.ANY, primitives.EXPRESSION, primitives.BOOLEAN])],
+            ([list, namedReduction], variables, morphisms) => {
+                const [names, acc, reduction, flag] = namedReduction.value;
+                const nameTable = ['@','#','$'];
+                const providedNames = names.value;
+                for (let i = 0 ; i < Math.min(3, providedNames.length) ; i ++ ) {
+                    nameTable[i] = charListToJsString(providedNames[i]);
+                }
+                return namedReduce(list, acc, reduction, variables, morphisms, nameTable, flag.value);
             }
         )
     ],
@@ -231,29 +250,20 @@ export const builtins = {
             2,
             [meta.LIST, primitives.EXPRESSION],
             ([list, action], variables, morphisms) => {
-                const internalList = [];
-                for (let i = 0 ; i < list.value.length ; i ++ ) {
-                    const item = list.value[i];
-                    variables.enterScope();
-                    variables.assignValue('@', item);
-                    variables.assignValue('#', createVar(i, primitives.NUMBER));
-                    variables.assignValue('^', createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
-                    const result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
-                    if (result.value) {
-                        internalList.push(item);
-                    }
-                    variables.exitScope();
+                return namedFilter(list, action, variables, morphisms, ['@','#','^']);
+            }
+        ),
+        newFunction(
+            2,
+            [meta.LIST, createTypedTuple([createTypedList(meta.STRING), primitives.EXPRESSION])],
+            ([list, namedAction], variables, morphisms) => {
+                const [names, filter] = namedAction.value;
+                const nameTable = ['@','#','^'];
+                const providedNames = names.value;
+                for (let i = 0 ; i < Math.min(3, providedNames.length) ; i ++ ) {
+                    nameTable[i] = charListToJsString(providedNames[i]);
                 }
-
-                const result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
-
-                if (isAlias(list.type)) {
-                    const created = newOfType(result.type, [result], variables, morphisms);
-                    if (created) {
-                        return created;
-                    }
-                }
-                return result;
+                return namedFilter(list, filter, variables, morphisms, nameTable);
             }
         )
     ],
@@ -586,6 +596,16 @@ export const builtins = {
                 'specificities': [0.6]
             }
 
+        ),
+        newFunction(
+            1,
+            [primitives.TYPE],
+            ([typeVar]) => {
+                return feverStringFromJsString(typeToString(typeVar.value, ''));
+            },
+            {
+                'specificities': [0.6]
+            }
         )
     ],
     'type': [
@@ -593,10 +613,7 @@ export const builtins = {
             1,
             [primitives.ANY],
             ([v]) => {
-                if (isAlias(v.type)) {
-                    return createVar(v.type.alias, meta.STRING);
-                }
-                return createVar(v.type.baseName, meta.STRING);
+                return createVar(v.type, primitives.TYPE);
              }
         )
     ],
@@ -639,7 +656,9 @@ export const standardLib = [
     "sort = {arr:[]} => (merge(sort(get(halve(arr),0)), sort(get(halve(arr),1))))",
     "reverse = {list:[]} => (list -> (get(list, len(list) - # - 1)))",
     "sum = {str:string} => (str \\> (0, ($ + ord(@))))",
-    "hash = {str:string, mod:#} => (sum(str) % mod)"
+    "hash = {str:string, mod:#} => (sum(str) % mod)",
+    "abs = {(a < 0):number} => (a * -1)",
+    "abs = {a:number} => (a)"
 ]
 
 export const registerBuiltins = (variables) => {
@@ -849,4 +868,94 @@ const simpleTypeSpec = (t) => {
     }
 
     return typeWeights.EQUIVALENT;
+}
+
+const typeToString = (t,contents) => {
+    if (!t.meta) {
+        return contents + t.baseName.toLowerCase();
+    }
+
+    if (isAlias(t)) {
+        contents += t.alias;
+    }
+
+    const [open, close] = t.baseName === 'LIST' ? ['[',']'] : ['(', ')'];
+
+    const types = t.types;
+    contents += open;
+    for (let i = 0 ; i < types.length ; i ++ ) {
+        contents = typeToString(types[i],contents);
+        if (i < types.length - 1) {
+            contents += ',';
+        }
+    }
+    contents += close;
+    return contents;
+}
+
+const namedMap = (list, action, variables, morphisms, [element, index, intermediate]) => {
+    const internalList = [];
+    for (let i = 0 ; i < list.value.length ; i ++ ) {
+        const item = list.value[i];
+        variables.enterScope();
+        variables.assignValue(element, item);
+        variables.assignValue(index, createVar(i, primitives.NUMBER));
+        variables.assignValue(intermediate, createVar([...internalList], createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
+        const result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
+        internalList.push(result);
+        variables.exitScope();
+    }
+
+    const result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
+
+    if (isAlias(list.type)) {
+        const created = newOfType(result.type, [result], variables, morphisms);
+        if (created) {
+            return created;
+        }
+    }
+    return result;
+}
+
+const namedReduce = (list, acc, expr, variables, morphisms, [element, index, accumulator], earlyTerminateIfNotFalse) => {
+
+    for (let i = 0 ; i < list.value.length ; i ++ ) {
+        const item = list.value[i];
+        variables.enterScope();
+        variables.assignValue(element, item);
+        variables.assignValue(index, createVar(i, primitives.NUMBER));
+        variables.assignValue(accumulator, acc);
+        acc = evaluate(expr.value, variables, morphisms, goals.EVALUATE);
+        variables.exitScope();
+        if (earlyTerminateIfNotFalse && acc.value !== false) {
+            return acc;
+        }
+    }
+    return acc;
+}
+
+const namedFilter = (list, action, variables, morphisms, [element, index, intermediate]) => {
+    const internalList = [];
+    for (let i = 0 ; i < list.value.length ; i ++ ) {
+        const item = list.value[i];
+        variables.enterScope();
+        variables.assignValue(element, item);
+        variables.assignValue(index, createVar(i, primitives.NUMBER));
+        variables.assignValue(intermediate, createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
+        const result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
+        if (result.value) {
+            internalList.push(item);
+        }
+        variables.exitScope();
+    }
+
+    const result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
+
+    if (isAlias(list.type)) {
+        const created = newOfType(result.type, [result], variables, morphisms);
+        if (created) {
+            return created;
+        }
+    }
+    return result;
 }

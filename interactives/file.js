@@ -20,7 +20,7 @@ export const file = (inputFile, vars, morphisms) => {
                 interpret(line, vars, morphisms, goals.EVALUATE);
             }
         } catch (e) {
-            console.log("Error on line " + (index + 1) + ": " + e);
+            console.log("Error on line " + (index + 1) + ": " + (e.stack ? e.stack : e));
         }
     });
 }
