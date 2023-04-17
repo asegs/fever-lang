@@ -12,7 +12,10 @@ can_capture = {queens:[], q:queen} => (can_capture_row(queens,q) | can_capture_c
 solve = {n:number, queens:[], (can_capture(queens,test)):queen} => false
 solve = {n:number,(len(queens) == n):[], (not(can_capture(queens,test))):queen} => (queens + test)
 solve = {n:number, queens:[], test:queen} => (0..n \> (false, (solve(n, queens + test, new(queen,len(queens) + 1, @))), true))
-solve = {n:number} => (solve(n-1, [], new(queen, 0,0)))
+
+try_starting_positions = {n:number} => (0..n \> (false, (solve(n, [], new(queen, 0, @))), true))
+
+solve = {n:number} => (try_starting_positions(n-1))
 
 
 show(solve(8))
