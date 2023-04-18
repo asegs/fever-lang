@@ -627,7 +627,7 @@ export const builtins = {
 }
 
 export const standardLib = [
-    "contains = {list:[], item} => (list \\> (false, (item == @ | $)))",
+    "contains = {list:[], item} => (list \\> (false, (item == @ | $), true))",
     "unique_add = {list:[], (contains(list, item))} => (list)",
     "unique_add = {list:[], item} => (list + item)",
     "unique = {list:[]} => (list \\> ([], (unique_add($,@))))",

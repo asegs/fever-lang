@@ -5,7 +5,7 @@ cols = {queens:[]} => (queens -> (col(@)))
 can_capture_row = {queens:[], q:queen} => (contains(rows(queens),row(q)))
 can_capture_col = {queens:[], q:queen} => (contains(cols(queens),col(q)))
 q_can_capture_diag = {q1:queen, q2: queen} => ((abs(row(q1-q2))) == (abs(col(q1-q2))))
-can_capture_diag = {queens:[], q:queen} => (queens \> (false, ($ | q_can_capture_diag(@,q))))
+can_capture_diag = {queens:[], q:queen} => (queens \> (false, ($ | q_can_capture_diag(@,q)), true))
 
 can_capture = {queens:[], q:queen} => (can_capture_row(queens,q) | can_capture_col(queens,q) | can_capture_diag(queens, q))
 
@@ -17,5 +17,4 @@ try_starting_positions = {n:number} => (0..n \> (false, (solve(n, [], new(queen,
 
 solve = {n:number} => (try_starting_positions(n-1))
 
-
-show(solve(8))
+1..10 -> (show(solve(@)))
