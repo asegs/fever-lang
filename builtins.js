@@ -369,6 +369,26 @@ export const builtins = {
                     const condition = signature.value[i].value[0].value;
                     const name = condition[0];
 
+                    //Handle 1 <-> 1 members
+                    const expression = condition[1];
+                    if (expression.value.startsWith('==') || expression.value === 'true') {
+                        permutations.push(arg => arg);
+                    } else {
+                        permutations.push(
+                            (arg, variables, morphisms) => {
+                                variables.enterScope();
+                                variables.assignValue(name.value, arg);
+                                const result = evaluate(expression.value, variables, morphisms, goals.EVALUATE);
+                                variables.exitScope();
+                                return result;
+                            }
+                        );
+                    }
+
+                    //Create mutating members
+
+
+                    //Register getters
                     registerNewFunction(
                         name.value,
                         variables,
@@ -379,23 +399,24 @@ export const builtins = {
                                 return ofType.value[i];
                             }
                         )
-                    )
+                    );
+                }
 
-                    const expression = condition[1];
-                    if (expression.value.startsWith('==') || expression.value === 'true') {
-                        permutations.push(arg => arg);
-                        continue;
-                    }
-
-                    //Conditions table is still putting out raw strings, not lists!
-                    permutations.push(
-                        (arg, variables, morphisms) => {
-                            variables.enterScope();
-                            variables.assignValue(name.value, arg);
-                            const result = evaluate(expression.value, variables, morphisms, goals.EVALUATE);
-                            variables.exitScope();
-                            return result;
-                        }
+                for (let i = 0 ; i < size ; i ++ ) {
+                    const condition = signature.value[i].value[0].value;
+                    const name = condition[0];
+                    //Register setters
+                    registerNewFunction(
+                        name.value,
+                        variables,
+                        newFunction(
+                            2,
+                            [newType, types[i]],
+                            ([ofType, newValue], variables, morphisms) => {
+                                ofType.value[i] = permutations[i](newValue, variables, morphisms);
+                                return ofType;
+                            }
+                        )
                     );
                 }
 

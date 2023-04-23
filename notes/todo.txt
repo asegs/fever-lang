@@ -25,7 +25,6 @@
 - morphisms could take [char] to [#]
 - tests to ensure changes didn't break functionality
 - list[] > any, in general going deep on types should be considered worth more than early any
-- setters using x(c1, 10)
 - things like sets of numbers should be set[number]
 - empty lists with any type should satisfy [t] type and be turned into [t] type when a t is added
 - not correctly exiting scope after error, [1,2,3] ~> (['item'],(@ < 2)) //no var named @ [1,2,3] ~> (['item'], (item < 2)) item is still defined so this evals to boolean!
