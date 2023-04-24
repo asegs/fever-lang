@@ -4,7 +4,7 @@ import {typeSatisfaction, createVar, isAlias, primitives, createError} from "./t
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
 import {builtins, registerBuiltins, standardLib} from "./builtins.js";
-import {file} from "./interactives/file.js";
+import {internalFile} from "./interactives/file.js";
 
 export const goals = {
     EVALUATE: Symbol("EVALUATE"),
@@ -169,7 +169,7 @@ export const instance = () => {
 
     registerBuiltins(variables);
 
-    file('../examples/lib.fv', variables, morphisms);
+    internalFile('../examples/lib.fv', variables, morphisms);
 
 
     return [variables, morphisms];

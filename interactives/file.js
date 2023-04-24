@@ -7,10 +7,7 @@ const lineShouldBeEvaluated = (line) => {
     return line.length > 0 && !line.startsWith("//");
 }
 
-export const file = (inputFile, vars, morphisms) => {
-    let dirPath = import.meta.url;
-    dirPath = dirPath.slice(7, dirPath.length - 7);
-    const inputPath = path.resolve(dirPath + inputFile);
+const file = (inputPath, vars, morphisms) => {
     if (!fs.existsSync(inputPath)) {
         console.error("No such input file: " + inputPath);
         process.exit(1);
@@ -25,4 +22,15 @@ export const file = (inputFile, vars, morphisms) => {
             console.log("Error on line " + (index + 1) + ": " + (e.stack ? e.stack : e));
         }
     });
+}
+
+export const internalFile = (inputFile, vars, morphisms) => {
+    let dirPath = import.meta.url;
+    dirPath = dirPath.slice(7, dirPath.length - 7);
+    const inputPath = path.resolve(dirPath + inputFile);
+    file(inputPath, vars, morphisms);
+}
+
+export const externalFile = (inputFile, vars, morphisms) => {
+    file(inputFile, vars, morphisms);
 }
