@@ -9,12 +9,8 @@ const rl = createInterface({
 
 export const prompt = (vars, morphisms) => {
     rl.question(">", (inp) => {
-        try {
-            const result = interpret(inp, vars, morphisms, goals.EVALUATE);
-            callFunction('show', [result], vars, morphisms);
-        } catch (e) {
-            console.log(e)
-        }
+        const result = interpret(inp, vars, morphisms, goals.EVALUATE);
+        callFunction('show', [result], vars, morphisms);
         prompt(vars, morphisms);
     })
 }

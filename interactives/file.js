@@ -8,7 +8,9 @@ const lineShouldBeEvaluated = (line) => {
 }
 
 export const file = (inputFile, vars, morphisms) => {
-    const inputPath = path.resolve(inputFile);
+    let dirPath = import.meta.url;
+    dirPath = dirPath.slice(7, dirPath.length - 7);
+    const inputPath = path.resolve(dirPath + inputFile);
     if (!fs.existsSync(inputPath)) {
         console.error("No such input file: " + inputPath);
         process.exit(1);

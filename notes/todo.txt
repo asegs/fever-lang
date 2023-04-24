@@ -29,3 +29,6 @@
 - empty lists with any type should satisfy [t] type and be turned into [t] type when a t is added
 - not correctly exiting scope after error, [1,2,3] ~> (['item'],(@ < 2)) //no var named @ [1,2,3] ~> (['item'], (item < 2)) item is still defined so this evals to boolean!
 - truthy
+- type ending with s is list?  like set vs. sets...
+- all type names are lowercase so we can do a key lookup in literals, rather than search each
+- most specific shared type for arrays

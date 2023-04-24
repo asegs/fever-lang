@@ -1,5 +1,5 @@
 import {
-    charListToJsString,
+    charListToJsString, createError,
     createTypedList,
     createTypedTuple, createTypeVar,
     createVar, isAlias,
@@ -466,6 +466,14 @@ export const builtins = {
             }
         ),
         newFunction(
+            1,
+            [primitives.ERROR],
+            ([e]) => {
+                console.log(e.value);
+                return e;
+            }
+        ),
+        newFunction(
             2,
             [primitives.ANY, meta.STRING],
             ([v, delimiter]) => {
@@ -516,14 +524,23 @@ export const builtins = {
             2,
             [meta.LIST, primitives.NUMBER],
             ([list, num]) => {
-                return list.value[num.value];
+                if (num.value < list.value.length) {
+                    return list.value[num.value];
+                }
+
+                return createError("Index " + num.value + " out of range on " + recursiveToString(list));
+
             }
         ),
         newFunction(
             2,
             [meta.TUPLE, primitives.NUMBER],
             ([tuple, num]) => {
-                return tuple.value[num.value];
+                if (num.value < tuple.value.length) {
+                    return tuple.value[num.value];
+                }
+
+                return createError("Index " + num.value + " out of range on " + recursiveToString(tuple));
             }
         )
     ],
@@ -644,42 +661,55 @@ export const builtins = {
             [primitives.CHARACTER],
             ([c]) => createVar(c.value.charCodeAt(0), primitives.NUMBER)
         )
+    ],
+    'depth': [
+        newFunction(
+            1,
+            [primitives.ANY],
+            ([ignored], variables) => {
+                return createVar(variables.scopes.length, primitives.NUMBER)
+            }
+        )
     ]
 }
 
 export const standardLib = [
-    "contains = {list:[], item} => (list \\> (false, (item == @ | $), true))",
-    "unique_add = {list:[], (contains(list, item))} => (list)",
-    "unique_add = {list:[], item} => (list + item)",
-    "unique = {list:[]} => (list \\> ([], (unique_add($,@))))",
-    "is_whole = {n:number} => (floor(n) == n)",
-    "sum = {list:[]} => (list \\> (0, ($ + @)))",
-    "min = {a:number, (a<=b):number} => (a)",
-    "min = {_:number, b: number} => (b)",
-    "min = {(len(list) > 0):[]} => (list \\> ((get(list,0)), (?((@ < $), @, $))))",
-    "max = {a:number, (a >= b):number} => (a)",
-    "max = {_:number, b:number} => (b)",
-    "max = {(len(list) > 0):[]} => (list \\> ((get(list,0)), (?((@ > $), @, $))))",
-    "slice = {list:[], from:number} => (list ~> (# >= from))",
-    "in_range = {target:number, (lower <= target):number, (target < higher):number} => true",
-    "in_range = {_:number, _:number, _: number} => false",
-    "slice = {list:[], from:number, to:number} => (list ~> (in_range(#, from, to)))",
-    "head = {(len(list) > 0):[]} => (get(list,0))",
-    "tail = {list:[]} => (slice(list,1))",
+    "contains = {lst:[], item} => (lst \\> (false, (item == @ | $), true))",
+    "unique_add = {lst:[], (contains(lst, item))} => (lst)",
+    "unique_add = {lst:[], item} => (lst + item)",
+    "unique = {lst:[]} => (lst \\> ([], (unique_add($,@))))",
+    "is_whole = {n:#} => (floor(n) == n)",
+    "sum = {lst:[]} => (lst \\> (0, ($ + @)))",
+    "min = {a:#, (a<=b):#} => (a)",
+    "min = {_:#, b: #} => (b)",
+    "min = {(len(lst) > 0):[]} => (lst \\> ((get(lst,0)), (?((@ < $), @, $))))",
+    "max = {a:#, (a >= b):#} => (a)",
+    "max = {_:#, b:#} => (b)",
+    "max = {(len(lst) > 0):[]} => (lst \\> ((get(lst,0)), (?((@ > $), @, $))))",
+    "slice = {lst:[], from:#} => (lst ~> (# >= from))",
+    "in_range = {target:#, (lower <= target):#, (target < higher):#} => true",
+    "in_range = {_:#, _:#, _: #} => false",
+    "slice = {lst:[], from:#, to:#} => (lst ~> (in_range(#, from, to)))",
+    "head = {(len(lst) > 0):[]} => (get(lst,0))",
+    "tail = {lst:[]} => (slice(lst,1))",
     "set = {(unique(entries)):[]}",
     "add = {s:set, item} => (new(set, s + item))",
-    "halve = {list:[]} => ([(slice(list,0,floor(len(list) / 2))), (slice(list, floor(len(list) / 2 )))])",
-    "merge = {[], l2:[]} => (l2)",
-    "merge = {l1:[], []} => (l1)",
-    "merge = {l1:[], ((get(l1,0)) < (get(l2,0))):[]} => ((get(l1,0)) + (merge(tail(l1),l2)))",
-    "merge = {l1:[], l2:[]} => ((get(l2,0)) + (merge(l1,tail(l2))))",
-    "sort = {(len(arr) <= 1):[]} => (arr)",
-    "sort = {arr:[]} => (merge(sort(get(halve(arr),0)), sort(get(halve(arr),1))))",
-    "reverse = {list:[]} => (list -> (get(list, len(list) - # - 1)))",
+    "halve = {lst:[]} => ([(slice(lst,0,floor(len(lst) / 2))), (slice(lst, floor(len(lst) / 2 )))])",
+    "merge = {_:fn, [], l2:[]} => (l2)",
+    "merge = {_:fn, l1:[], []} => (l1)",
+    "merge = {compare:fn, l1:[], ((compare(get(l1,0),get(l2,0))) < 0):[]} => ((get(l1,0)) + (merge(compare,tail(l1),l2)))",
+    "merge = {compare:fn, l1:[], l2:[]} => ((get(l2,0)) + (merge(compare, l1, tail(l2))))",
+    "sort = {(len(lst) <= 1):[], _:fn} => (lst)",
+    "sort = {lst:[], compare:fn} => (merge(compare,sort(get(halve(lst),0),compare), sort(get(halve(lst),1),compare)))",
+    "compare = {n1:#,(n1 < n2):#} => -1",
+    "compare = {n1:#,(n1 > n2):#} => 1",
+    "compare = {_:#,_:#} => 0",
+    "sort = {nums:[#]} => (sort(nums, compare))",
+    "reverse = {lst:[]} => (lst -> (get(lst, len(lst) - # - 1)))",
     "sum = {str:string} => (str \\> (0, ($ + ord(@))))",
     "hash = {str:string, mod:#} => (sum(str) % mod)",
-    "abs = {(a < 0):number} => (a * -1)",
-    "abs = {a:number} => (a)"
+    "abs = {(a < 0):#} => (a * -1)",
+    "abs = {a:#} => (a)"
 ]
 
 export const registerBuiltins = (variables) => {
@@ -707,11 +737,11 @@ const conditionsFromSignature = (signature) => {
         const conditionExpression = condition.value[1];
         conditions.push((argument, variables, morphisms) => {
             variables.assignValue(conditionName.value, argument);
-            try {
-                return evaluate(conditionExpression.value, variables, morphisms, goals.EVALUATE).value;
-            } catch (e) {
+            const result = evaluate(conditionExpression.value, variables, morphisms, goals.EVALUATE);
+            if (result.type.baseName === 'ERROR') {
                 return false;
             }
+            return result.value;
         });
     }
     return conditions;
@@ -787,12 +817,7 @@ const generateCaseFromNative = (functionObject) => {
 
 const newOfType = (t, args, vars, morphisms) => {
     const typeVar = createTypeVar(t);
-    try {
-        return callFunction("new", [typeVar, ...args], vars, morphisms);
-    }
-    catch (e) {
-        return null;
-    }
+    return  callFunction("new", [typeVar, ...args], vars, morphisms);
 }
 
 const argNamesFromFunction = (functionBody) => {

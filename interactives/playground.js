@@ -20,13 +20,9 @@ const interpretInBrowser = (text) => {
     }
     let output;
 
-    try {
-        const result = interpret(text, variables, morphisms, goals.EVALUATE);
-        output = charListToJsString(callFunction('stringify', [result], variables, morphisms));
+    const result = interpret(text, variables, morphisms, goals.EVALUATE);
+    output = charListToJsString(callFunction('stringify', [result], variables, morphisms));
 
-    } catch (e) {
-        output = e;
-    }
     const outputPara = document.createElement("p");
     const outputNode = document.createTextNode(output);
     outputPara.style.color = "white";

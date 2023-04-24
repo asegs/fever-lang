@@ -1,13 +1,13 @@
 import {
+    createError,
     createPatternFromString,
     createTypedList,
-    createTypedTuple,
-    createVar,
+    createTypedTuple, createTypeVar,
+    createVar, isAlias,
     meta,
     primitives, typeAssignableFrom
 } from './types.js'
-import {splitArray, lex} from "./prefixer.js";
-import {ScopedVars} from "./vars.js";
+import {splitArray} from "./prefixer.js";
 import {evaluate, goals, findMissing} from "./interpreter.js";
 
 const everyCharNumeric = (string) => {
@@ -45,6 +45,25 @@ const isSignature = (string) => {
     return string.match(/^{.+}$/g);
 }
 
+const getAsTypeVar = (string) => {
+    for (const prim of Object.values(primitives)) {
+        if (prim.baseName.toLowerCase() === string.toLowerCase()) {
+            return createTypeVar(prim);
+        }
+    }
+
+    for (const m of Object.values(meta)) {
+        if (isAlias(m)) {
+            if (m.alias.toLowerCase() === string.toLowerCase()) {
+                return createTypeVar(m);
+            }
+        } else if (m.baseName.toLowerCase() === string.toLowerCase()) {
+            return createTypeVar(m);
+        }
+    }
+    return null;
+}
+
 
 const parseCollectionToItems = (string) => {
     return splitArray(string.slice(1, string.length - 1));
@@ -68,6 +87,10 @@ export const inferTypeAndValue = (string, vars, morphisms, goal) => {
     }
     if (string === '()') {
         return createVar([], meta.TUPLE);
+    }
+    const asTypeVar = getAsTypeVar(string);
+    if (asTypeVar) {
+        return asTypeVar;
     }
     if (everyCharNumeric(string)) {
         return createVar(Number(string), primitives.NUMBER);
@@ -130,7 +153,7 @@ export const inferTypeAndValue = (string, vars, morphisms, goal) => {
     }
 
     if (goal === goals.EVALUATE) {
-        throw "No variable named " + string;
+        return createError("No variable named " + string);
     } else {
         return {
             "type": "VARIABLE",

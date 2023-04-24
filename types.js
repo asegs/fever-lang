@@ -40,6 +40,7 @@ export const primitives = {
     VOID: createType("VOID"),
     EXPRESSION: createType("EXPRESSION", [],  false),
     TYPE: createType("TYPE", [],  false),
+    ERROR: createType("ERROR", [], false)
 }
 
 export const createVar = (value, type) => {
@@ -132,6 +133,10 @@ export const createTypeVar = (type) => {
     return createVar(type, primitives.TYPE);
 }
 
+export const createError = (message) => {
+    return createVar(message, primitives.ERROR);
+}
+
 export const createPattern = (condition, type) => {
     return createVar([condition, type], meta.PATTERN);
 }
@@ -159,6 +164,10 @@ export const inferTypeFromString = (rawString) => {
 
     if (string === "#") {
         return primitives.NUMBER;
+    }
+
+    if (string === 'fn') {
+        return meta.FUNCTION
     }
 
     if (string[0] === '[') {

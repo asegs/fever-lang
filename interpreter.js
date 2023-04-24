@@ -1,9 +1,10 @@
 import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
-import {typeSatisfaction, createVar, isAlias} from "./types.js";
+import {typeSatisfaction, createVar, isAlias, primitives, createError} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
 import {builtins, registerBuiltins, standardLib} from "./builtins.js";
+import {file} from "./interactives/file.js";
 
 export const goals = {
     EVALUATE: Symbol("EVALUATE"),
@@ -37,19 +38,28 @@ const splitIntoNameAndBody = (text) => {
 export const callFunction = (name, args, variables, morphisms) => {
     const named = variables.getOrNull(name);
     if (!named) {
-        throw "Unknown function " + name + " invoked."
+        return createError("Unknown function " + name + " invoked.");
     }
 
     if (!isAlias(named.type) || named.type.alias !== "FUNCTION") {
         return named;
     }
 
+    const errors = args.filter(arg => arg.type.baseName === 'ERROR');
+
+    if (errors.length > 0) {
+        if (name !== 'show') {
+            return errors[0];
+        }
+    }
+
     const func = named['invocations'];
     const candidates = func.filter(f => f.arity === args.length);
 
     if (candidates.length === 0) {
-        throw "No definition of " + name + " that takes " + args.length + " arguments";
+        return createError("No definition of " + name + " that takes " + args.length + " arguments");
     }
+
     let bestScore = 0;
     let bestCandidate = undefined;
     for (const candidateFunction of candidates) {
@@ -88,14 +98,13 @@ export const callFunction = (name, args, variables, morphisms) => {
             const tupleSize = args[0].value.length;
             //All tuples are the same size
             if (args.every(arg => arg.value.length === tupleSize)) {
-                try {
-                    const result = [];
-                    for (let i = 0 ; i < tupleSize ; i ++ ) {
-                        result.push(callFunction(name, args.map(arg => arg.value[i]), variables, morphisms));
-                    }
-                    return createVar(result,args[0].type)
-                } catch (e) {
-                    //It was worth a shot...
+                const result = [];
+                for (let i = 0 ; i < tupleSize ; i ++ ) {
+                    result.push(callFunction(name, args.map(arg => arg.value[i]), variables, morphisms));
+                }
+
+                if (result.every(elem => elem.type.baseName !== 'ERROR')) {
+                    return createVar(result, args[0].type);
                 }
             }
         }
@@ -103,8 +112,9 @@ export const callFunction = (name, args, variables, morphisms) => {
 
 
     if (bestScore <= 0) {
-        throw "No satisfactory match for " + name + ".";
+        return createError("No satisfactory match for " + name + ".");
     }
+
     return bestCandidate.function(args, variables, morphisms);
 }
 
@@ -159,9 +169,8 @@ export const instance = () => {
 
     registerBuiltins(variables);
 
-    standardLib.forEach(line => {
-        interpret(line, variables, morphisms, goals.EVALUATE);
-    });
+    file('../examples/lib.fv', variables, morphisms);
+
 
     return [variables, morphisms];
 
