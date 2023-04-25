@@ -670,6 +670,15 @@ export const builtins = {
                 return createVar(variables.scopes.length, primitives.NUMBER)
             }
         )
+    ],
+    'time': [
+        newFunction(
+            1,
+            [primitives.NUMBER],
+            ([diff]) => {
+                return createVar(Date.now() - diff.value, primitives.NUMBER);
+            }
+        )
     ]
 }
 
