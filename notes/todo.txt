@@ -31,3 +31,4 @@
 - truthy
 - type ending with s is list?  like set vs. sets...
 - most specific shared type for arrays
+- single list types like set still return first by keyname instead of whole list
