@@ -192,7 +192,7 @@ export const builtins = {
 
                 if (isAlias(res.type)) {
                     const created = newOfType(res.type, [res], variables, morphisms);
-                    if (created) {
+                    if (created.type.baseName !== 'ERROR') {
                         return created;
                     }
                 }
@@ -361,7 +361,7 @@ export const builtins = {
                 const size = types.length;
                 const isListAlias = size === 1 && types[0].baseName === "LIST";
                 const newType = isListAlias ? createTypedList(types[0].types[0], realName) :createTypedTuple(types, realName);
-                meta[realName] = newType;
+                meta[realName.toUpperCase()] = newType;
 
                 const permutations = [];
 
@@ -384,8 +384,6 @@ export const builtins = {
                             }
                         );
                     }
-
-                    //Create mutating members
 
 
                     //Register getters
@@ -826,7 +824,7 @@ const generateCaseFromNative = (functionObject) => {
 
 const newOfType = (t, args, vars, morphisms) => {
     const typeVar = createTypeVar(t);
-    return  callFunction("new", [typeVar, ...args], vars, morphisms);
+    return callFunction("new", [typeVar, ...args], vars, morphisms);
 }
 
 const argNamesFromFunction = (functionBody) => {
@@ -965,7 +963,7 @@ const namedMap = (list, action, variables, morphisms, [element, index, intermedi
 
     if (isAlias(list.type)) {
         const created = newOfType(result.type, [result], variables, morphisms);
-        if (created) {
+        if (created.type.baseName !== 'ERROR') {
             return created;
         }
     }
@@ -1008,7 +1006,7 @@ const namedFilter = (list, action, variables, morphisms, [element, index, interm
 
     if (isAlias(list.type)) {
         const created = newOfType(result.type, [result], variables, morphisms);
-        if (created) {
+        if (created.type.baseName !== 'ERROR') {
             return created;
         }
     }

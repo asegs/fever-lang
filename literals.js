@@ -46,21 +46,15 @@ const isSignature = (string) => {
 }
 
 const getAsTypeVar = (string) => {
-    for (const prim of Object.values(primitives)) {
-        if (prim.baseName.toLowerCase() === string.toLowerCase()) {
-            return createTypeVar(prim);
-        }
+    const tName = string.toUpperCase();
+    if (tName in primitives) {
+        return createTypeVar(primitives[tName]);
     }
 
-    for (const m of Object.values(meta)) {
-        if (isAlias(m)) {
-            if (m.alias.toLowerCase() === string.toLowerCase()) {
-                return createTypeVar(m);
-            }
-        } else if (m.baseName.toLowerCase() === string.toLowerCase()) {
-            return createTypeVar(m);
-        }
+    if (tName in meta) {
+        return createTypeVar(meta[tName]);
     }
+
     return null;
 }
 
