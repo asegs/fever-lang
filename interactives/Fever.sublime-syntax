@@ -28,7 +28,7 @@ contexts:
     - match: '(\b[a-z][a-z0-9_]*)'
       captures:
         0: keyword.fever
-    - match: '(@|#|^|\$)'
+    - match: '(@|#|^|\$|_)'
       captures:
         0: variable.other.constant.fever
     - match: '(\b\d+)'
