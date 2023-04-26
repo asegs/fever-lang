@@ -119,8 +119,6 @@ export const typeSatisfaction = (child, parent) => {
     //Tuple(String, Number, Character) <-> Tuple(String, Character, Character) => 0.8333 (assuming 1 step morphism from number to character)
 }
 
-
-
 export const createTypedList = (ofType, name) => {
     return createType("LIST", [ofType], true, name);
 }
@@ -162,12 +160,8 @@ export const inferTypeFromString = (rawString) => {
         }
     }
 
-    if (string === "#") {
-        return primitives.NUMBER;
-    }
-
-    if (string === 'fn') {
-        return meta.FUNCTION
+    if (string in shorthands) {
+        return shorthands[string];
     }
 
     if (string[0] === '[') {
@@ -277,6 +271,10 @@ export const meta = {
     TUPLE: createTypedTuple([]),
 }
 
+export const shorthands = {
+    '#': primitives.NUMBER,
+    'fn': meta.FUNCTION
+}
 export const recursiveToString = (v) => {
     if (Array.isArray(v.value)) {
         if (v.type.types[0] === primitives.CHARACTER) {

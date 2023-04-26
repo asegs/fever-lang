@@ -1,6 +1,7 @@
 import {createInterface} from 'readline';
 import {builtins} from "../builtins.js";
 import {callFunction, goals, interpret} from "../interpreter.js";
+import {primitives, meta, shorthands} from "../types.js";
 
 let vars;
 let morphisms;
@@ -33,13 +34,13 @@ const getFromLeft = (line) => {
     for (let i = line.length - 1 ; i >= 0 ; i -- ) {
         const char = line[i];
         if (breakingChars.includes(char)) {
-            return terminator;
+            return [char, terminator];
         }
 
         terminator = char + terminator;
     }
 
-    return terminator;
+    return ['', terminator];
 }
 
 const completeLine = (line, partial, match) => {
@@ -47,8 +48,15 @@ const completeLine = (line, partial, match) => {
 }
 
 const complete = (line) => {
-    const varNames = Object.keys(vars.flattenToMap());
-    const token = getFromLeft(line);
+    const [breaker, token] = getFromLeft(line);
+    let varNames;
+    if (breaker === ':') {
+        //Options include types
+        varNames = Object.keys(primitives).concat(Object.keys(meta)).concat(Object.keys(shorthands)).map(name => name.toLowerCase());
+    } else {
+        //Normal values
+        varNames = Object.keys(vars.flattenToMap());
+    }
     const options = varNames.filter(v => v.startsWith(token));
     return [options, token];
 }
