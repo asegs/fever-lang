@@ -50,6 +50,5 @@ const complete = (line) => {
     const varNames = Object.keys(vars.flattenToMap());
     const token = getFromLeft(line);
     const options = varNames.filter(v => v.startsWith(token));
-    const completions = options.map(option => completeLine(line, token, option));
-    return [options.length > 1 ? options : completions, line];
+    return [options, token];
 }
