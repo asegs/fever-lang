@@ -18,15 +18,15 @@ export const patternWeights = {
 
 
 
-export const createType = (baseName, types, meta, name) => {
+export const createType = (baseName, types, meta, alias) => {
     const type = {
         'baseName': baseName,
         'types': types,
         'meta': meta
     };
 
-    if (name) {
-        type['alias'] = name;
+    if (alias) {
+        type['alias'] = alias;
     }
 
     return type;
@@ -144,7 +144,7 @@ export const createCondition = (name, expr, specificity) => {
     return createVar([name, expr, specificity], meta.CONDITION);
 }
 
-export const inferTypeFromString = (rawString) => {
+export const inferTypeFromString = (rawString, variables) => {
     const string = rawString.trim();
     for (const [, prim] of Object.entries(primitives)) {
         if (string.toLowerCase() === prim.baseName.toLowerCase()) {
@@ -166,13 +166,27 @@ export const inferTypeFromString = (rawString) => {
     }
 
     if (string[0] === '[') {
-        const internalType = inferTypeFromString(string.slice(1, string.length - 1));
+        const internalType = inferTypeFromString(string.slice(1, string.length - 1), variables);
         return createTypedList(internalType);
     }
     if (string[0] === '(') {
-        const types = splitArray(string.slice(1, string.length - 1)).map(e => inferTypeFromString(e));
+        const types = splitArray(string.slice(1, string.length - 1)).map(e => inferTypeFromString(e, variables));
         return createTypedTuple(types);
     }
+
+    const typeVar = variables.getOrNull(string);
+    if (typeVar && typeVar.type.baseName === 'TYPE') {
+        return typeVar.value;
+    }
+
+    if (string.endsWith('s') && string.length > 1) {
+        const singular = string.slice(0, string.length -1);
+        const newType = inferTypeFromString(singular, variables);
+        if (newType.baseName !== 'ANY') {
+            return createTypedList(newType);
+        }
+    }
+
     return primitives.ANY;
 }
 
@@ -245,7 +259,7 @@ export const inferConditionFromString = (rawString, vars, morphisms, takenVars) 
 
 export const createPatternFromString = (string, vars, morphisms, takenVars) => {
     const conditionAndType = splitGeneral(string, ':');
-    let type = conditionAndType.length === 1 ? primitives.ANY : inferTypeFromString(conditionAndType[1]);
+    let type = conditionAndType.length === 1 ? primitives.ANY : inferTypeFromString(conditionAndType[1], vars);
     const [condition, inferredType, namedVar] = inferConditionFromString(conditionAndType[0], vars, morphisms, takenVars);
     if (type === primitives.ANY) {
         type = inferredType;

@@ -1,5 +1,5 @@
 import {
-    charListToJsString, createError,
+    charListToJsString, createError, createType,
     createTypedList,
     createTypedTuple, createTypeVar,
     createVar, isAlias,
@@ -360,6 +360,10 @@ export const builtins = {
                 const types = typesFromSignature(signature);
                 const size = types.length;
                 const isListAlias = size === 1 && types[0].baseName === "LIST";
+                let newInnerType;
+                if (isListAlias) {
+                    newInnerType = createType("LIST", types[0].types, true);
+                }
                 const newType = isListAlias ? createTypedList(types[0].types[0], realName) :createTypedTuple(types, realName);
                 meta[realName.toUpperCase()] = newType;
 
@@ -394,7 +398,7 @@ export const builtins = {
                             1,
                             [newType],
                             ([ofType]) => {
-                                return ofType.value[i];
+                                return isListAlias ? createVar(ofType.value, newInnerType) : ofType.value[i];
                             }
                         )
                     );
