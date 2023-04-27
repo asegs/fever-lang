@@ -1,3 +1,5 @@
+import {typeToString} from "./builtins.js";
+
 export class Morphisms {
     constructor() {
         this.table = {};
@@ -5,16 +7,14 @@ export class Morphisms {
     }
 
     //Make from and true into string
-    registerMorphism (morph)  {
-        const signature = morph.value.signature;
-        const from = signature.conditions[0];
-        const to = signature.returned.value;
-
-        if (!(from in this.table)) {
-            this.table[from] = {}
+    registerMorphism (fromType, toType, func)  {
+        const fromName = typeToString(fromType);
+        const toName = typeToString(toType);
+        if (!(fromName in this.table)) {
+            this.table[fromName] = {}
         }
 
-        this.table[from][to] = morph;
+        this.table[fromName][toName] = func;
     }
 
     //Just track the type path, no need to generate composed functions.
@@ -26,51 +26,38 @@ export class Morphisms {
     buildGraph () {
 
     }
-}
 
-const example = {
-    "BOOLEAN": {
-        "INTEGER": "conv",
-        "STRING": "conv",
-        "LIST(BOOLEAN)": "conv",
-        "CHARACTER": "conv"
-    },
-    "INTEGER": {
-        "BOOLEAN": "conv",
-        "STRING": "conv",
-        "LIST(INTEGER)": "conv",
-        "CHARACTER": "conv"
-    }
-}
+    setDiff (a, b) {
+        const c = new Set();
+        a.forEach(e => c.add(e));
+        b.forEach(e => c.delete(e));
 
-const setDiff = (a, b) => {
-    const c = new Set();
-    a.forEach(e => c.add(e));
-    b.forEach(e => c.delete(e));
-
-    return c;
-}
-
-const pathBetween = (start, end, m) => {
-    return pathBetweenRec(end, m, [start]);
-}
-
-const pathBetweenRec = (end, m, path) => {
-    const pathEnd = path[path.length - 1];
-    const keys = new Set((pathEnd in m) ? Object.keys(m[pathEnd]) : []);
-    if (keys.has(end)) {
-        return [...path, end];
+        return c;
     }
 
-    const freshKeys = setDiff(keys, new Set(path));
-
-    for (const key of freshKeys) {
-        const result = pathBetweenRec(end, m, [...path, key]);
-        if (result.length > 0) {
-            return result;
+    pathBetweenRec (end, m, path) {
+        const pathEnd = path[path.length - 1];
+        const keys = new Set((pathEnd in m) ? Object.keys(m[pathEnd]) : []);
+        if (keys.has(end)) {
+            return [...path, end];
         }
+
+        const freshKeys = setDiff(keys, new Set(path));
+
+        for (const key of freshKeys) {
+            const result = this.pathBetweenRec(end, m, [...path, key]);
+            if (result.length > 0) {
+                return result;
+            }
+        }
+
+        return [];
     }
 
-    return [];
+    pathBetween (start, end) {
+        return this.pathBetweenRec(typeToString(end), this.table, [typeToString(start)]);
+    }
+
+
 }
 

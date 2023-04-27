@@ -1,5 +1,4 @@
 -add functions to function scope/call functions from var table?
--support return keyword in signature
 -mark expression as not to be evaluated
 -functions called during instantiation? because of stupid expression evaluation
 -double parens required for nested function calls like: f = {n:number} => ((f(n-1)) + (f(n-2)))
@@ -32,3 +31,4 @@
 - type ending with s is list?  like set vs. sets...
 - most specific shared type for arrays
 - single list types like set still return first by keyname instead of whole list
+- maybe conditions in patterns can have failure messages?

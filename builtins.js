@@ -7,7 +7,7 @@ import {
     primitives,
     recursiveToString, typeAssignableFrom, typeWeights
 } from './types.js'
-import {callFunction, evaluate, goals} from "./interpreter.js";
+import {callFunction, callFunctionByReference, evaluate, goals} from "./interpreter.js";
 import {feverStringFromJsString} from "./literals.js";
 
 const newFunction = (arity, types, functionOperation, args) => {
@@ -677,6 +677,41 @@ export const builtins = {
                 return createVar(Date.now() - diff.value, primitives.NUMBER);
             }
         )
+    ],
+    'morph': [
+        newFunction(
+            2,
+            [meta.FUNCTION, primitives.TYPE],
+            ([transformation, toType], variables, morphisms) => {
+                const fromType = transformation.invocations[0].types[0];
+                morphisms.registerMorphism(fromType, toType.value, transformation);
+                return createVar(true, primitives.BOOLEAN);
+            },
+            {
+                'conditions': [
+                    (transformation) => {
+                        return transformation.invocations.every(invocation => invocation.types.length === 1);
+                    },
+                    () => true
+                ],
+                'specificities': [1, 1]
+            }
+        )
+    ],
+    'convert': [
+        newFunction(
+            2,
+            [primitives.ANY, primitives.TYPE],
+            ([value, toType], variables, morphisms) => {
+                let intermediateValue = value;
+                const typePath = morphisms.pathBetween(value.type, toType.value);
+                for (let i = 0 ; i < typePath.length - 1 ; i ++ ) {
+                    const transformation = morphisms.table[typePath[i]][typePath[i + 1]];
+                    intermediateValue = callFunctionByReference(transformation, [intermediateValue], variables, morphisms, 'morph_transform');
+                }
+                return intermediateValue;
+            }
+        )
     ]
 }
 
@@ -923,7 +958,11 @@ const simpleTypeSpec = (t) => {
     return typeWeights.EQUIVALENT;
 }
 
-const typeToString = (t,contents) => {
+export const typeToString = (t) => {
+    return typeToStringRec(t, '');
+}
+
+const typeToStringRec = (t,contents) => {
     if (!t.meta) {
         return contents + t.baseName.toLowerCase();
     }
@@ -937,7 +976,7 @@ const typeToString = (t,contents) => {
     const types = t.types;
     contents += open;
     for (let i = 0 ; i < types.length ; i ++ ) {
-        contents = typeToString(types[i],contents);
+        contents = typeToStringRec(types[i],contents);
         if (i < types.length - 1) {
             contents += ',';
         }

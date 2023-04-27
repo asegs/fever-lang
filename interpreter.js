@@ -35,16 +35,7 @@ const splitIntoNameAndBody = (text) => {
     return [text.slice(0, firstParen), text.slice(firstParen)]
 }
 
-export const callFunction = (name, args, variables, morphisms) => {
-    const named = variables.getOrNull(name);
-    if (!named) {
-        return createError("Unknown function " + name + " invoked.");
-    }
-
-    if (!isAlias(named.type) || named.type.alias !== "FUNCTION") {
-        return named;
-    }
-
+export const callFunctionByReference = (ref, args, variables, morphisms, name) => {
     const errors = args.filter(arg => arg.type.baseName === 'ERROR');
 
     if (errors.length > 0) {
@@ -53,7 +44,7 @@ export const callFunction = (name, args, variables, morphisms) => {
         }
     }
 
-    const func = named['invocations'];
+    const func = ref['invocations'];
     const candidates = func.filter(f => f.arity === args.length);
 
     if (candidates.length === 0) {
@@ -100,7 +91,7 @@ export const callFunction = (name, args, variables, morphisms) => {
             if (args.every(arg => arg.value.length === tupleSize)) {
                 const result = [];
                 for (let i = 0 ; i < tupleSize ; i ++ ) {
-                    result.push(callFunction(name, args.map(arg => arg.value[i]), variables, morphisms));
+                    result.push(callFunctionByReference(ref, args.map(arg => arg.value[i]), variables, morphisms));
                 }
 
                 if (result.every(elem => elem.type.baseName !== 'ERROR')) {
@@ -116,6 +107,22 @@ export const callFunction = (name, args, variables, morphisms) => {
     }
 
     return bestCandidate.function(args, variables, morphisms);
+}
+
+export const callFunction = (name, args, variables, morphisms) => {
+
+    const named = variables.getOrNull(name);
+    if (!named) {
+        return createError("Unknown function " + name + " invoked.");
+    }
+
+    if (!isAlias(named.type) || named.type.alias !== "FUNCTION") {
+        return named;
+    }
+
+    return callFunctionByReference(named, args, variables, morphisms, name);
+
+
 }
 
 export const findMissing = (args) => {
