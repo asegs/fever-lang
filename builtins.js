@@ -700,6 +700,24 @@ export const builtins = {
                 ],
                 'specificities': [1, 1]
             }
+        ),
+        newFunction(
+            3,
+            [meta.FUNCTION, primitives.TYPE, primitives.TYPE],
+            ([transformation, fromType, toType], variables, morphisms) => {
+                morphisms.registerMorphism(fromType.value, toType.value, transformation);
+                return createVar(true, primitives.BOOLEAN);
+            },
+            {
+                'conditions': [
+                    (transformation) => {
+                        return transformation.invocations.every(invocation => invocation.types.length === 1);
+                    },
+                    () => true,
+                    () => true
+                ],
+                'specificities': [1, 1, 1]
+            }
         )
     ],
     'convert': [
