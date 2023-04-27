@@ -703,16 +703,20 @@ export const builtins = {
             2,
             [primitives.ANY, primitives.TYPE],
             ([value, toType], variables, morphisms) => {
-                let intermediateValue = value;
-                const typePath = morphisms.pathBetween(value.type, toType.value);
-                for (let i = 0 ; i < typePath.length - 1 ; i ++ ) {
-                    const transformation = morphisms.table[typePath[i]][typePath[i + 1]];
-                    intermediateValue = callFunctionByReference(transformation, [intermediateValue], variables, morphisms, 'morph_transform');
-                }
-                return intermediateValue;
+                return morphTypes(value, toType, variables, morphisms);
             }
         )
     ]
+}
+
+export const morphTypes = (value, toType, variables, morphisms) => {
+    let intermediateValue = value;
+    const typePath = morphisms.pathBetween(value.type, toType.value);
+    for (let i = 0 ; i < typePath.length - 1 ; i ++ ) {
+        const transformation = morphisms.table[typePath[i]][typePath[i + 1]];
+        intermediateValue = callFunctionByReference(transformation, [intermediateValue], variables, morphisms, 'morph_transform');
+    }
+    return intermediateValue;
 }
 
 export const standardLib = [

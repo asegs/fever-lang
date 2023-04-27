@@ -32,3 +32,6 @@
 - most specific shared type for arrays
 - single list types like set still return first by keyname instead of whole list
 - maybe conditions in patterns can have failure messages?
+- recursively find morphisms instead of at top level
+- if type unknown, see if it exists in variables table
+- make morphisms take a from and to type so that functions that handle multiple different types can work, to stringify

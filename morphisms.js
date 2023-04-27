@@ -42,7 +42,7 @@ export class Morphisms {
             return [...path, end];
         }
 
-        const freshKeys = setDiff(keys, new Set(path));
+        const freshKeys = this.setDiff(keys, new Set(path));
 
         for (const key of freshKeys) {
             const result = this.pathBetweenRec(end, m, [...path, key]);
@@ -57,7 +57,4 @@ export class Morphisms {
     pathBetween (start, end) {
         return this.pathBetweenRec(typeToString(end), this.table, [typeToString(start)]);
     }
-
-
 }
-

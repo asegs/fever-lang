@@ -75,6 +75,7 @@ export const typeAssignableFrom = (child, parent) => {
     return child.types.every((item, index) => typeAssignableFrom(item, parent.types[index]));
 }
 
+//Track depth param
 export const typeSatisfaction = (child, parent) => {
     if (parent.baseName === "ANY") {
         return typeWeights.ANY;
