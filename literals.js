@@ -3,7 +3,7 @@ import {
     createPatternFromString,
     createTypedList,
     createTypedTuple, createTypeVar,
-    createVar, isAlias,
+    createVar, inferTypeFromString, isAlias,
     meta,
     primitives, typeAssignableFrom
 } from './types.js'
@@ -144,6 +144,22 @@ export const inferTypeAndValue = (string, vars, morphisms, goal) => {
             signatureItems.push(pattern);
         }
         return createVar(signatureItems, meta.SIGNATURE);
+    }
+
+    if (string.startsWith("list[") && string.endsWith("]")) {
+        const subTypeString = string.slice(4);
+        const subType = inferTypeFromString(subTypeString);
+        if (subType.baseName !== 'ANY') {
+            return createTypeVar(subType);
+        }
+    }
+
+    if (string.startsWith("tuple[") && string.endsWith("]")) {
+        const subTypeString = '(' + string.slice(6,string.length - 1) + ')';
+        const subType = inferTypeFromString(subTypeString);
+        if (subType.baseName !== 'ANY') {
+            return createTypeVar(subType);
+        }
     }
 
     if (goal === goals.EVALUATE) {
