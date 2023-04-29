@@ -63,6 +63,8 @@ const parseCollectionToItems = (string) => {
     return splitArray(string.slice(1, string.length - 1));
 }
 
+const recursiveTypeMatch = new RegExp(/^(list|tuple)\[(.*)]$/m);
+
 export const inferTypeAndValue = (string, vars, morphisms, goal) => {
     if (goal === goals.MISSING) {
         if (vars.hasVariableInScope(string)) {
@@ -146,20 +148,18 @@ export const inferTypeAndValue = (string, vars, morphisms, goal) => {
         return createVar(signatureItems, meta.SIGNATURE);
     }
 
-    if (string.startsWith("list[") && string.endsWith("]")) {
-        const subTypeString = string.slice(4);
-        const subType = inferTypeFromString(subTypeString);
-        if (subType.baseName !== 'ANY') {
-            return createTypeVar(subType);
-        }
-    }
+    const match = recursiveTypeMatch.exec(string);
+    if (match) {
+        const baseTypeString = match[1];
+        const subTypeString = match[2];
 
-    if (string.startsWith("tuple[") && string.endsWith("]")) {
-        const subTypeString = '(' + string.slice(6,string.length - 1) + ')';
-        const subType = inferTypeFromString(subTypeString);
-        if (subType.baseName !== 'ANY') {
-            return createTypeVar(subType);
-        }
+       const returnType = (baseTypeString === 'list') ?
+           inferTypeFromString('[' + subTypeString + ']', vars) :
+           inferTypeFromString('(' + subTypeString + ')', vars);
+
+       if (returnType.baseName !== 'ANY') {
+           return createTypeVar(returnType);
+       }
     }
 
     if (goal === goals.EVALUATE) {
