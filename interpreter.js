@@ -1,6 +1,6 @@
 import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
-import {typeSatisfaction, createVar, isAlias, primitives, createError, createTypeVar} from "./types.js";
+import {typeSatisfaction, createVar, isAlias, primitives, createError, createTypeVar, isGeneric} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
 import {builtins, morphTypes, registerBuiltins, standardLib} from "./builtins.js";
@@ -35,6 +35,18 @@ const splitIntoNameAndBody = (text) => {
     return [text.slice(0, firstParen), text.slice(firstParen)]
 }
 
+const assignGenericTableToTypeVars = (vars, genericTable) => {
+    for (const genericName of Object.keys(genericTable)) {
+        vars.assignValue(genericName, createTypeVar(genericTable[genericName]));
+    }
+}
+
+const unassignGenericTableToTypeVars = (vars, genericTable) => {
+    for (const genericName of Object.keys(genericTable)) {
+        vars.deleteValue(genericName);
+    }
+}
+
 export const callFunctionByReference = (ref, args, variables, morphisms, name) => {
     const errors = args.filter(arg => arg.type.baseName === 'ERROR');
 
@@ -54,13 +66,24 @@ export const callFunctionByReference = (ref, args, variables, morphisms, name) =
     let bestScore = 0;
     let bestCandidate = undefined;
     let modifiedArgs = args;
+    let usedGenericTable = {};
     for (const candidateFunction of candidates) {
         //For the conditions analysis
         variables.enterScope();
         const tempArgs = [...args];
+        const genericTable = {};
         let score = 0;
         for (let i = 0 ; i < candidateFunction.types.length ; i ++ ) {
-            const type = candidateFunction.types[i];
+            let type = candidateFunction.types[i];
+            if (isGeneric(type)) {
+                const genericName = type.generic;
+                if (genericName in genericTable) {
+                    type = genericTable[genericName];
+                } else {
+                    genericTable[genericName] = args[i].type;
+                    variables.assignValue(genericName, genericTable[genericName]);
+                }
+            }
             const condition = candidateFunction.conditions[i];
             const specificity = 'specificities' in candidateFunction ? candidateFunction.specificities[i] : 1;
             let typeScore = typeSatisfaction(args[i].type, type);
@@ -87,6 +110,7 @@ export const callFunctionByReference = (ref, args, variables, morphisms, name) =
             bestScore = score;
             bestCandidate = candidateFunction;
             modifiedArgs = tempArgs;
+            usedGenericTable = genericTable;
         }
         variables.exitScope();
     }
@@ -100,9 +124,11 @@ export const callFunctionByReference = (ref, args, variables, morphisms, name) =
             //All tuples are the same size
             if (modifiedArgs.every(arg => arg.value.length === tupleSize)) {
                 const result = [];
+                assignGenericTableToTypeVars(variables, usedGenericTable);
                 for (let i = 0 ; i < tupleSize ; i ++ ) {
                     result.push(callFunctionByReference(ref, modifiedArgs.map(arg => arg.value[i]), variables, morphisms));
                 }
+                unassignGenericTableToTypeVars(variables, usedGenericTable);
 
                 if (result.every(elem => elem.type.baseName !== 'ERROR')) {
                     return createVar(result, args[0].type);
@@ -116,7 +142,11 @@ export const callFunctionByReference = (ref, args, variables, morphisms, name) =
         return createError("No satisfactory match for " + name + ".");
     }
 
-    return bestCandidate.function(modifiedArgs, variables, morphisms);
+    assignGenericTableToTypeVars(variables, usedGenericTable);
+    const result = bestCandidate.function(modifiedArgs, variables, morphisms);
+    unassignGenericTableToTypeVars(variables, usedGenericTable);
+
+    return result;
 }
 
 export const callFunction = (name, args, variables, morphisms) => {

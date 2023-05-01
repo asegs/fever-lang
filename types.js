@@ -132,6 +132,10 @@ export const createTypeVar = (type) => {
     return createVar(type, primitives.TYPE);
 }
 
+export const createGeneric = (type, name) => {
+    return {...type, 'generic': name};
+}
+
 export const createError = (message) => {
     return createVar(message, primitives.ERROR);
 }
@@ -186,6 +190,8 @@ export const inferTypeFromString = (rawString, variables) => {
             return createTypedList(newType);
         }
     }
+
+    return createGeneric(primitives.ANY, string);
 
     return primitives.ANY;
 }
@@ -313,3 +319,9 @@ export const charListToJsString = (v) => {
 export const isAlias = (t) => {
     return 'alias' in t;
 }
+
+export const isGeneric = (t) => {
+    return 'generic' in t;
+}
+
+//Create function that given a type fills in a generic value for a generic so we don't have to search every time
