@@ -71,22 +71,14 @@ export const callFunctionByReference = (ref, args, variables, morphisms, name) =
         //For the conditions analysis
         variables.enterScope();
         const tempArgs = [...args];
-        const genericTable = {};
+        let genericTable = {};
         let score = 0;
         for (let i = 0 ; i < candidateFunction.types.length ; i ++ ) {
             let type = candidateFunction.types[i];
-            if (isGeneric(type)) {
-                const genericName = type.generic;
-                if (genericName in genericTable) {
-                    type = genericTable[genericName];
-                } else {
-                    genericTable[genericName] = args[i].type;
-                    variables.assignValue(genericName, genericTable[genericName]);
-                }
-            }
             const condition = candidateFunction.conditions[i];
             const specificity = 'specificities' in candidateFunction ? candidateFunction.specificities[i] : 1;
-            let typeScore = typeSatisfaction(args[i].type, type);
+            let [typeScore, gt] = typeSatisfaction(args[i].type, type,genericTable);
+            genericTable = {...genericTable, ...gt};
             if (typeScore === 0) {
                 //Try to find a morphism path
                 const path = morphisms.pathBetween(args[i].type, type);

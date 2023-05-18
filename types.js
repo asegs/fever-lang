@@ -6,7 +6,8 @@ export const typeWeights = {
     ANY: 0.5,
     BASE_TUPLE: 0.75,
     NOMINAL: 1.1,
-    EQUIVALENT: 1
+    EQUIVALENT: 1,
+    GENERIC: 1
 }
 
 export const patternWeights = {
@@ -75,41 +76,55 @@ export const typeAssignableFrom = (child, parent) => {
     return child.types.every((item, index) => typeAssignableFrom(item, parent.types[index]));
 }
 
+
 //Track depth param
-export const typeSatisfaction = (child, parent) => {
+export const typeSatisfaction = (child, parent, genericTable) => {
     if (parent.baseName === "ANY") {
-        return typeWeights.ANY;
+
+        if (isGeneric(parent)) {
+            //We are either matching against a known type
+            if (parent.generic in genericTable) {
+                return typeSatisfaction(child, genericTable[parent.generic], genericTable);
+            }
+
+            //Or we just encountered some generic for the first time
+            genericTable[parent.generic] = child;
+            return [typeWeights.GENERIC, genericTable];
+        }
+
+        return [typeWeights.ANY, genericTable];
     }
 
     if (isAlias(parent)) {
         if (isAlias(child)) {
             if (child['alias'] === parent['alias']) {
-                return typeWeights.NOMINAL;
+                return [typeWeights.NOMINAL, genericTable];
             }
         }
-        return 0;
+        return [0, genericTable];
     }
 
     if (!child.meta && !parent.meta) {
-        return (child.baseName === parent.baseName) ? typeWeights.NOMINAL : 0;
+        return [((child.baseName === parent.baseName) ? typeWeights.NOMINAL : 0), genericTable];
     }
 
     if (child.types.length !== parent.types.length) {
-        return (parent.baseName === "TUPLE" && parent.types.length === 0) ? typeWeights.BASE_TUPLE : 0;
+        return [((parent.baseName === "TUPLE" && parent.types.length === 0) ? typeWeights.BASE_TUPLE : 0), genericTable];
     }
 
     let combinedScore = 0;
 
     for (let i = 0 ; i < child.types.length ; i ++ ) {
-        const satisfaction = typeSatisfaction(child.types[i], parent.types[i]);
+        const [satisfaction, gt] = typeSatisfaction(child.types[i], parent.types[i], genericTable);
         if (satisfaction === 0) {
-            return 0;
+            return [0, genericTable];
         }
 
         combinedScore += satisfaction;
+        genericTable = {...genericTable, ...gt};
     }
 
-    return combinedScore / child.types.length;
+    return [combinedScore / child.types.length, genericTable];
     //Exact match is 1
     //Same base type is something
     //Handle [String, String, Int] never working with [String, String, String] (aside from morphisms)
@@ -192,8 +207,6 @@ export const inferTypeFromString = (rawString, variables) => {
     }
 
     return createGeneric(primitives.ANY, string);
-
-    return primitives.ANY;
 }
 
 /**
@@ -324,4 +337,3 @@ export const isGeneric = (t) => {
     return 'generic' in t;
 }
 
-//Create function that given a type fills in a generic value for a generic so we don't have to search every time

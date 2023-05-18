@@ -1,0 +1,16 @@
+There are two types of generics here
+
+f = {x:T, y:T} => ...
+
+and
+
+f = {x:(T,T)} => ...
+
+Cases:
+f = {x:T, xs: [T]}
+f = {x:(T,S), y:S}
+
+Matching can assign n generics, that happens in the type satisfaction function
+This should return a pair of (satisfaction:#, generics:[])
+
+These generics should be persisted between arguments but not cases unless the case is winning
