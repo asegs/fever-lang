@@ -77,7 +77,7 @@ export const callFunctionByReference = (ref, args, variables, morphisms, name) =
             let type = candidateFunction.types[i];
             const condition = candidateFunction.conditions[i];
             const specificity = 'specificities' in candidateFunction ? candidateFunction.specificities[i] : 1;
-            let [typeScore, gt] = typeSatisfaction(args[i].type, type,genericTable);
+            let [typeScore, gt] = typeSatisfaction(args[i].type, type,genericTable, 0);
             genericTable = {...genericTable, ...gt};
             if (typeScore === 0) {
                 //Try to find a morphism path

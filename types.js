@@ -76,15 +76,19 @@ export const typeAssignableFrom = (child, parent) => {
     return child.types.every((item, index) => typeAssignableFrom(item, parent.types[index]));
 }
 
+const weightedAnyType = (depth) => {
+    return (typeWeights.ANY + (typeWeights.EQUIVALENT * depth)) / (depth + 1);
+}
+
 
 //Track depth param
-export const typeSatisfaction = (child, parent, genericTable) => {
+export const typeSatisfaction = (child, parent, genericTable, depth) => {
     if (parent.baseName === "ANY") {
 
         if (isGeneric(parent)) {
             //We are either matching against a known type
             if (parent.generic in genericTable) {
-                return typeSatisfaction(child, genericTable[parent.generic], genericTable);
+                return typeSatisfaction(child, genericTable[parent.generic], genericTable, depth);
             }
 
             //Or we just encountered some generic for the first time
@@ -92,7 +96,7 @@ export const typeSatisfaction = (child, parent, genericTable) => {
             return [typeWeights.GENERIC, genericTable];
         }
 
-        return [typeWeights.ANY, genericTable];
+        return [weightedAnyType(depth), genericTable];
     }
 
     if (isAlias(parent)) {
@@ -115,7 +119,7 @@ export const typeSatisfaction = (child, parent, genericTable) => {
     let combinedScore = 0;
 
     for (let i = 0 ; i < child.types.length ; i ++ ) {
-        const [satisfaction, gt] = typeSatisfaction(child.types[i], parent.types[i], genericTable);
+        const [satisfaction, gt] = typeSatisfaction(child.types[i], parent.types[i], genericTable, depth + 1);
         if (satisfaction === 0) {
             return [0, genericTable];
         }
