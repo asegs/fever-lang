@@ -654,7 +654,10 @@ export const builtins = {
             [primitives.ANY],
             ([v]) => {
                 return createVar(v.type, primitives.TYPE);
-             }
+             },
+            {
+                'specificities': [0.6]
+            }
         )
     ],
     'ord': [

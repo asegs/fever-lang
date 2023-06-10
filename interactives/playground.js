@@ -1,5 +1,6 @@
 import {callFunction, goals, instance, interpret} from "../interpreter.js";
-import {charListToJsString} from "../types.js";
+import {charListToJsString, primitives} from "../types.js";
+import {builtins} from "../builtins.js";
 
 const [variables, morphisms] = instance();
 
@@ -21,7 +22,11 @@ const interpretInBrowser = (text) => {
     let output;
 
     const result = interpret(text, variables, morphisms, goals.EVALUATE);
-    output = charListToJsString(callFunction('stringify', [result], variables, morphisms));
+    if (result.type === primitives.ERROR) {
+        output = result.value;
+    } else {
+        output = charListToJsString(callFunction('stringify', [result], variables, morphisms));
+    }
 
     const outputPara = document.createElement("p");
     const outputNode = document.createTextNode(output);
