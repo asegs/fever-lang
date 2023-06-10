@@ -22,14 +22,15 @@ It came to me in a fever dream.
 
 
 ### How do I use it?
-It works normally in a lot of ways.  Arithmetic and all should just work.  However, order of operations simply isn't respected.
-Sorry, use parentheses.  Expressions are just evaluated in order.
+Fever tries to do exactly what you might imagine it would when you look at its code. However, order of operations is not operational yet.
+Expressions are just evaluated in order.
 
 You can visit the Sweat Lodge, an in-browser Fever REPL here:
 https://asegs.github.io/fever-lang/interactives/playground.html
 
 You can run it by cloning this repo and running `node fever.js` in the directory.  As arguments you may pass in additional Fever files to be run and loaded into scope in order, such as `node fever.js examples/std.fv`.
 
+#### Expressions
 ```js
 1 + 2 //3
 
@@ -67,6 +68,8 @@ You can also make expressions which are evaluated if they have no mysteries.
 (n + 5) // "+(n,5)" (this is the parsed s-expression)
 ```
 
+#### Higher Order Functions
+
 You can apply higher order functions on lists as well.
 
 ```js
@@ -77,6 +80,8 @@ You can apply higher order functions on lists as well.
 [1,2,3] ~> (# % 2 == 0) //[1,3] (The squiggly "dubious arrow" is a filter operator)
 [1,2,3] \> (0, ($ + @)) //6 (This is a reduce.  The $ is the accumulator, the 0 is the starting value)
 ```
+
+#### Functions and Patterns
 
 You can define your own functions too.
 
@@ -144,6 +149,7 @@ is_double(1,2) //true
 
 Pretty cool!
 
+#### Types
 
 While types can be inferred, Fever supports nominal typing derived from named tuples.
 You can instantiate a type with the `new` function.
@@ -179,3 +185,46 @@ item = new(set,[1,2,2]) //[1,2]
 
 You can see that the given expression is applied to the argument before constructing the object.
 Also, when you define single list types like this, they will be registered not as a typed tuple but as a named list type.
+
+#### Generics
+Fever supports a very simple generics implementation.  Unknown types are considered generic at function definition time.
+Once the function is called, they are realized and assigned to that value during evaluation of that function.
+During invocation of the function, the generics are available as type variables.
+
+```js
+types_match = {a:T, b:T} => true
+types_match = {_,_} => false
+
+types_match(1,2) //true
+types_match(1,"hello") //false
+
+get_type = {_:T} => (T)
+```
+
+Generics can occur in the same type clause.  For example:
+```js
+f = {x:(T,T)} => ...
+g = {x:(T,S,T), y:S} => ...
+h = {x:T, xs:[T]} => ...
+```
+
+#### Morphisms
+
+Fever supports "morphisms" (loosely based on the real thing) which automatically convert types into matching ones via a predefined function if a path can be found.
+They are registered in a global morphism table using the morph function.
+
+```js
+bool_to_int = {true} => 1
+bool_to_int = {false} => 0
+
+morph(bool_to_int, boolean, number)
+
+f = {x:#} => (x + 1)
+
+f(true) //2
+f(false) //1
+```
+
+Morphisms are considered increasingly dubious as they require a farther path to the given type, so a longer morphism chain is worth less in a pattern match than a short one.
+
+

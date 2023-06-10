@@ -761,7 +761,7 @@ export const standardLib = [
     "head = {(len(lst) > 0):[]} => (get(lst,0))",
     "tail = {lst:[]} => (slice(lst,1))",
     "set = {(unique(entries)):[]}",
-    "add = {s:set, item} => (new(set, s + item))",
+    "+ = {s:set, item} => (new(set, entries(s) + item))",
     "halve = {lst:[]} => ([(slice(lst,0,floor(len(lst) / 2))), (slice(lst, floor(len(lst) / 2 )))])",
     "merge = {_:fn, [], l2:[]} => (l2)",
     "merge = {_:fn, l1:[], []} => (l1)",

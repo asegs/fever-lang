@@ -3,8 +3,7 @@ import {inferTypeAndValue} from "./literals.js";
 import {typeSatisfaction, createVar, isAlias, primitives, createError, createTypeVar, isGeneric} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
-import {builtins, morphTypes, registerBuiltins, standardLib} from "./builtins.js";
-import {internalFile} from "./interactives/file.js";
+import {morphTypes, registerBuiltins, standardLib} from "./builtins.js";
 
 export const goals = {
     EVALUATE: Symbol("EVALUATE"),
@@ -208,7 +207,11 @@ export const instance = () => {
 
     registerBuiltins(variables);
 
-    internalFile('../examples/lib.fv', variables, morphisms);
+    standardLib.forEach(line => {
+        interpret(line, variables, morphisms, goals.EVALUATE);
+    });
+
+    //internalFile('../examples/lib.fv', variables, morphisms);
 
 
     return [variables, morphisms];
