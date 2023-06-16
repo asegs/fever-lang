@@ -1,6 +1,35 @@
 const infixes = ['+','-','*','/','>','<','&','|','<=','>=','->','\\>','~>','=>','==','%', '..'];
 
+const infixPrecedences = {
+    '+': 9,
+    '-': 9,
+    '*': 10,
+    '/': 10,
+    '%': 8,
+    '>': 6,
+    '<': 6,
+    '<=': 6,
+    '>=': 6,
+    '==': 6,
+    '..': 7,
+    '&': 5,
+    '|': 5,
+    '->': 4,
+    '~>': 4,
+    '\\>': 4,
+    '=>': 3,
+    '=': 2
+}
+
+const getSurroundingChars = (text, idx) => {
+    const prevChar = idx > 0 ? text[idx - 1] : null;
+    const char = text[idx];
+    const nextChar = text.length > idx - 1 ? text[idx + 1] : null;
+    return [prevChar, char, nextChar];
+}
+
 //1 means take next, 0 means take this, -1 means not operator
+//This doesn't need to be handwritten
 const unusualCases = {
     '-': (text, idx) => {
         const nextChar = getSurroundingChars(text, idx)[2];
@@ -27,7 +56,7 @@ const unusualCases = {
     },
     '=': (text, idx) => {
         const nextChar = getSurroundingChars(text, idx)[2];
-        return nextChar === '=' || nextChar === '>' ? 1 : -1;
+        return nextChar === '=' || nextChar === '>' ? 1 : 0;
     },
     '.': (text, idx) => {
         const nextChar = getSurroundingChars(text, idx)[2];
@@ -37,12 +66,223 @@ const unusualCases = {
 
 }
 
-const getSurroundingChars = (text, idx) => {
-    const prevChar = idx > 0 ? text[idx - 1] : null;
-    const char = text[idx];
-    const nextChar = text.length > idx - 1 ? text[idx + 1] : null;
-    return [prevChar, char, nextChar];
+const newTracker = () => {
+    return {
+        'doubleQuotes': 0,
+        'singleQuotes': 0,
+        'openParens': 0,
+        'openBrackets': 0,
+        'openBraces': 0
+    }
 }
+
+const inSingleQuotes = (tracker) => {
+    return tracker.singleQuotes % 2 === 1;
+}
+
+const inDoubleQuotes = (tracker) => {
+    return tracker.doubleQuotes % 2 === 1;
+}
+
+const handleSyntaxChars = (char, tracker) => {
+    switch (char) {
+        case '"':
+            if (!inSingleQuotes(tracker)) {
+                tracker.doubleQuotes++;
+                return true;
+            }
+            break;
+        case "'":
+            if (!inDoubleQuotes(tracker)) {
+                tracker.singleQuotes++;
+                return true;
+            }
+            break;
+        case '(':
+            tracker.openParens++;
+            return true;
+        case '[':
+            tracker.openBrackets++;
+            return true;
+        case ')':
+            tracker.openParens--;
+            return true;
+        case ']':
+            tracker.openBrackets--;
+            return true;
+        case '{':
+            tracker.openBraces++;
+            return true;
+        case '}':
+            tracker.openBraces--;
+            return true;
+    }
+
+    return false;
+}
+
+const isInTopLevelContext = (tracker) => {
+    return tracker.openParens === 0 &&
+        tracker.openBrackets === 0 &&
+        tracker.openBraces === 0 &&
+        !inSingleQuotes(tracker) &&
+        !inDoubleQuotes(tracker);
+}
+
+export const tokenTypes = {
+    SYNTAX: Symbol("SYNTAX"),
+    OPERATOR: Symbol("OPERATOR"),
+}
+
+const syntaxToken = (text) => {
+    return {
+        'value': text,
+        'type': tokenTypes.SYNTAX
+    }
+}
+
+const operatorToken = (text) => {
+    return {
+        'value': text,
+        'type': tokenTypes.OPERATOR
+    }
+}
+
+
+const tokenize = (segment) => {
+    const tokens = [];
+    let buffer = '';
+    const tracker = newTracker();
+
+    for (let i = 0 ; i < segment.length ; i ++ ) {
+        const char = segment[i];
+        if (char === ' ') {
+            if (inSingleQuotes(tracker) || inDoubleQuotes(tracker)) {
+                buffer += char;
+            } else {
+                continue;
+            }
+        }
+        handleSyntaxChars(char, tracker);
+        if (isInTopLevelContext(tracker)) {
+            if (char in unusualCases) {
+                const score = unusualCases[char](segment, i);
+                if (buffer.length > 0) {
+                    tokens.push(syntaxToken(buffer));
+                    buffer = '';
+                }
+
+                if (score === 1) {
+                    tokens.push(operatorToken(char + segment[i + 1]))
+                    i ++;
+                } else if (score === 0) {
+                    tokens.push(operatorToken(char));
+                } else {
+                    buffer += char;
+                }
+            } else if (char in infixPrecedences) {
+                if (buffer.length > 0) {
+                    tokens.push(syntaxToken(buffer));
+                    buffer = '';
+                }
+                tokens.push(operatorToken(char));
+            } else {
+                buffer += char;
+            }
+        } else {
+            buffer += char;
+        }
+    }
+    if (buffer.length > 0) {
+        tokens.push(syntaxToken(buffer));
+    }
+
+    return tokens;
+}
+
+const reverse = (list) => {
+    const reversed = new Array(list.length);
+    for (let i = 0 ; i < list.length ; i ++ ) {
+        reversed[list.length - i - 1] = list[i];
+    }
+
+    return reversed;
+}
+
+const stringifyTokens = (tokens) => {
+    const scopes = [];
+    let index = -1;
+    let buffer = '';
+
+    for (let i = 0 ; i < tokens.length ; i ++) {
+        const token = tokens[i];
+        if (token.type === tokenTypes.OPERATOR) {
+            buffer += token.value + '(';
+            index ++;
+            scopes.push(2);
+        } else {
+            buffer += token.value;
+            scopes[index]--;
+            if (scopes[index] === 1) {
+                buffer += ',';
+            } else {
+                buffer += ')';
+                scopes.pop();
+                index--;
+                while (scopes[index] === 1) {
+                    buffer += ')';
+                    scopes.pop();
+                    index --;
+                }
+                if (scopes.length > 0) {
+                    scopes[index] = 1;
+                    buffer += ',';
+                }
+            }
+        }
+    }
+
+    return buffer;
+
+}
+
+export const shunt = (segment) => {
+    const tokens = tokenize(segment);
+    const stack = [];
+    const result = [];
+    for (let i = tokens.length - 1 ; i >= 0 ; i -- ) {
+        const token = tokens[i];
+        if (token.type === tokenTypes.SYNTAX) {
+            result.push(token);
+            continue;
+        }
+
+        const precedence = infixPrecedences[token.value];
+
+        if (stack.length === 0) {
+            stack.push(token);
+            continue;
+        }
+
+        if (infixPrecedences[stack[stack.length - 1]] <= precedence) {
+            stack.push(token);
+        }
+
+        while ( stack.length > 0 && infixPrecedences[stack[stack.length - 1]] > precedence) {
+            result.push(stack.pop());
+        }
+
+        stack.push(token);
+    }
+    while (stack.length > 0) {
+        result.push(stack.pop());
+    }
+
+    return stringifyTokens(reverse(result));
+}
+
+console.log(shunt('3 + 5 * 8'))
+
 
 /*
 3 + 5 -> +(3, 5)
