@@ -268,7 +268,7 @@ export const shunt = (segment) => {
             stack.push(token);
         }
 
-        while ( stack.length > 0 && infixPrecedences[stack[stack.length - 1]] > precedence) {
+        while ( stack.length > 0 && infixPrecedences[stack[stack.length - 1].value] > precedence) {
             result.push(stack.pop());
         }
 
