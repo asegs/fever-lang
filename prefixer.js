@@ -246,6 +246,40 @@ const stringifyTokens = (tokens) => {
 
 }
 
+const syntaxTermCount = (tracker) => {
+    return tracker.openParens + tracker.openBrackets + tracker.openBraces;
+}
+
+const getCaptureGroup = (text) => {
+    let firstCaptureIndex = -1;
+    const tracker = newTracker();
+
+    for (let i = 0 ; i < text.length ; i ++ ) {
+        const char = text[i];
+        const prevCount = syntaxTermCount(tracker);
+        handleSyntaxChars(char, tracker);
+        if (prevCount === 0 && syntaxTermCount(tracker) === 1) {
+            firstCaptureIndex = i;
+        }
+
+        if (prevCount === 1 && syntaxTermCount(tracker) === 0) {
+            return [text.slice(firstCaptureIndex, i + 1), char, [firstCaptureIndex, i]];
+        }
+    }
+    return ['',false, [-1,-1]];
+}
+
+const processSyntaxNode = (node) => {
+    const nodeText = node.value;
+    const [nestedText, nestingType,[start, end]] = getCaptureGroup(nodeText)
+    switch (nestingType) {
+        case ')':
+            return nodeText.slice(0, start) + '(' + shunt(nestedText.slice(1, nestedText.length - 1)) + ')' + nodeText.slice(end);
+    }
+    console.log(nestedText);
+    return nodeText;
+}
+
 export const shunt = (segment) => {
     const tokens = tokenize(segment);
     const stack = [];
@@ -253,7 +287,7 @@ export const shunt = (segment) => {
     for (let i = tokens.length - 1 ; i >= 0 ; i -- ) {
         const token = tokens[i];
         if (token.type === tokenTypes.SYNTAX) {
-            result.push(token);
+            result.push(syntaxToken(processSyntaxNode(token)));
             continue;
         }
 
@@ -281,7 +315,7 @@ export const shunt = (segment) => {
     return stringifyTokens(reverse(result));
 }
 
-console.log(shunt('3 + 5 * 8'))
+console.log(shunt('[1,2, 5 + 3, (3 + 2) * 3] -> 3 + 5 * (3 + 1 * f([1,2,3]))'))
 
 
 /*
