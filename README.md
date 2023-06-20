@@ -22,9 +22,7 @@ It came to me in a fever dream.
 
 
 ### How do I use it?
-Fever tries to do exactly what you might imagine it would when you look at its code. However, order of operations is not operational yet.
-Expressions are just evaluated in order.
-
+Fever tries to do exactly what you might imagine it would when you look at its code. 
 You can visit the Sweat Lodge, an in-browser Fever REPL here:
 https://asegs.github.io/fever-lang/interactives/playground.html
 
@@ -36,7 +34,7 @@ You can run it by cloning this repo and running `node fever.js` in the directory
 
 3 * 3 //9
 
-3 + 3 * 10 //60?
+3 + 3 * 10 //33
 ```
 
 Variables can be assigned with the `=` operator (a function).

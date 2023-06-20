@@ -1,6 +1,6 @@
 import {lex, trimAndSplitArray} from "./prefixer.js";
 import {inferTypeAndValue} from "./literals.js";
-import {typeSatisfaction, createVar, isAlias, primitives, createError, createTypeVar, isGeneric} from "./types.js";
+import {typeSatisfaction, createVar, isAlias, createError, createTypeVar} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
 import {morphTypes, registerBuiltins, standardLib} from "./builtins.js";
@@ -14,7 +14,7 @@ export const goals = {
 
 export const interpret = (text, variables, morphisms ,goal) => {
     const lexed = lex(text)
-    //Uncomment for debugging
+    //Uncomment for lexer debugging
     //console.log(lexed)
     return evaluate(lexed, variables, morphisms, goal);
 }

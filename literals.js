@@ -3,8 +3,7 @@ import {
     createPatternFromString,
     createTypedList,
     createTypedTuple, createTypeVar,
-    createVar, inferTypeFromString, isAlias,
-    meta,
+    createVar, inferTypeFromString, meta,
     primitives, typeAssignableFrom
 } from './types.js'
 import {splitArray} from "./prefixer.js";
