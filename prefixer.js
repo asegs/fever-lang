@@ -1,5 +1,3 @@
-const infixes = ['+','-','*','/','>','<','&','|','<=','>=','->','\\>','~>','=>','==','%', '..'];
-
 const infixPrecedences = {
     '+': 9,
     '-': 9,
@@ -91,6 +89,10 @@ const inDoubleQuotes = (tracker) => {
     return tracker.doubleQuotes % 2 === 1;
 }
 
+const quoted = (tracker) => {
+    return inSingleQuotes(tracker) || inDoubleQuotes(tracker);
+}
+
 const handleSyntaxChars = (char, tracker) => {
     switch (char) {
         case '"':
@@ -132,8 +134,7 @@ const isInTopLevelContext = (tracker) => {
     return tracker.openParens === 0 &&
         tracker.openBrackets === 0 &&
         tracker.openBraces === 0 &&
-        !inSingleQuotes(tracker) &&
-        !inDoubleQuotes(tracker);
+        !quoted(tracker)
 }
 
 export const tokenTypes = {
@@ -163,41 +164,13 @@ const notQuoted = (s, d) => {
  * This requires trimming of the initial characters, ie. [1,2,3] -> 1,2,3
  */
 export const splitGeneral = (text, on) => {
-    let doubleQuotes = 0;
-    let singleQuotes = 0;
-    let openParens = 0;
-    let openBrackets = 0;
-    let openBraces = 0;
+    const tracker = newTracker();
     const chunks = [];
     let current = "";
     for (let i = 0 ; i < text.length ; i ++ ) {
         const char = text[i];
-        switch (char) {
-            case '"':
-                doubleQuotes++;
-                break;
-            case "'":
-                singleQuotes++;
-                break;
-            case '(':
-                openParens++;
-                break;
-            case '[':
-                openBrackets++;
-                break;
-            case ')':
-                openParens--;
-                break;
-            case ']':
-                openBrackets--;
-                break;
-            case '{':
-                openBraces ++;
-                break;
-            case '}':
-                openBraces --;
-        }
-        if (char === on && (notQuoted(singleQuotes, doubleQuotes) && openParens === 0 && openBrackets === 0 && openBraces === 0)) {
+        handleSyntaxChars(char, tracker);
+        if (char === on && isInTopLevelContext(tracker)) {
             chunks.push(current);
             current = ""
         } else {
@@ -223,7 +196,7 @@ const tokenize = (segment) => {
     for (let i = 0 ; i < segment.length ; i ++ ) {
         const char = segment[i];
         if (char === ' ') {
-            if (!inSingleQuotes(tracker) && !inDoubleQuotes(tracker)) {
+            if (!quoted(tracker)) {
                 continue;
             }
         }
@@ -419,91 +392,8 @@ const isNegation = (text, idx) => {
     if (prev === null) {
         return true;
     }
-    return infixes.includes(prev) || extras.includes(prev);
+    return (prev in infixPrecedences) || extras.includes(prev);
 }
-
-const preprocess = (text) => {
-    let singleQuotes = 0;
-    let doubleQuotes = 0;
-    let builder = "";
-    for (let i = 0 ; i < text.length ; i ++ ) {
-        const [prev, char, next] = getSurroundingChars(text, i);
-        if (char === '"') {
-            doubleQuotes ++;
-        } else if (char === "'") {
-            singleQuotes ++;
-        }
-        if (notQuoted(singleQuotes, doubleQuotes) && char in unusualCases) {
-            const score = unusualCases[char](text, i);
-            if (score >= 0) {
-                if (prev !== null && prev !== ' ') {
-                    builder += ' ';
-                }
-                builder += text.slice(i, i + score + 1);
-                i += score;
-                if (score === 1) {
-                    const superNext = getSurroundingChars(text, i)[2];
-                    if (superNext !== null && superNext !== ' ') {
-                        builder += ' ';
-                    }
-                } else if (next !== null && next !== ' ') {
-                    builder += ' ';
-                }
-
-            } else {
-                builder += char;
-            }
-        } else if (notQuoted(singleQuotes, doubleQuotes) && infixes.includes(char)) {
-            if (prev !== null && prev !== ' ') {
-                builder += ' ';
-            }
-            builder += char;
-            if (next !== null && next !== ' ') {
-                builder += ' ';
-            }
-        } else {
-            builder += char;
-        }
-    }
-    return builder;
-}
-
-const pairs = [
-    ['[',']'],
-    ['(',')'],
-    ['{','}']
-]
-
-
-const unensconce = (text, pair) => {
-    const [start, end] = pair;
-    if (text[0] === start && text[text.length - 1] === end) {
-        return text.slice(1, text.length - 1);
-    }
-    return text;
-}
-
-export const unshiftRedundantNesting = (text) => {
-    let interestedPair = undefined;
-    while (true) {
-        const before = text;
-        if (interestedPair) {
-            text = unensconce(text, interestedPair);
-        } else {
-            for (const pair of pairs) {
-                text = unensconce(text, pair);
-                if (text.length < before.length) {
-                    interestedPair = pair;
-                }
-            }
-        }
-        if (text.length === before.length) {
-            return text;
-        }
-    }
-}
-
-
 
 export const trimAndSplitArray = (text) => {
     return splitArray(text.slice(1, text.length - 1));
@@ -534,104 +424,8 @@ export const lex = (rawText) => {
     //This will cause issues if anything with lower precedence than assignment is ever added
     const [name, body] = handleAssignment(rawText);
     if (name !== '_') {
-        return "=(\"" + name +"\"," + shunt(body) + ")";
+        return "=(\"" + name + "\"," + shunt(body) + ")";
     }
     return shunt(body);
-}
-
-export const lexer = (rawText) => {
-    const text = preprocess(rawText);
-    const reorderStack = [];
-    const operatorStack = [];
-    let doubleQuotes = 0;
-    let singleQuotes = 0;
-    let currentBuffer = "";
-    let recursiveBuffer = "";
-    let openParens = 0;
-    let openBrackets = 0;
-    let openBraces = 0;
-    for (let i = 0 ; i < text.length ; i ++ ) {
-        const char = text[i];
-        if (char in unusualCases && notQuoted(singleQuotes, doubleQuotes) && (openParens === 0 && openBrackets === 0 && openBraces === 0)) {
-            const score = unusualCases[char](text, i);
-            if (score === 1) {
-                operatorStack.push(char + text[i + 1]);
-                i ++;
-            } else if (score === 0) {
-                operatorStack.push(char);
-            } else {
-                currentBuffer += char;
-            }
-        } else if (infixes.includes(char) && notQuoted(singleQuotes, doubleQuotes) && (openParens === 0 && openBrackets === 0 && openBraces === 0)) {
-            operatorStack.push(char);
-        } else if (char !== ' ' || !notQuoted(singleQuotes, doubleQuotes)) {
-            if (notQuoted(singleQuotes, doubleQuotes)) {
-                switch (char) {
-                    case '(':
-                        openParens++;
-                        break;
-                    case '[':
-                        openBrackets++;
-                        break;
-                    case ')':
-                        openParens--;
-                        break;
-                    case ']':
-                        openBrackets--;
-                        break;
-                    case '{':
-                        openBraces ++;
-                        break;
-                    case '}':
-                        openBraces --;
-                }
-            }
-            if (openBrackets === 0 && openParens === 0 && openBraces === 0) {
-                if (recursiveBuffer.length > 0) {
-                    if (char === ')' || char === ']' || char === '}') {
-                        recursiveBuffer += char;
-                    }
-                    const internal = recursiveBuffer.slice(1, recursiveBuffer.length - 1);
-                    let newBuffer = "";
-                    const entries = splitArray(internal);
-                    //(Un)wrapped expressions in list literals don't work
-                    if (char === ']' || char === '}') {
-                        newBuffer = entries.map(e => lexer(e)).join(',');
-                    } else {
-                        if (entries.length > 1) {
-                            newBuffer = entries.map(e => lexer(e)).join(',');
-                        } else {
-                            newBuffer = lexer(internal);
-                        }
-                    }
-                    currentBuffer += recursiveBuffer[0] + newBuffer + recursiveBuffer[recursiveBuffer.length - 1];
-                    recursiveBuffer = "";
-                } else {
-                    currentBuffer += char;
-                }
-            } else {
-                recursiveBuffer += char;
-            }
-        }
-        if (char === '"') {
-            doubleQuotes++;
-        } else if (char === "'") {
-            singleQuotes++;
-        }
-
-        if ((char === ' ' && notQuoted(singleQuotes, doubleQuotes)) || i === text.length - 1) {
-            if (currentBuffer.length > 0) {
-                reorderStack.push(currentBuffer);
-            }
-            currentBuffer = "";
-            if (operatorStack.length > 0 && reorderStack.length > 1) {
-                const operand2 = reorderStack.pop();
-                const operand1 = reorderStack.pop();
-                const operator = operatorStack.pop();
-                reorderStack.push(operator + '(' + operand1+ ',' + operand2 + ')')
-            }
-        }
-    }
-    return reorderStack.join('');
 }
 
