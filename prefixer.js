@@ -21,6 +21,13 @@ const infixPrecedences = {
     '=': 2
 }
 
+
+const pairBackRefs = {
+    ']': '[',
+    '}': '{',
+    ')': '('
+}
+
 const getSurroundingChars = (text, idx) => {
     const prevChar = idx > 0 ? text[idx - 1] : null;
     const char = text[idx];
@@ -148,6 +155,65 @@ const operatorToken = (text) => {
     }
 }
 
+const notQuoted = (s, d) => {
+    return s % 2 === 0 && d % 2 === 0;
+}
+
+/**
+ * This requires trimming of the initial characters, ie. [1,2,3] -> 1,2,3
+ */
+export const splitGeneral = (text, on) => {
+    let doubleQuotes = 0;
+    let singleQuotes = 0;
+    let openParens = 0;
+    let openBrackets = 0;
+    let openBraces = 0;
+    const chunks = [];
+    let current = "";
+    for (let i = 0 ; i < text.length ; i ++ ) {
+        const char = text[i];
+        switch (char) {
+            case '"':
+                doubleQuotes++;
+                break;
+            case "'":
+                singleQuotes++;
+                break;
+            case '(':
+                openParens++;
+                break;
+            case '[':
+                openBrackets++;
+                break;
+            case ')':
+                openParens--;
+                break;
+            case ']':
+                openBrackets--;
+                break;
+            case '{':
+                openBraces ++;
+                break;
+            case '}':
+                openBraces --;
+        }
+        if (char === on && (notQuoted(singleQuotes, doubleQuotes) && openParens === 0 && openBrackets === 0 && openBraces === 0)) {
+            chunks.push(current);
+            current = ""
+        } else {
+            current += char;
+        }
+    }
+    if (current.length > 0) {
+        chunks.push(current)
+    }
+    return chunks;
+}
+
+export const splitArray = (text) => {
+    return splitGeneral(text, ',');
+}
+
 
 const tokenize = (segment) => {
     const tokens = [];
@@ -225,7 +291,7 @@ const stringifyTokens = (tokens) => {
             scopes[index]--;
             if (scopes[index] === 1) {
                 buffer += ',';
-            } else {
+            } else if (scopes[index] === 0) {
                 buffer += ')';
                 scopes.pop();
                 index--;
@@ -271,12 +337,17 @@ const getCaptureGroup = (text) => {
 
 const processSyntaxNode = (node) => {
     const nodeText = node.value;
-    const [nestedText, nestingType,[start, end]] = getCaptureGroup(nodeText)
-    switch (nestingType) {
-        case ')':
-            return nodeText.slice(0, start) + '(' + shunt(nestedText.slice(1, nestedText.length - 1)) + ')' + nodeText.slice(end);
+    const [nestedText, nestingType,[start, end]] = getCaptureGroup(nodeText);
+    let innerText;
+    if (start !== -1) {
+        const subText = nestedText.slice(1, nestedText.length - 1);
+        innerText = splitArray(subText).map(e => shunt(e)).join(',');
     }
-    console.log(nestedText);
+
+    if (innerText) {
+        return nodeText.slice(0, start) + pairBackRefs[nestingType] + innerText + nestingType + nodeText.slice(end + 1);
+    }
+
     return nodeText;
 }
 
@@ -315,7 +386,12 @@ export const shunt = (segment) => {
     return stringifyTokens(reverse(result));
 }
 
-console.log(shunt('[1,2, 5 + 3, (3 + 2) * 3] -> 3 + 5 * (3 + 1 * f([1,2,3]))'))
+
+// shunt("1");
+// console.log(shunt('[1,2,3]'))
+// console.log(shunt('(1,2,3)'))
+// console.log(shunt('{(a > 3):#, (b > a * 2):#}'))
+// console.log(shunt('[1,2, 5 + 3, (3 + 2) * 3] -> 3 + 5 * (3 + 1 * f([1,2,3]))'))
 
 
 /*
@@ -346,10 +422,6 @@ const isNegation = (text, idx) => {
         return true;
     }
     return infixes.includes(prev) || extras.includes(prev);
-}
-
-const notQuoted = (s, d) => {
-    return s % 2 === 0 && d % 2 === 0;
 }
 
 const preprocess = (text) => {
@@ -404,11 +476,6 @@ const pairs = [
     ['{','}']
 ]
 
-const pairBackRefs = {
-    ']': '[',
-    '}': '{',
-    ')': '('
-}
 
 const unensconce = (text, pair) => {
     const [start, end] = pair;
@@ -438,64 +505,13 @@ export const unshiftRedundantNesting = (text) => {
     }
 }
 
-/**
- * This requires trimming of the initial characters, ie. [1,2,3] -> 1,2,3
- */
-export const splitGeneral = (text, on) => {
-    let doubleQuotes = 0;
-    let singleQuotes = 0;
-    let openParens = 0;
-    let openBrackets = 0;
-    let openBraces = 0;
-    const chunks = [];
-    let current = "";
-    for (let i = 0 ; i < text.length ; i ++ ) {
-        const char = text[i];
-        switch (char) {
-            case '"':
-                doubleQuotes++;
-                break;
-            case "'":
-                singleQuotes++;
-                break;
-            case '(':
-                openParens++;
-                break;
-            case '[':
-                openBrackets++;
-                break;
-            case ')':
-                openParens--;
-                break;
-            case ']':
-                openBrackets--;
-                break;
-            case '{':
-                openBraces ++;
-                break;
-            case '}':
-                openBraces --;
-        }
-        if (char === on && (notQuoted(singleQuotes, doubleQuotes) && openParens === 0 && openBrackets === 0 && openBraces === 0)) {
-            chunks.push(current);
-            current = ""
-        } else {
-            current += char;
-        }
-    }
-    if (current.length > 0) {
-        chunks.push(current)
-    }
-    return chunks;
-}
+
 
 export const trimAndSplitArray = (text) => {
     return splitArray(text.slice(1, text.length - 1));
 }
 
-export const splitArray = (text) => {
-    return splitGeneral(text, ',');
-}
+
 
 const assignmentRegex = new RegExp(/^[^\s()0-9"'[\]][^\s()"'[\]]* ?=[^=].*$/gm);
 
@@ -517,8 +533,12 @@ export const handleAssignment = (rawText) => {
 }
 
 export const lex = (rawText) => {
+    //This will cause issues if anything with lower precedence than assignment is ever added
     const [name, body] = handleAssignment(rawText);
-    return "=(\"" + name +"\"," + lexer(body) + ")";
+    if (name !== '_') {
+        return "=(\"" + name +"\"," + shunt(body) + ")";
+    }
+    return shunt(body);
 }
 
 export const lexer = (rawText) => {
