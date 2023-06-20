@@ -223,9 +223,7 @@ const tokenize = (segment) => {
     for (let i = 0 ; i < segment.length ; i ++ ) {
         const char = segment[i];
         if (char === ' ') {
-            if (inSingleQuotes(tracker) || inDoubleQuotes(tracker)) {
-                buffer += char;
-            } else {
+            if (!inSingleQuotes(tracker) && !inDoubleQuotes(tracker)) {
                 continue;
             }
         }
@@ -386,7 +384,7 @@ export const shunt = (segment) => {
     return stringifyTokens(reverse(result));
 }
 
-
+shunt('"I love you"');
 // shunt("1");
 // console.log(shunt('[1,2,3]'))
 // console.log(shunt('(1,2,3)'))
