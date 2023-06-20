@@ -101,20 +101,20 @@ Types are not strictly enforced but they are used to perform pattern matching.
 Values can also be used to pattern match.
 
 ```js
-is_twenty = {20} => true
-is_twenty = {n} => false
+is_twenty? = {20} => true
+is_twenty? = {n} => false
 
-is_twenty(20) // true
-is_twenty(19) //false
-is_twenty("hello") //false
+is_twenty?(20) // true
+is_twenty?(19) //false
+is_twenty?("hello") //false
 ```
 
 More specific patterns will be preferred over more generic ones in order of matching.
-Functions can be called recursively.  You may need to go overboard on parentheses in times like these.
+Functions can be called recursively.
 ```js
 fib = {0} => 0
 fib = {1} => 1
-fib = {n:number} => ((fib(n-1)) + (fib(n-2)))
+fib = {n:number} => (fib(n-1) + fib(n-2))
 
 fib(1) //1
 fib(0) //0
