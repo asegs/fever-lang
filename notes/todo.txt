@@ -29,3 +29,5 @@
 - get list subtypes by name like list[character] or tuple(#,#)
 - when signature defined with unknown types, we need to handle calling that function so that that type is assigned on call
 - a  = 3 //reads as =(_,a=3) since assignment regex doesn't accept spaces
+- [1,2,3].contains?(3) -> contains?([1,2,3],3) rewritten by parser
+- use real AST...

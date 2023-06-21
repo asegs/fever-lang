@@ -199,6 +199,27 @@ export const builtins = {
                 return res;
             }
 
+        ),
+        newFunction(
+            2,
+            [meta.LIST, meta.FUNCTION],
+            ([list, func], variables, morphisms) => {
+                const results = list.value.map(item => callFunctionByReference(func, [item], variables, morphisms, 'lambda'));
+                const errors = results.filter(res => res.type.baseName === 'ERROR');
+                if (errors.length > 0) {
+                    return errors[0];
+                }
+                const res = createVar(results, createTypedList((results.length > 0 ? results[0].type : primitives.ANY), list.type.alias));
+
+                if (isAlias(res.type)) {
+                    const created = newOfType(res.type, [res], variables, morphisms);
+                    if (created.type.baseName !== 'ERROR') {
+                        return created;
+                    }
+                }
+
+                return res;
+            }
         )
     ],
     '\\>': [
@@ -250,7 +271,7 @@ export const builtins = {
             2,
             [meta.LIST, primitives.EXPRESSION],
             ([list, action], variables, morphisms) => {
-                return namedFilter(list, action, variables, morphisms, ['@','#','^']);
+                return namedFilter(list, action, variables, morphisms, ['@','#','^'], null);
             }
         ),
         newFunction(
@@ -263,9 +284,17 @@ export const builtins = {
                 for (let i = 0 ; i < Math.min(3, providedNames.length) ; i ++ ) {
                     nameTable[i] = charListToJsString(providedNames[i]);
                 }
-                return namedFilter(list, filter, variables, morphisms, nameTable);
+                return namedFilter(list, filter, variables, morphisms, nameTable, null);
+            }
+        ),
+        newFunction(
+            2,
+            [meta.LIST, meta.FUNCTION],
+            ([list, funcRef], variables, morphisms) => {
+                return namedFilter(list, null, variables, morphisms, ['@','#','^'], funcRef);
             }
         )
+
     ],
     '==': [
         newFunction(
@@ -745,11 +774,11 @@ export const morphTypes = (value, toType, variables, morphisms) => {
 }
 
 export const standardLib = [
-    "contains = {lst:[], item} => (lst \\> (false, (item == @ | $), true))",
-    "unique_add = {lst:[], (contains(lst, item))} => (lst)",
+    "contains? = {lst:[], item} => (lst \\> (false, (item == @ | $), true))",
+    "unique_add = {lst:[], (contains?(lst, item))} => (lst)",
     "unique_add = {lst:[], item} => (lst + item)",
     "unique = {lst:[]} => (lst \\> ([], (unique_add($,@))))",
-    "is_whole = {n:#} => (floor(n) == n)",
+    "is_whole? = {n:#} => (floor(n) == n)",
     "sum = {lst:[]} => (lst \\> (0, ($ + @)))",
     "min = {a:#, (a<=b):#} => (a)",
     "min = {_:#, b: #} => (b)",
@@ -758,9 +787,9 @@ export const standardLib = [
     "max = {_:#, b:#} => (b)",
     "max = {(len(lst) > 0):[]} => (lst \\> ((get(lst,0)), (?((@ > $), @, $))))",
     "slice = {lst:[], from:#} => (lst ~> (# >= from))",
-    "in_range = {target:#, (lower <= target):#, (target < higher):#} => true",
-    "in_range = {_:#, _:#, _: #} => false",
-    "slice = {lst:[], from:#, to:#} => (lst ~> (in_range(#, from, to)))",
+    "in_range? = {target:#, (lower <= target):#, (target < higher):#} => true",
+    "in_range? = {_:#, _:#, _: #} => false",
+    "slice = {lst:[], from:#, to:#} => (lst ~> (in_range?(#, from, to)))",
     "head = {(len(lst) > 0):[]} => (get(lst,0))",
     "tail = {lst:[]} => (slice(lst,1))",
     "set = {(unique(entries)):[]}",
@@ -1055,7 +1084,7 @@ const namedReduce = (list, acc, expr, variables, morphisms, [element, index, acc
     return acc;
 }
 
-const namedFilter = (list, action, variables, morphisms, [element, index, intermediate]) => {
+const namedFilter = (list, action, variables, morphisms, [element, index, intermediate], funcRef) => {
     const internalList = [];
     for (let i = 0 ; i < list.value.length ; i ++ ) {
         const item = list.value[i];
@@ -1063,7 +1092,12 @@ const namedFilter = (list, action, variables, morphisms, [element, index, interm
         variables.assignValue(element, item);
         variables.assignValue(index, createVar(i, primitives.NUMBER));
         variables.assignValue(intermediate, createVar(internalList, createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
-        const result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
+        let result;
+        if (funcRef) {
+            result = callFunctionByReference(funcRef, [item], variables, morphisms, 'lambda')
+        } else {
+            result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
+        }
         if (result.value) {
             internalList.push(item);
         }
