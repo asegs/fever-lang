@@ -187,6 +187,29 @@ export const splitArray = (text) => {
     return splitGeneral(text, ',');
 }
 
+const isNumeric = (value) => {
+    return /^\d+$/.test(value);
+}
+
+const preprocessMethodSyntax = (text) => {
+    for (let i = 1 ; i < text.length - 1 ; i ++ ) {
+        const char = text[i];
+        if (char === '.') {
+            const next = text[i + 1];
+            if (next === '.') {
+                continue;
+            }
+            if (isNumeric(next)) {
+                continue;
+            }
+
+
+
+
+        }
+    }
+}
+
 
 const tokenize = (segment) => {
     const tokens = [];
