@@ -204,7 +204,7 @@ const tokenize = (segment) => {
         if (isInTopLevelContext(tracker)) {
             if (char in unusualCases) {
                 const score = unusualCases[char](segment, i);
-                if (buffer.length > 0) {
+                if (buffer.length > 0 && score >= 0) {
                     tokens.push(syntaxToken(buffer));
                     buffer = '';
                 }
@@ -357,7 +357,7 @@ export const shunt = (segment) => {
     return stringifyTokens(reverse(result));
 }
 
-shunt('"I love you"');
+shunt('1.1..10')
 // shunt("1");
 // console.log(shunt('[1,2,3]'))
 // console.log(shunt('(1,2,3)'))
