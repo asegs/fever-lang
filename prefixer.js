@@ -156,10 +156,6 @@ const operatorToken = (text) => {
     }
 }
 
-const notQuoted = (s, d) => {
-    return s % 2 === 0 && d % 2 === 0;
-}
-
 /**
  * This requires trimming of the initial characters, ie. [1,2,3] -> 1,2,3
  */
@@ -186,6 +182,109 @@ export const splitGeneral = (text, on) => {
 export const splitArray = (text) => {
     return splitGeneral(text, ',');
 }
+
+const isNumeric = (char) => {
+    return char.charCodeAt(0) >= '0'.charCodeAt(0) && char.charCodeAt(0) <= '9'.charCodeAt(0)
+}
+
+const infixEndsWith = (buf) => {
+    return Object.keys(infixPrecedences).some(key => key.endsWith(buf));
+}
+
+const preprocessMethodSyntax = (text) => {
+    let mainTracker = newTracker();
+    handleSyntaxChars(text[0], mainTracker);
+    //Handle . in quotes
+    for (let i = 1 ; i < text.length - 1 ; i ++ ) {
+        const char = text[i];
+        handleSyntaxChars(char, mainTracker);
+        if (!quoted(mainTracker) && char === '.') {
+            const next = text[i + 1];
+            if (next === '.') {
+                continue;
+            }
+            if (isNumeric(next)) {
+                continue;
+            }
+
+            let functionIndex;
+            let offset = 0;
+            let itemBuffer;
+
+            while ((i + offset) < text.length && text[i + offset] !== '(') {
+                offset ++;
+            }
+
+            functionIndex = i + offset;
+
+            let backwardsOffset = -1;
+
+            if ([')',']','}','"',"'"].includes(text[i + backwardsOffset])) {
+                const tracker = newTracker();
+                handleSyntaxChars(text[i + backwardsOffset], tracker);
+                while ((i + backwardsOffset) > 0 && !isInTopLevelContext(tracker)) {
+                    backwardsOffset --;
+                    handleSyntaxChars(text[i + backwardsOffset], tracker);
+                }
+                itemBuffer = text.slice(i + backwardsOffset, i);
+            }
+
+            if (!itemBuffer || itemBuffer.startsWith('(')) {
+                if (itemBuffer) {
+                    backwardsOffset --;
+                }
+                let operatorBuffer = '';
+                while (i + backwardsOffset >= 0) {
+                    const char = text[i + backwardsOffset];
+                    if (char === ',') {
+                        break;
+                    }
+                    if (char === '(') {
+                        break;
+                    }
+                    if (char === ' ') {
+                        break;
+                    }
+
+                    //Match operators
+                    if (infixEndsWith(char + operatorBuffer)) {
+                        operatorBuffer = char + operatorBuffer;
+                        if (operatorBuffer in infixPrecedences) {
+                            //End, bump index back to before operator, minus 1 so it hits the last char of it.
+                            backwardsOffset += operatorBuffer.length - 1;
+                            break;
+                        }
+                    } else {
+                        if (infixEndsWith(char)) {
+                            operatorBuffer = char;
+                        } else {
+                            operatorBuffer = '';
+                        }
+                    }
+                    backwardsOffset --;
+                }
+                itemBuffer = text.slice(i + backwardsOffset + 1, i);
+            }
+
+            if (itemBuffer) {
+                //Restructured, start over with one less method
+                text = text.slice(0, i - itemBuffer.length) + text.slice(i + 1, functionIndex + 1) + itemBuffer + ',' + text.slice(functionIndex + 1);
+                i = 0;
+                mainTracker = newTracker();
+                handleSyntaxChars(text[0], mainTracker);
+            }
+        }
+    }
+
+    return text;
+}
+
+// console.log(preprocessMethodSyntax('".".times(2)'))
+// console.log(preprocessMethodSyntax("f(1).times(2)"))
+// console.log(preprocessMethodSyntax("1<=3.times(2).divided(4)"))
+// console.log(preprocessMethodSyntax("3.times(2)"))
+// console.log(preprocessMethodSyntax("f(3.times(2,3))"))
+// console.log(preprocessMethodSyntax("[1,2,3].contains(3)"))
 
 
 const tokenize = (segment) => {
@@ -421,8 +520,9 @@ export const handleAssignment = (rawText) => {
 }
 
 export const lex = (rawText) => {
+    const ufcsText = preprocessMethodSyntax(rawText);
     //This will cause issues if anything with lower precedence than assignment is ever added
-    const [name, body] = handleAssignment(rawText);
+    const [name, body] = handleAssignment(ufcsText);
     if (name !== '_') {
         return "=(\"" + name + "\"," + shunt(body) + ")";
     }
