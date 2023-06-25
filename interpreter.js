@@ -142,9 +142,20 @@ export const callFunctionByReference = (ref, args, variables, morphisms, name) =
 
 export const callFunction = (name, args, variables, morphisms) => {
 
-    const named = variables.getOrNull(name);
+    let named = variables.getOrNull(name);
     if (!named) {
-        return createError("Unknown function " + name + " invoked.");
+        const booleanName = variables.getOrNull(name + '?');
+        const assertionName = variables.getOrNull(name + '!');
+
+        if (booleanName && assertionName) {
+            return createError("Ambiguous conversion from " + name + " to " + name + '? and ' + name + '! found.');
+        }
+
+        if (!booleanName && !assertionName) {
+            return createError("Unknown function " + name + " invoked.");
+        }
+
+        named = booleanName ?? assertionName;
     }
 
     if (!isAlias(named.type) || named.type.alias !== "FUNCTION") {
