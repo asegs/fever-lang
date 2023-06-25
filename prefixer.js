@@ -194,12 +194,14 @@ const infixEndsWith = (buf) => {
 const preprocessMethodSyntax = (text) => {
     let mainTracker = newTracker();
     handleSyntaxChars(text[0], mainTracker);
-    //Handle . in quotes
     for (let i = 1 ; i < text.length - 1 ; i ++ ) {
         const char = text[i];
         handleSyntaxChars(char, mainTracker);
         if (!quoted(mainTracker) && char === '.') {
             const next = text[i + 1];
+            if (text[i - 1] === '.') {
+                continue;
+            }
             if (next === '.') {
                 continue;
             }
@@ -269,7 +271,7 @@ const preprocessMethodSyntax = (text) => {
             if (itemBuffer) {
                 //Restructured, start over with one less method
                 text = text.slice(0, i - itemBuffer.length) + text.slice(i + 1, functionIndex + 1) + itemBuffer + ',' + text.slice(functionIndex + 1);
-                i = 0;
+                i = 1;
                 mainTracker = newTracker();
                 handleSyntaxChars(text[0], mainTracker);
             }
@@ -285,11 +287,17 @@ const preprocessMethodSyntax = (text) => {
 // console.log(preprocessMethodSyntax("3.times(2)"))
 // console.log(preprocessMethodSyntax("f(3.times(2,3))"))
 // console.log(preprocessMethodSyntax("[1,2,3].contains(3)"))
+// console.log(preprocessMethodSyntax("1..a"))
 
 
 const tokenize = (segment) => {
     const tokens = [];
-    let buffer = '';
+    let buffer = '';// console.log(preprocessMethodSyntax('".".times(2)'))
+// console.log(preprocessMethodSyntax("f(1).times(2)"))
+// console.log(preprocessMethodSyntax("1<=3.times(2).divided(4)"))
+// console.log(preprocessMethodSyntax("3.times(2)"))
+// console.log(preprocessMethodSyntax("f(3.times(2,3))"))
+// console.log(preprocessMethodSyntax("[1,2,3].contains(3)"))
     const tracker = newTracker();
 
     for (let i = 0 ; i < segment.length ; i ++ ) {

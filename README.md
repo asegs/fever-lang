@@ -223,6 +223,25 @@ f(true) //2
 f(false) //1
 ```
 
-Morphisms are considered increasingly dubious as they require a farther path to the given type, so a longer morphism chain is worth less in a pattern match than a short one.
+Morphisms are considered increasingly treacherous as they require a farther path to the given type, so a longer morphism chain is worth less in a pattern match than a short one.
+
+#### Syntax Tricks
+
+Fever has a few novel syntax features.  One common one is the inclusion of non-alphanumeric characters in variables and function names.  For example:
+```js
+contains?([1,2,3],3) //true
++ = {a:my_type, b:my_type} => ... //overrides the add function for a given type
+quit!(code)
+```
+
+Fever also supports universal function call syntax (UFCS) in which each function can be called as a method.
+```js
+[1,2,3].contains?(3) //true
+3.square() //9
+5.plus(3).times(2) //16, methods are chained sequentially
+f(x).g()
+```
+
+Method calls effectively have the highest operator precedence and will always be grouped first, before any reordering.
 
 
