@@ -105,13 +105,7 @@ export const inferTypeAndValue = (string, vars, morphisms, goal) => {
                 return missing;
             }
         }
-        if (items.length > 0) {
-            const first = items[0];
-            if (items.every(i => typeAssignableFrom(i.type, first.type))) {
-                return createVar(items, createTypedList(first.type));
-            }
-        }
-        return createVar(items, meta.LIST);
+        return createVar(items, inferListType(items));
     } else if (isTuple(string)) {
         const entries = parseCollectionToItems(string);
         const items = entries.map(e => inferTypeAndValue(e, vars, morphisms, goal));
@@ -175,6 +169,15 @@ export const feverStringFromJsString = (jsString) => {
     return createVar(jsString.split('').map(char => createVar(char, primitives.CHARACTER)), meta.STRING);
 }
 
+export const inferListType = (items, optionalAlias) => {
+    if (items.length > 0) {
+        const first = items[0];
+        if (items.every(i => typeAssignableFrom(i.type, first.type))) {
+            return createTypedList(first.type, optionalAlias);
+        }
+    }
+    return meta.LIST;
+}
 // console.log(inferTypeAndValue(lex("3"), vars))
 // console.log(inferTypeAndValue(lex("3.5"), vars))
 // console.log(inferTypeAndValue(lex("-82.13"), vars))

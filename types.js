@@ -81,14 +81,13 @@ const weightedAnyType = (depth) => {
 }
 
 
-//Track depth param
-export const typeSatisfaction = (child, parent, genericTable, depth) => {
+export const typeSatisfaction = (child, parent, genericTable, depth, actualChild) => {
     if (parent.baseName === "ANY") {
 
         if (isGeneric(parent)) {
             //We are either matching against a known type
             if (parent.generic in genericTable) {
-                return typeSatisfaction(child, genericTable[parent.generic], genericTable, depth);
+                return typeSatisfaction(child, genericTable[parent.generic], genericTable, depth, actualChild);
             }
 
             //Or we just encountered some generic for the first time
@@ -118,8 +117,18 @@ export const typeSatisfaction = (child, parent, genericTable, depth) => {
 
     let combinedScore = 0;
 
+    if (parent.baseName === 'LIST' && child.baseName === 'LIST' && actualChild.value.length === 0) {
+        return [typeWeights.EQUIVALENT, genericTable];
+    }
+
     for (let i = 0 ; i < child.types.length ; i ++ ) {
-        const [satisfaction, gt] = typeSatisfaction(child.types[i], parent.types[i], genericTable, depth + 1);
+        let subChild;
+        if (child.baseName === 'LIST') {
+            subChild = actualChild;
+        } else {
+            subChild = actualChild.value[i];
+        }
+        const [satisfaction, gt] = typeSatisfaction(child.types[i], parent.types[i], genericTable, depth + 1, subChild);
         if (satisfaction === 0) {
             return [0, genericTable];
         }

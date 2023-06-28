@@ -8,7 +8,7 @@ import {
     recursiveToString, typeAssignableFrom, typeWeights
 } from './types.js'
 import {callFunction, callFunctionByReference, evaluate, goals} from "./interpreter.js";
-import {feverStringFromJsString} from "./literals.js";
+import {feverStringFromJsString, inferListType} from "./literals.js";
 
 const newFunction = (arity, types, functionOperation, args) => {
     const func = {
@@ -46,8 +46,27 @@ export const builtins = {
         newFunction(
             2,
             [meta.LIST, meta.LIST],
-            ([a, b]) => createVar(a.value.concat(b.value), a.type)
+            ([a, b]) => {
+                const l = a.value.concat(b.value);
+                return createVar(l, inferListType(l));
+            }
 
+        ),
+        newFunction(
+            2,
+            [meta.LIST, meta.STRING],
+            ([a,b]) => {
+                const l = [...a.value, b];
+                return createVar(l, inferListType(l));
+            }
+        ),
+        newFunction(
+            2,
+            [meta.STRING, meta.LIST],
+            ([a,b]) => {
+                const l = [a, ...b.value];
+                return createVar(l, inferListType(l));
+            }
         ),
         newFunction(
             2,
@@ -58,12 +77,18 @@ export const builtins = {
         newFunction(
             2,
             [primitives.ANY, meta.LIST],
-            ([a, b]) => createVar([a, ...b.value], b.type)
+            ([a, b]) => {
+                const l = [a, ...b.value];
+                return createVar(l, inferListType(l));
+            }
         ),
         newFunction(
             2,
             [meta.LIST, primitives.ANY],
-            ([a, b]) => createVar([...a.value, b], a.type)
+            ([a, b]) => {
+                const l = [...a.value, b];
+                return createVar(l, inferListType(l));
+            }
         ),
         newFunction(
             2,
@@ -459,7 +484,7 @@ export const builtins = {
                     for (let i = 0 ; i < size ; i ++) {
                         mutatedArgs.push(permutations[i](args[i], variables, morphisms));
                     }
-                    return isListAlias ? createVar(mutatedArgs[0].value, newType) : createVar(mutatedArgs, newType);
+                    return isListAlias ? createVar(mutatedArgs[0].value, inferListType(mutatedArgs[0].value, realName)) : createVar(mutatedArgs, newType);
                 }
 
                 registerNewFunction(
@@ -1056,7 +1081,7 @@ const namedMap = (list, action, variables, morphisms, [element, index, intermedi
         variables.exitScope();
     }
 
-    const result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
+    const result = createVar(internalList, inferListType(internalList, list.type.alias));
 
     if (isAlias(list.type)) {
         const created = newOfType(result.type, [result], variables, morphisms);
@@ -1104,7 +1129,7 @@ const namedFilter = (list, action, variables, morphisms, [element, index, interm
         variables.exitScope();
     }
 
-    const result = createVar(internalList, createTypedList((internalList.length > 0 ? internalList[0].type : primitives.ANY), list.type.alias));
+    const result = createVar(internalList, inferListType(internalList, list.type.alias));
 
     if (isAlias(list.type)) {
         const created = newOfType(result.type, [result], variables, morphisms);
