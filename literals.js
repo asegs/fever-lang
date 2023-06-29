@@ -64,6 +64,39 @@ const parseCollectionToItems = (string) => {
 
 const recursiveTypeMatch = new RegExp(/^(list|tuple)\[(.*)]$/m);
 
+export const AST_NODE = (text, type, children, value) => {
+    return {
+        'text': text,
+        'children': children,
+        'value': value,
+        'type': type
+    }
+}
+
+export const expressionToAst = (expr) => {
+    if (expr === '[]') {
+        return AST_NODE(expr, meta.LIST, [], createVar([], meta.LIST));
+    }
+
+    if (expr === '""') {
+        return AST_NODE(expr, meta.STRING, [], createVar([], meta.STRING));
+    }
+
+    if (expr === '()') {
+        return AST_NODE(expr, meta.TUPLE, [], createVar([], meta.TUPLE));
+    }
+
+    if (everyCharNumeric(expr)) {
+        return AST_NODE(expr, primitives.NUMBER, null, createVar(Number(expr), primitives.NUMBER));
+    }
+
+    if (isStringLiteral(expr)) {
+        return AST_NODE()
+    }
+
+
+}
+
 export const inferTypeAndValue = (string, vars, morphisms, goal) => {
     if (goal === goals.MISSING) {
         if (vars.hasVariableInScope(string)) {
