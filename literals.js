@@ -1,12 +1,12 @@
 import {
     createError,
-    createPatternFromString,
+    createPatternFromString, createType,
     createTypedList,
     createTypedTuple, createTypeVar,
     createVar, inferTypeFromString, meta,
     primitives, typeAssignableFrom
 } from './types.js'
-import {splitArray} from "./prefixer.js";
+import {splitArray, splitGeneral, trimAndSplitArray} from "./prefixer.js";
 import {evaluate, goals, findMissing} from "./interpreter.js";
 
 const everyCharNumeric = (string) => {
@@ -64,38 +64,134 @@ const parseCollectionToItems = (string) => {
 
 const recursiveTypeMatch = new RegExp(/^(list|tuple)\[(.*)]$/m);
 
-export const AST_NODE = (text, type, children, value) => {
+export const AST_NODE = (text, obj) => {
     return {
         'text': text,
-        'children': children,
-        'value': value,
-        'type': type
+        'obj': obj
     }
+}
+
+export const AST_SPECIAL_TYPES = {
+    "VARIABLE": createType("VARIABLE",[], false),
+    "FUNCTION_INVOCATION": createType("FUNCTION_INVOCATION", [], false)
+}
+
+const isFunctionCall = (text) => {
+    return /^[^(]+\(.*\)$/gm.test(text);
+}
+
+const splitIntoNameAndBody = (text) => {
+    const firstParen = text.indexOf("(");
+    return [text.slice(0, firstParen), text.slice(firstParen)]
 }
 
 export const expressionToAst = (expr) => {
     if (expr === '[]') {
-        return AST_NODE(expr, meta.LIST, [], createVar([], meta.LIST));
+        return AST_NODE(expr, createVar([], meta.LIST));
     }
 
     if (expr === '""') {
-        return AST_NODE(expr, meta.STRING, [], createVar([], meta.STRING));
+        return AST_NODE(expr, createVar([], meta.STRING));
     }
 
     if (expr === '()') {
-        return AST_NODE(expr, meta.TUPLE, [], createVar([], meta.TUPLE));
+        return AST_NODE(expr, createVar([], meta.TUPLE));
     }
 
     if (everyCharNumeric(expr)) {
-        return AST_NODE(expr, primitives.NUMBER, null, createVar(Number(expr), primitives.NUMBER));
+        return AST_NODE(expr, createVar(Number(expr), primitives.NUMBER));
     }
 
     if (isStringLiteral(expr)) {
-        return AST_NODE()
+        return AST_NODE(expr, feverStringFromJsString(expr.slice(1, expr.length - 1)));
     }
 
+    if (wordIsBoolean(expr)) {
+        return AST_NODE(expr, createVar(expr === "true", primitives.BOOLEAN));
+    }
 
+    if (isList(expr)) {
+        const entries = parseCollectionToItems(expr);
+        const items = entries.map(e => expressionToAst(e));
+        return AST_NODE(expr, createVar(items, inferListType(items)));
+    }
+
+    else if (isTuple(expr)) {
+        const entries = parseCollectionToItems(expr);
+        const items = entries.map(e => expressionToAst(e));
+        return AST_NODE(expr, createVar(items, createTypedTuple(items.map(i => i.type))));
+    }
+
+    if (isExpression(expr)) {
+        const expression = expr.slice(1, expr.length - 1);
+        return expressionToAst(expression);
+    }
+
+    if (isSignature(expr)) {
+        const entries = parseCollectionToItems(expr);
+        return AST_NODE(expr, createVar(entries.map(entry => createPatternAstFromSting(entry)), meta.SIGNATURE));
+    }
+
+    if (isFunctionCall(expr)) {
+        const [name, body] = splitIntoNameAndBody(expr);
+        const args = trimAndSplitArray(body).map(arg => expressionToAst(arg));
+        return AST_NODE(name, createVar(args, AST_SPECIAL_TYPES.FUNCTION_INVOCATION));
+    }
+
+    return AST_NODE(expr, createVar(expr, AST_SPECIAL_TYPES.VARIABLE));
 }
+
+const createPatternAstFromSting = (string) => {
+    const conditionAndType = splitGeneral(string, ':');
+    const hasType = conditionAndType.length === 2;
+
+    const condition = conditionAndType[0];
+
+    let conditionAst;
+    if (condition[0] === '(' && condition[condition.length - 1] === ')') {
+        conditionAst = expressionToAst(condition.slice(1, condition.length - 1));
+    } else {
+        conditionAst = expressionToAst(condition);
+    }
+
+    return [createVar([conditionAst, hasType ? createVar(conditionAndType[1], AST_SPECIAL_TYPES.VARIABLE): createTypeVar(primitives.ANY)], meta.TUPLE)]
+}
+
+//Evaluates all non static items as missing.
+export const missing = (astNode) => {
+    if (astNode.obj.type.baseName === 'VARIABLE') {
+        return {
+            'var': {
+                [astNode.text]: astNode
+            },
+            'func': {
+            }
+        }
+    }
+
+    if (astNode.obj.type.baseName === 'FUNCTION_INVOCATION') {
+        return {
+            'var': {
+            },
+            'func': {
+                [astNode.text]: astNode
+            }
+        }
+    }
+
+    let missingEntries = {'var':{}, 'func':{}};
+    if (Array.isArray(astNode.obj.value)) {
+        for (const item of astNode.obj.value) {
+            const result = missing(item);
+            missingEntries = {'var': {...missingEntries.var, ...result.var}, 'func': {...missingEntries.func, ...result.func}};
+        }
+        return missingEntries;
+    }
+
+    return {'var': {}, 'func': {}};
+}
+
+
 
 export const inferTypeAndValue = (string, vars, morphisms, goal) => {
     if (goal === goals.MISSING) {
@@ -128,7 +224,6 @@ export const inferTypeAndValue = (string, vars, morphisms, goal) => {
         if (wordIsBoolean(string)) {
             return createVar(string === "true", primitives.BOOLEAN);
         }
-        //Return from vars table.
     } else if (isList(string)) {
         const entries = parseCollectionToItems(string);
         const items = entries.map(e => inferTypeAndValue(e, vars, morphisms, goal));
@@ -204,6 +299,9 @@ export const feverStringFromJsString = (jsString) => {
 
 export const inferListType = (items, optionalAlias) => {
     if (items.length > 0) {
+        if (items.some(item => item.type.baseName === 'VARIABLE' || item.type.baseName === 'FUNCTION_INVOCATION')) {
+            return meta.LIST;
+        }
         const first = items[0];
         if (items.every(i => typeAssignableFrom(i.type, first.type))) {
             return createTypedList(first.type, optionalAlias);
