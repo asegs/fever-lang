@@ -4,9 +4,9 @@ import {
     createTypedList,
     createTypedTuple, createTypeVar,
     createVar, inferTypeFromString, meta,
-    primitives, typeAssignableFrom
+    primitives, typeAssignableFrom, typeFromString
 } from './types.js'
-import {splitArray, splitGeneral, trimAndSplitArray} from "./prefixer.js";
+import {lex, splitArray, splitGeneral, trimAndSplitArray} from "./prefixer.js";
 import {evaluate, goals, findMissing} from "./interpreter.js";
 
 const everyCharNumeric = (string) => {
@@ -141,6 +141,7 @@ export const expressionToAst = (expr) => {
     return AST_NODE(expr, createVar(expr, AST_SPECIAL_TYPES.VARIABLE));
 }
 
+
 const createPatternAstFromSting = (string) => {
     const conditionAndType = splitGeneral(string, ':');
     const hasType = conditionAndType.length === 2;
@@ -154,7 +155,18 @@ const createPatternAstFromSting = (string) => {
         conditionAst = expressionToAst(condition);
     }
 
-    return [createVar([conditionAst, hasType ? createVar(conditionAndType[1], AST_SPECIAL_TYPES.VARIABLE): createTypeVar(primitives.ANY)], meta.TUPLE)]
+    let inferredType = primitives.ANY;
+    if (hasType) {
+        inferredType = typeFromString(conditionAndType[1]);
+    }
+
+    return [createVar([conditionAst, hasType ? (inferredType.baseName === 'ANY' ? createVar(conditionAndType[1], AST_SPECIAL_TYPES.VARIABLE) : createTypeVar(inferredType)): createTypeVar(primitives.ANY)], meta.TUPLE)]
+}
+
+export const populateTypeHierarchy = (typeNode, variables) => {
+    if (typeNode.obj.type.baseName === 'VARIABLE') {
+        return AST_NODE(typeNode.text, )
+    }
 }
 
 //Evaluates all non static items as missing.
@@ -190,8 +202,6 @@ export const missing = (astNode) => {
 
     return {'var': {}, 'func': {}};
 }
-
-
 
 export const inferTypeAndValue = (string, vars, morphisms, goal) => {
     if (goal === goals.MISSING) {

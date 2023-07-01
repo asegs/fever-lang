@@ -1,5 +1,5 @@
 import {lex, trimAndSplitArray} from "./prefixer.js";
-import {inferTypeAndValue} from "./literals.js";
+import {expressionToAst, inferTypeAndValue} from "./literals.js";
 import {typeSatisfaction, createVar, isAlias, createError, createTypeVar} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
@@ -14,9 +14,10 @@ export const goals = {
 
 export const interpret = (text, variables, morphisms ,goal) => {
     const lexed = lex(text)
+    const ast = expressionToAst(lexed);
     //Uncomment for lexer debugging
     //console.log(lexed)
-    return evaluate(lexed, variables, morphisms, goal);
+    return evaluateAst(ast, variables, morphisms, goal);
 }
 const stripRedundantParens = (text) => {
     while (text.startsWith("(") && text.endsWith(")")) {
@@ -172,6 +173,27 @@ export const findMissing = (args) => {
     const arrays = args.filter(arg => Array.isArray(arg));
     const flattenedLeaves = arrays.flatMap(array => findMissing(array));
     return missingLeaves.concat(flattenedLeaves);
+}
+
+export const evaluateAst = (node, variables, morphisms, goal) => {
+    if (node.obj.type.baseName === 'FUNCTION_INVOCATION') {
+        const name = node.text;
+        const args = node.obj.value.map(argNode => evaluateAst(argNode, variables, morphisms, goal));
+        if (goal === goals.EVALUATE) {
+            return callFunction(name, args, variables, morphisms);
+        }
+    }
+    if (node.obj.type.baseName === 'VARIABLE') {
+        const resolved = variables.getOrNull(node.text);
+        if (resolved) {
+            return resolved;
+        } else {
+            return createError("No variable named " + node.text);
+        }
+    }
+
+    //May need to resolve this.
+    return node.obj;
 }
 
 

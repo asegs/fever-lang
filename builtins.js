@@ -846,9 +846,10 @@ export const registerBuiltins = (variables) => {
     }
 }
 
-const typesFromSignature = (signature) => {
+const typesFromSignature = (signature, vars) => {
     return signature.value.map(i => i.value[1].value);
 }
+
 
 const conditionsFromSignature = (signature) => {
     const conditions = [];

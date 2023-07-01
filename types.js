@@ -176,6 +176,43 @@ export const createCondition = (name, expr, specificity) => {
     return createVar([name, expr, specificity], meta.CONDITION);
 }
 
+export const typeFromString = (typeString) => {
+    const string = typeString.trim();
+    for (const [, prim] of Object.entries(primitives)) {
+        if (string.toLowerCase() === prim.baseName.toLowerCase()) {
+            return prim;
+        }
+        if (isAlias(prim) && (string.toLowerCase() === prim.alias.toLowerCase())) {
+            return prim;
+        }
+    }
+
+    for (const [, m] of Object.entries(meta)) {
+        if (isAlias(m) && (string.toLowerCase() === m.alias.toLowerCase())) {
+            return m;
+        }
+    }
+
+    if (string in shorthands) {
+        return shorthands[string];
+    }
+
+    if (string[0] === '[') {
+        const internalType = typeFromString(string.slice(1, string.length - 1));
+        return createTypedList(internalType);
+    }
+    if (string[0] === '(') {
+        const types = splitArray(string.slice(1, string.length - 1)).map(e => typeFromString(e));
+        return createTypedTuple(types);
+    }
+
+    return primitives.ANY;
+}
+
+export const typeFromStringWithContext = (typeString, variables) => {
+    return inferTypeFromString(typeString, variables);
+}
+
 export const inferTypeFromString = (rawString, variables) => {
     const string = rawString.trim();
     for (const [, prim] of Object.entries(primitives)) {
