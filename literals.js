@@ -64,13 +64,6 @@ const parseCollectionToItems = (string) => {
 
 const recursiveTypeMatch = new RegExp(/^(list|tuple)\[(.*)]$/m);
 
-export const AST_NODE = (text, obj) => {
-    return {
-        'text': text,
-        'obj': obj
-    }
-}
-
 export const AST_SPECIAL_TYPES = {
     "VARIABLE": createType("VARIABLE",[], false),
     "FUNCTION_INVOCATION": createType("FUNCTION_INVOCATION", [], false)
@@ -176,9 +169,7 @@ const createPatternAstFromSting = (string) => {
 }
 
 export const populateTypeHierarchy = (typeNode, variables) => {
-    if (typeNode.type.baseName === 'VARIABLE') {
-        return AST_NODE(typeNode.text, )
-    }
+    //This will be interesting...
 }
 
 //Evaluates all non static items as missing.

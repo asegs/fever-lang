@@ -426,7 +426,6 @@ export const builtins = {
                 for (let i = 0 ; i < size ; i ++ ) {
                     const condition = signature.value[i].value[0].value;
                     const name = condition[0];
-
                     //Handle 1 <-> 1 members
                     const expression = condition[1];
                     if (expression.functionName.startsWith('==') || expression.value === 'true') {

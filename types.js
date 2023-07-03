@@ -259,6 +259,14 @@ export const inferTypeFromString = (rawString, variables) => {
     return createGeneric(primitives.ANY, string);
 }
 
+export const conditionFromAst = (ast, variables) => {
+    if (ast.type.baseName === 'VARIABLE' && ast.value === '_') {
+        return [createCondition(createVar('_', meta.STRING), createVar(createVar(true, primitives.BOOLEAN), primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
+    }
+
+    //Populate ast from variables table.  Evaluate what can be evaluated?  Not necessary...but a little bit necessary
+}
+
 /**
  Patterns can be:
  a (unknown)
