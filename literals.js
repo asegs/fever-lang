@@ -87,58 +87,60 @@ const splitIntoNameAndBody = (text) => {
 
 export const expressionToAst = (expr) => {
     if (expr === '[]') {
-        return AST_NODE(expr, createVar([], meta.LIST));
+        return createVar([], meta.LIST);
     }
 
     if (expr === '""') {
-        return AST_NODE(expr, createVar([], meta.STRING));
+        return createVar([], meta.STRING);
     }
 
     if (expr === '()') {
-        return AST_NODE(expr, createVar([], meta.TUPLE));
+        return createVar([], meta.TUPLE);
     }
 
     if (everyCharNumeric(expr)) {
-        return AST_NODE(expr, createVar(Number(expr), primitives.NUMBER));
+        return createVar(Number(expr), primitives.NUMBER);
     }
 
     if (isStringLiteral(expr)) {
-        return AST_NODE(expr, feverStringFromJsString(expr.slice(1, expr.length - 1)));
+        return feverStringFromJsString(expr.slice(1, expr.length - 1));
     }
 
     if (wordIsBoolean(expr)) {
-        return AST_NODE(expr, createVar(expr === "true", primitives.BOOLEAN));
+        return createVar(expr === "true", primitives.BOOLEAN);
     }
 
     if (isList(expr)) {
         const entries = parseCollectionToItems(expr);
         const items = entries.map(e => expressionToAst(e));
-        return AST_NODE(expr, createVar(items, inferListType(items)));
+        return createVar(items, inferListType(items));
     }
 
     else if (isTuple(expr)) {
         const entries = parseCollectionToItems(expr);
         const items = entries.map(e => expressionToAst(e));
-        return AST_NODE(expr, createVar(items, createTypedTuple(items.map(i => i.type))));
+        return createVar(items, createTypedTuple(items.map(i => i.type)));
     }
 
     if (isExpression(expr)) {
         const expression = expr.slice(1, expr.length - 1);
-        return expressionToAst(expression);
+        return createVar(expressionToAst(expression), primitives.EXPRESSION);
     }
 
     if (isSignature(expr)) {
         const entries = parseCollectionToItems(expr);
-        return AST_NODE(expr, createVar(entries.map(entry => createPatternAstFromSting(entry)), meta.SIGNATURE));
+        return createVar(entries.map(entry => createPatternAstFromSting(entry)), meta.SIGNATURE);
     }
 
     if (isFunctionCall(expr)) {
         const [name, body] = splitIntoNameAndBody(expr);
         const args = trimAndSplitArray(body).map(arg => expressionToAst(arg));
-        return AST_NODE(name, createVar(args, AST_SPECIAL_TYPES.FUNCTION_INVOCATION));
+        const functionInvocation = createVar(args, AST_SPECIAL_TYPES.FUNCTION_INVOCATION);
+        functionInvocation['functionName'] = name;
+        return functionInvocation;
     }
 
-    return AST_NODE(expr, createVar(expr, AST_SPECIAL_TYPES.VARIABLE));
+    return createVar(expr, AST_SPECIAL_TYPES.VARIABLE);
 }
 
 
@@ -160,40 +162,50 @@ const createPatternAstFromSting = (string) => {
         inferredType = typeFromString(conditionAndType[1]);
     }
 
-    return [createVar([conditionAst, hasType ? (inferredType.baseName === 'ANY' ? createVar(conditionAndType[1], AST_SPECIAL_TYPES.VARIABLE) : createTypeVar(inferredType)): createTypeVar(primitives.ANY)], meta.TUPLE)]
+    const realType = hasType ? (inferredType.baseName === 'ANY' ? createVar(conditionAndType[1], AST_SPECIAL_TYPES.VARIABLE) : createTypeVar(inferredType)): createTypeVar(primitives.ANY);
+    const missingVars = missing(conditionAst);
+    const missingVarNames = Object.keys(missingVars.var);
+    let varName;
+    if (missingVarNames.length > 0) {
+        varName = missingVarNames[0];
+    }  else {
+        varName = '__repr';
+    }
+    const conditionObj = createVar([varName, conditionAst, 1], meta.CONDITION)
+    return createVar([conditionObj, realType], meta.PATTERN)
 }
 
 export const populateTypeHierarchy = (typeNode, variables) => {
-    if (typeNode.obj.type.baseName === 'VARIABLE') {
+    if (typeNode.type.baseName === 'VARIABLE') {
         return AST_NODE(typeNode.text, )
     }
 }
 
 //Evaluates all non static items as missing.
 export const missing = (astNode) => {
-    if (astNode.obj.type.baseName === 'VARIABLE') {
+    if (astNode.type.baseName === 'VARIABLE') {
         return {
             'var': {
-                [astNode.text]: astNode
+                [astNode.value]: astNode
             },
             'func': {
             }
         }
     }
 
-    if (astNode.obj.type.baseName === 'FUNCTION_INVOCATION') {
+    if (astNode.type.baseName === 'FUNCTION_INVOCATION') {
         return {
             'var': {
             },
             'func': {
-                [astNode.text]: astNode
+                [astNode.functionName]: astNode
             }
         }
     }
 
     let missingEntries = {'var':{}, 'func':{}};
-    if (Array.isArray(astNode.obj.value)) {
-        for (const item of astNode.obj.value) {
+    if (Array.isArray(astNode.value)) {
+        for (const item of astNode.value) {
             const result = missing(item);
             missingEntries = {'var': {...missingEntries.var, ...result.var}, 'func': {...missingEntries.func, ...result.func}};
         }

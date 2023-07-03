@@ -176,24 +176,24 @@ export const findMissing = (args) => {
 }
 
 export const evaluateAst = (node, variables, morphisms, goal) => {
-    if (node.obj.type.baseName === 'FUNCTION_INVOCATION') {
-        const name = node.text;
-        const args = node.obj.value.map(argNode => evaluateAst(argNode, variables, morphisms, goal));
+    if (node.type.baseName === 'FUNCTION_INVOCATION') {
+        const name = node.functionName;
+        const args = node.value.map(argNode => evaluateAst(argNode, variables, morphisms, goal));
         if (goal === goals.EVALUATE) {
             return callFunction(name, args, variables, morphisms);
         }
     }
-    if (node.obj.type.baseName === 'VARIABLE') {
-        const resolved = variables.getOrNull(node.text);
+    if (node.type.baseName === 'VARIABLE') {
+        const resolved = variables.getOrNull(node.value);
         if (resolved) {
             return resolved;
         } else {
-            return createError("No variable named " + node.text);
+            return createError("No variable named " + node.value);
         }
     }
 
     //May need to resolve this.
-    return node.obj;
+    return node;
 }
 
 

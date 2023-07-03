@@ -429,7 +429,7 @@ export const builtins = {
 
                     //Handle 1 <-> 1 members
                     const expression = condition[1];
-                    if (expression.value.startsWith('==') || expression.value === 'true') {
+                    if (expression.functionName.startsWith('==') || expression.value === 'true') {
                         permutations.push(arg => arg);
                     } else {
                         permutations.push(
