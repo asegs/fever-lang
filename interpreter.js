@@ -1,5 +1,5 @@
-import {lex, trimAndSplitArray} from "./prefixer.js";
-import {expressionToAst, inferTypeAndValue} from "./literals.js";
+import {lex} from "./prefixer.js";
+import {expressionToAst} from "./literals.js";
 import {typeSatisfaction, createVar, isAlias, createError, createTypeVar} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
@@ -192,44 +192,6 @@ export const evaluateAst = (node, variables, morphisms) => {
 
     //May need to resolve this.
     return node;
-}
-
-
-
-export const evaluate = (text, variables, morphisms, goal) => {
-    //const cleanText = stripRedundantParens(text);
-    const cleanText = text;
-    if (isFunctionCall(text)) {
-        const [name, body] = splitIntoNameAndBody(text);
-        const args = trimAndSplitArray(body).map(e => evaluate(e, variables, morphisms, goal));
-        if (goal === goals.EVALUATE) {
-            return callFunction(name, args, variables, morphisms);
-        } else {
-            if (variables.hasVariable(name)) {
-                return findMissing(args, variables, morphisms);
-            } else {
-                return findMissing([{'name': name, 'type': 'FUNCTION'}, ...args], variables, morphisms);
-            }
-
-        }
-    }
-
-    const result = inferTypeAndValue(cleanText, variables, morphisms, goal);
-    if (goal === goals.MISSING ) {
-        if (('value' in result) && Array.isArray(result.value)) {
-            return findMissing(result.value);
-        }
-        if ('name' in result) {
-            return [result];
-        }
-
-        if (Array.isArray(result)) {
-            return findMissing(result);
-        }
-
-        return [];
-    }
-    return result;
 }
 
 export const instance = () => {

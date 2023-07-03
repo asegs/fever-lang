@@ -7,7 +7,7 @@ import {
     primitives,
     recursiveToString, typeAssignableFrom, typeWeights
 } from './types.js'
-import {callFunction, callFunctionByReference, evaluate, evaluateAst, goals} from "./interpreter.js";
+import {callFunction, callFunctionByReference, evaluateAst, goals} from "./interpreter.js";
 import {feverStringFromJsString, inferListType} from "./literals.js";
 
 const newFunction = (arity, types, functionOperation, args) => {
@@ -383,7 +383,7 @@ export const builtins = {
                     for (let i = 0 ; i < args.length ; i ++ ) {
                         variables.assignValue(names[i], args[i]);
                     }
-                    const result = evaluate(expression.value, variables, morphisms, goals.EVALUATE);
+                    const result = evaluateAst(expression.value, variables, morphisms);
                     variables.exitScope();
                     return result;
                 }
@@ -425,14 +425,14 @@ export const builtins = {
                     const name = condition[0];
                     //Handle 1 <-> 1 members
                     const expression = condition[1];
-                    if (expression.functionName.startsWith('==') || expression.value === 'true') {
+                    if (expression.type.baseName === 'FUNCTION_INVOCATION' && expression.functionName.startsWith('==') || expression.value === 'true') {
                         permutations.push(arg => arg);
                     } else {
                         permutations.push(
                             (arg, variables, morphisms) => {
                                 variables.enterScope();
                                 variables.assignValue(name.value, arg);
-                                const result = evaluate(expression.value, variables, morphisms, goals.EVALUATE);
+                                const result = evaluateAst(expression.value, variables, morphisms);
                                 variables.exitScope();
                                 return result;
                             }
@@ -1070,7 +1070,7 @@ const namedMap = (list, action, variables, morphisms, [element, index, intermedi
         variables.assignValue(element, item);
         variables.assignValue(index, createVar(i, primitives.NUMBER));
         variables.assignValue(intermediate, createVar([...internalList], createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
-        const result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
+        const result = evaluateAst(action.value, variables, morphisms);
         internalList.push(result);
         variables.exitScope();
     }
@@ -1094,7 +1094,7 @@ const namedReduce = (list, acc, expr, variables, morphisms, [element, index, acc
         variables.assignValue(element, item);
         variables.assignValue(index, createVar(i, primitives.NUMBER));
         variables.assignValue(accumulator, acc);
-        acc = evaluate(expr.value, variables, morphisms, goals.EVALUATE);
+        acc = evaluateAst(expr.value, variables, morphisms);
         variables.exitScope();
         if (earlyTerminateIfNotFalse && acc.value !== false) {
             return acc;
@@ -1115,7 +1115,7 @@ const namedFilter = (list, action, variables, morphisms, [element, index, interm
         if (funcRef) {
             result = callFunctionByReference(funcRef, [item], variables, morphisms, 'lambda')
         } else {
-            result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
+            result = evaluateAst(action.value, variables, morphisms);
         }
         if (result.value) {
             internalList.push(item);

@@ -1,13 +1,11 @@
 import {
-    createError,
-    createPatternFromString, createType,
+    createType,
     createTypedList,
     createTypedTuple, createTypeVar,
-    createVar, inferTypeFromString, meta,
+    createVar, meta,
     primitives, typeAssignableFrom, typeFromString
 } from './types.js'
-import {lex, splitArray, splitGeneral, trimAndSplitArray} from "./prefixer.js";
-import {evaluate, goals, findMissing} from "./interpreter.js";
+import {splitArray, splitGeneral, trimAndSplitArray} from "./prefixer.js";
 
 const everyCharNumeric = (string) => {
    return string.match(/^-?[0-9]+$/g) || string.match(/^-?[0-9]+\.[0-9]+$/g);
@@ -206,106 +204,6 @@ export const missing = (astNode) => {
     }
 
     return {'var': {}, 'func': {}};
-}
-
-export const inferTypeAndValue = (string, vars, morphisms, goal) => {
-    if (goal === goals.MISSING) {
-        if (vars.hasVariableInScope(string)) {
-            return vars.lookupValueInScope(string);
-        }
-    } else {
-        if (vars.hasVariable(string)) {
-            return vars.lookupValue(string);
-        }
-    }
-    if (string === "[]") {
-        return createVar([], meta.LIST);
-    }
-    if (string === '""') {
-        return createVar([], meta.STRING);
-    }
-    if (string === '()') {
-        return createVar([], meta.TUPLE);
-    }
-    const asTypeVar = getAsTypeVar(string);
-    if (asTypeVar) {
-        return asTypeVar;
-    }
-    if (everyCharNumeric(string)) {
-        return createVar(Number(string), primitives.NUMBER);
-    } else if (isStringLiteral(string)) {
-        return feverStringFromJsString(string.slice(1, string.length - 1));
-    } else if (isWord(string)) {
-        if (wordIsBoolean(string)) {
-            return createVar(string === "true", primitives.BOOLEAN);
-        }
-    } else if (isList(string)) {
-        const entries = parseCollectionToItems(string);
-        const items = entries.map(e => inferTypeAndValue(e, vars, morphisms, goal));
-        if (goals.MISSING === goal) {
-            const missing = findMissing(items);
-            if (missing.length > 0) {
-                return missing;
-            }
-        }
-        return createVar(items, inferListType(items));
-    } else if (isTuple(string)) {
-        const entries = parseCollectionToItems(string);
-        const items = entries.map(e => inferTypeAndValue(e, vars, morphisms, goal));
-        if (goals.MISSING === goal) {
-            const missing = findMissing(items);
-            if (missing.length > 0) {
-                return missing;
-            }
-        }
-        return createVar(items, createTypedTuple(items.map(i => i.type)))
-    } else if (isExpression(string)) {
-        const expr = string.slice(1, string.length - 1);
-        const missing = evaluate(expr, vars, morphisms, goals.MISSING);
-        if (missing.length === 0) {
-            return evaluate(expr, vars, morphisms, goals.EVALUATE);
-        }
-
-        if (goal === goals.MISSING && missing.length > 0 ) {
-            return missing;
-        }
-        return createVar(expr, primitives.EXPRESSION);
-    } else if (isSignature(string)) {
-        const entries = parseCollectionToItems(string);
-        const takenVars = new Set();
-        const signatureItems = [];
-        for (let i = 0 ; i < entries.length ; i ++ ) {
-            const [pattern, varName] = createPatternFromString(entries[i], vars, morphisms, takenVars);
-            if (varName !== null) {
-                takenVars.add(varName);
-            }
-            signatureItems.push(pattern);
-        }
-        return createVar(signatureItems, meta.SIGNATURE);
-    }
-
-    const match = recursiveTypeMatch.exec(string);
-    if (match) {
-        const baseTypeString = match[1];
-        const subTypeString = match[2];
-
-       const returnType = (baseTypeString === 'list') ?
-           inferTypeFromString('[' + subTypeString + ']', vars) :
-           inferTypeFromString('(' + subTypeString + ')', vars);
-
-       if (returnType.baseName !== 'ANY') {
-           return createTypeVar(returnType);
-       }
-    }
-
-    if (goal === goals.EVALUATE) {
-        return createError("No variable named " + string);
-    } else {
-        return {
-            "type": "VARIABLE",
-            "name": string
-        };
-    }
 }
 
 export const feverStringFromJsString = (jsString) => {

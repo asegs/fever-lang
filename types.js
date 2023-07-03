@@ -1,5 +1,5 @@
-import {splitGeneral, splitArray} from "./prefixer.js";
-import {evaluate, evaluateAst, goals} from "./interpreter.js";
+import {splitArray} from "./prefixer.js";
+import {evaluateAst} from "./interpreter.js";
 import {AST_SPECIAL_TYPES, missing} from "./literals.js";
 
 
@@ -309,91 +309,14 @@ export const conditionFromAst = (ast, variables, morphisms) => {
     }
 
     if (populatedAst.type.baseName === 'FUNCTION_INVOCATION') {
-        return createCondition(missingNames[0], populatedAst, patternWeights.EXPRESSION);
+        return createCondition(createVar(missingNames[0], meta.STRING), populatedAst, createVar(patternWeights.EXPRESSION, primitives.NUMBER));
     } else if (populatedAst.type.baseName === 'VARIABLE') {
-        return createCondition(missingNames[0], createVar(true, primitives.BOOLEAN), patternWeights.ANY);
+        return createCondition(createVar(missingNames[0], meta.STRING), createVar(true, primitives.BOOLEAN), createVar(patternWeights.ANY, primitives.NUMBER));
     } else {
         const equalityCheck = createVar([createVar('__repr', AST_SPECIAL_TYPES.VARIABLE), ast], AST_SPECIAL_TYPES.FUNCTION_INVOCATION);
         equalityCheck.functionName = '==';
-        return createCondition('__repr', equalityCheck, patternWeights.VALUE);
+        return createCondition(createVar('__repr', meta.STRING), equalityCheck, createVar(patternWeights.VALUE, primitives.NUMBER));
     }
-}
-
-/**
- Patterns can be:
- a (unknown)
-
- [_,_3] (later)
- (len(a) % 2 == 0) (expression with unknown)
- */
-export const inferConditionFromString = (rawString, vars, morphisms, takenVars) => {
-    const string = rawString.trim();
-
-    if (string === '_') {
-        return [createCondition(createVar('_', meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
-    }
-
-    const missing = evaluate(string, vars, morphisms, goals.MISSING);
-    if (missing.length === 0) {
-        /**
-         123
-         [1,2,3]
-         b (known)
-         (b + 3) (expression with known)
-         */
-            // Catch case where it's just a function, we want to be able to redefine function names.
-            //ie. type 1 is: {name: string, price:#}
-            //and type 2 is: {name: string, size: #}
-            // Even though declaring type 1 introduced name as a function, we will never want to match function equality
-        let isPreviouslyDeclaredFunction = false;
-        if (!string.startsWith('(')) {
-            const consideredValue = vars.getOrNull(string);
-            if (consideredValue && isAlias(consideredValue.type) && consideredValue.type.alias === 'FUNCTION') {
-                isPreviouslyDeclaredFunction = true;
-                missing.push({'name': string, 'type': 'VARIABLE'});
-            }
-        }
-        if (!isPreviouslyDeclaredFunction) {
-            const result = evaluate(string, vars, morphisms, goals.EVALUATE);
-            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), result.type, null];
-        }
-       }
-
-    const acceptedMissing = missing.filter(item => !takenVars.has(item.name));
-
-    if (acceptedMissing.length === 0) {
-        //Then we have an expression or variable entirely using previous variables.
-        if (string[0] === '(') {
-            //Only reasonable case is (b * 2) where b is defined
-            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + string + ")", primitives.EXPRESSION), createVar(patternWeights.EXPRESSION, primitives.NUMBER)), primitives.ANY, null];
-            //b where b is defined
-        } else {
-            //Only reasonable case is (b * 2) where b is defined
-            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + missing[0].name + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), primitives.ANY, null];
-        }
-    }
-
-    /**
-     Distinguish between a, [1,2, a] (len(a) % 2 == 0)...let's just use parens.
-     */
-    const name = acceptedMissing[0].name;
-    if (string[0] === '(') {
-        // (len(a) % 2 == 0)
-        return [createCondition(createVar(name, meta.STRING), createVar(string, primitives.EXPRESSION), createVar(patternWeights.EXPRESSION, primitives.NUMBER)), primitives.ANY, name];
-    }
-
-    // a, won't support [1,2,a] yet, will need to destructure (what if we are actually testing for [1, 2, sublist]?)
-    return [createCondition(createVar(name, meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, name];
-}
-
-export const createPatternFromString = (string, vars, morphisms, takenVars) => {
-    const conditionAndType = splitGeneral(string, ':');
-    let type = conditionAndType.length === 1 ? primitives.ANY : inferTypeFromString(conditionAndType[1], vars);
-    const [condition, inferredType, namedVar] = inferConditionFromString(conditionAndType[0], vars, morphisms, takenVars);
-    if (type === primitives.ANY) {
-        type = inferredType;
-    }
-    return [createPattern(condition, createTypeVar(type)), namedVar];
 }
 
 const STRING = createTypedList(primitives.CHARACTER, "STRING");
