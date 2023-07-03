@@ -12,12 +12,12 @@ export const goals = {
 
 //.. as infix function
 
-export const interpret = (text, variables, morphisms ,goal) => {
+export const interpret = (text, variables, morphisms) => {
     const lexed = lex(text)
     const ast = expressionToAst(lexed);
     //Uncomment for lexer debugging
     //console.log(lexed)
-    return evaluateAst(ast, variables, morphisms, goal);
+    return evaluateAst(ast, variables, morphisms);
 }
 const stripRedundantParens = (text) => {
     while (text.startsWith("(") && text.endsWith(")")) {
@@ -175,13 +175,11 @@ export const findMissing = (args) => {
     return missingLeaves.concat(flattenedLeaves);
 }
 
-export const evaluateAst = (node, variables, morphisms, goal) => {
+export const evaluateAst = (node, variables, morphisms) => {
     if (node.type.baseName === 'FUNCTION_INVOCATION') {
         const name = node.functionName;
-        const args = node.value.map(argNode => evaluateAst(argNode, variables, morphisms, goal));
-        if (goal === goals.EVALUATE) {
-            return callFunction(name, args, variables, morphisms);
-        }
+        const args = node.value.map(argNode => evaluateAst(argNode, variables, morphisms));
+        return callFunction(name, args, variables, morphisms);
     }
     if (node.type.baseName === 'VARIABLE') {
         const resolved = variables.getOrNull(node.value);
@@ -241,7 +239,7 @@ export const instance = () => {
     registerBuiltins(variables);
 
     standardLib.forEach(line => {
-        interpret(line, variables, morphisms, goals.EVALUATE);
+        interpret(line, variables, morphisms);
     });
 
     //internalFile('../examples/lib.fv', variables, morphisms);

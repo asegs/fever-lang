@@ -418,7 +418,7 @@ export const builtins = {
                 if (isListAlias) {
                     newInnerType = createType("LIST", types[0].types, true);
                 }
-                const newType = isListAlias ? createTypedList(types[0].types[0], realName) :createTypedTuple(types, realName);
+                const newType = isListAlias ? createTypedList(types[0].types[0], realName) : createTypedTuple(types, realName);
                 meta[realName.toUpperCase()] = newType;
 
                 const permutations = [];

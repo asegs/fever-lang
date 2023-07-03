@@ -16,7 +16,7 @@ const file = (inputPath, vars, morphisms) => {
     file.split('\n').forEach((line, index) => {
         try {
             if (lineShouldBeEvaluated(line)) {
-                interpret(line, vars, morphisms, goals.EVALUATE);
+                interpret(line, vars, morphisms);
             }
         } catch (e) {
             console.log("Error on line " + (index + 1) + ": " + (e.stack ? e.stack : e));

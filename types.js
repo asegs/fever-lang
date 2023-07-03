@@ -1,5 +1,6 @@
 import {splitGeneral, splitArray} from "./prefixer.js";
-import {evaluate, goals} from "./interpreter.js";
+import {evaluate, evaluateAst, goals} from "./interpreter.js";
+import {AST_SPECIAL_TYPES} from "./literals.js";
 
 
 export const typeWeights = {
@@ -257,6 +258,42 @@ export const inferTypeFromString = (rawString, variables) => {
     }
 
     return createGeneric(primitives.ANY, string);
+}
+
+//Returns [new populated ast, boolean if all children are populated]
+export const populateAst = (ast, vars, morphisms) => {
+    if (!Array.isArray(ast.value)) {
+        if (ast.type.baseName === 'VARIABLE') {
+            const lookupValue = vars.getOrNull(ast.name);
+            if (lookupValue) {
+                return [lookupValue, true];
+            }
+            return [ast, false];
+        }
+        return [ast, true];
+    }
+
+    const populatedArgs = [];
+    let previousChildrenPopulated = true;
+    for (const child of ast.value) {
+        const [newChild, allPopulated] = populateAst(child, vars, morphisms);
+        previousChildrenPopulated = allPopulated && previousChildrenPopulated;
+        populatedArgs.push(newChild);
+    }
+
+    if (previousChildrenPopulated && ast.type.baseName === 'FUNCTION_INVOCATION') {
+        const populatedFunctionCall = createVar(populatedArgs, AST_SPECIAL_TYPES.FUNCTION_INVOCATION);
+        populatedFunctionCall.functionName = ast.functionName;
+        return [evaluateAst(populatedFunctionCall, vars, morphisms), true];
+    }
+
+    if (ast.type.baseName === 'FUNCTION_INVOCATION') {
+        const unpopulatedFunctionCall = createVar(populatedArgs, AST_SPECIAL_TYPES.FUNCTION_INVOCATION);
+        unpopulatedFunctionCall.functionName = ast.functionName;
+        return [unpopulatedFunctionCall, false];
+    }
+
+    return [createVar(populatedArgs, ast.type), previousChildrenPopulated];
 }
 
 export const conditionFromAst = (ast, variables) => {

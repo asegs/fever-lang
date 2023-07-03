@@ -21,7 +21,7 @@ const interpretInBrowser = (text) => {
     }
     let output;
 
-    const result = interpret(text, variables, morphisms, goals.EVALUATE);
+    const result = interpret(text, variables, morphisms);
     if (result.type === primitives.ERROR) {
         output = result.value;
     } else {
