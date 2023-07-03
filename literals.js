@@ -186,15 +186,15 @@ export const missing = (astNode) => {
         }
     }
 
-    if (astNode.type.baseName === 'FUNCTION_INVOCATION') {
-        return {
-            'var': {
-            },
-            'func': {
-                [astNode.functionName]: astNode
-            }
-        }
-    }
+    // if (astNode.type.baseName === 'FUNCTION_INVOCATION') {
+    //     return {
+    //         'var': {
+    //         },
+    //         'func': {
+    //             [astNode.functionName]: astNode
+    //         }
+    //     }
+    // }
 
     let missingEntries = {'var':{}, 'func':{}};
     if (Array.isArray(astNode.value)) {

@@ -298,7 +298,7 @@ export const populateAst = (ast, vars, morphisms) => {
 
 export const conditionFromAst = (ast, variables, morphisms) => {
     if (ast.type.baseName === 'VARIABLE' && ast.value === '_') {
-        return [createCondition(createVar('_', meta.STRING), createVar(createVar(true, primitives.BOOLEAN), primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
+        return createCondition(createVar('_', meta.STRING), createVar(true, primitives.BOOLEAN), createVar(patternWeights.ANY, primitives.NUMBER));
     }
 
     const [populatedAst, isComplete] = populateAst(ast, variables, morphisms);

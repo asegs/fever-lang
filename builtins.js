@@ -7,7 +7,7 @@ import {
     primitives,
     recursiveToString, typeAssignableFrom, typeWeights
 } from './types.js'
-import {callFunction, callFunctionByReference, evaluate, goals} from "./interpreter.js";
+import {callFunction, callFunctionByReference, evaluate, evaluateAst, goals} from "./interpreter.js";
 import {feverStringFromJsString, inferListType} from "./literals.js";
 
 const newFunction = (arity, types, functionOperation, args) => {
@@ -377,10 +377,7 @@ export const builtins = {
                 const size = signature.value.length;
 
                 const types = typesFromSignature(signature);
-                const conditions = conditionsFromSignature(signature).map(c => conditionFromAst(c.value[1], variables, morphisms));
-                const names = namesFromSignature(signature);
-                const specificities = specificitiesFromSignature(signature);
-
+                const [conditions, specificities, names] = conditionsFromSignature(signature, variables, morphisms);
                 const operation = (args, variables, morphisms) => {
                     variables.enterScope();
                     for (let i = 0 ; i < args.length ; i ++ ) {
@@ -850,34 +847,31 @@ const typesFromSignature = (signature, vars) => {
 }
 
 
-const conditionsFromSignature = (signature) => {
+const conditionsFromSignature = (signature, variables, morphisms) => {
     const conditions = [];
+    const specificities = [];
+    const names = [];
 
     const sigPatterns = signature.value;
     const size = sigPatterns.length;
-    for (let i = 0 ; i < size ; i ++ ) {
+    for (let i = 0; i < size; i++) {
         const pattern = sigPatterns[i];
         const condition = pattern.value[0];
-        const conditionName = condition.value[0];
         const conditionExpression = condition.value[1];
+        const conditionObject = conditionFromAst(conditionExpression, variables, morphisms);
+        const [conditionName, conditionAstFunction, conditionSpecificity] = conditionObject.value;
         conditions.push((argument, variables, morphisms) => {
             variables.assignValue(conditionName.value, argument);
-            const result = evaluate(conditionExpression.value, variables, morphisms, goals.EVALUATE);
+            const result = evaluateAst(conditionAstFunction, variables, morphisms);
             if (result.type.baseName === 'ERROR') {
                 return false;
             }
             return result.value;
         });
+        specificities.push(conditionSpecificity.value);
+        names.push(conditionName.value);
     }
-    return conditions;
-}
-
-const namesFromSignature = (signature) => {
-    return signature.value.map(i => i.value[0].value[0].value);
-}
-
-const specificitiesFromSignature = (signature) => {
-    return signature.value.map(i => i.value[0].value[2].value);
+    return [conditions, specificities, names];
 }
 
 const registerNewFunction = (name, variables, functionObject, rawCase) => {
