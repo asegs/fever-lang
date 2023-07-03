@@ -19,22 +19,6 @@ export const interpret = (text, variables, morphisms) => {
     //console.log(lexed)
     return evaluateAst(ast, variables, morphisms);
 }
-const stripRedundantParens = (text) => {
-    while (text.startsWith("(") && text.endsWith(")")) {
-        text = text.slice(1, text.length - 1);
-    }
-    return text;
-}
-
-const isFunctionCall = (text) => {
-    return /^[^(]+\(.*\)$/gm.test(text);
-}
-
-const splitIntoNameAndBody = (text) => {
-    const firstParen = text.indexOf("(");
-    return [text.slice(0, firstParen), text.slice(firstParen)]
-}
-
 const assignGenericTableToTypeVars = (vars, genericTable) => {
     for (const genericName of Object.keys(genericTable)) {
         vars.assignValue(genericName, createTypeVar(genericTable[genericName]));

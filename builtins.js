@@ -351,7 +351,7 @@ export const builtins = {
             [meta.SIGNATURE, primitives.ANY],
             ([signature, value]) => {
                 return createVar(
-                    [signature, createVar(recursiveToString(value), primitives.EXPRESSION)],
+                    [signature, createVar(value, primitives.EXPRESSION)],
                     meta.CASE
                 );
             }
@@ -406,7 +406,7 @@ export const builtins = {
         newFunction(
             2,
             [meta.STRING, meta.SIGNATURE],
-            ([name, signature], variables) => {
+            ([name, signature], variables, morphisms) => {
                 const realName = charListToJsString(name);
                 const types = typesFromSignature(signature);
                 const size = types.length;
@@ -422,12 +422,11 @@ export const builtins = {
 
                 for (let i = 0 ; i < size ; i ++ ) {
                     const condition = signature.value[i].value[0].value;
-                    const name = condition[0];
-                    //Handle 1 <-> 1 members
+                    const conditionObject = conditionFromAst(condition[1], variables, morphisms);
+                    const [name, conditionExpr,] = conditionObject.value;
                     const expression = condition[1];
-                    if (expression.type.baseName === 'FUNCTION_INVOCATION' && expression.functionName.startsWith('==') || expression.value === 'true') {
-                        permutations.push(arg => arg);
-                    } else {
+                    //We have a function that is not a test
+                    if (conditionExpr.type.baseName === 'FUNCTION_INVOCATION' && conditionExpr.functionName !== '==') {
                         permutations.push(
                             (arg, variables, morphisms) => {
                                 variables.enterScope();
@@ -437,6 +436,8 @@ export const builtins = {
                                 return result;
                             }
                         );
+                    } else {
+                        permutations.push(arg => arg);
                     }
 
 
