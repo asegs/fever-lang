@@ -1,6 +1,6 @@
 import {splitGeneral, splitArray} from "./prefixer.js";
 import {evaluate, evaluateAst, goals} from "./interpreter.js";
-import {AST_SPECIAL_TYPES} from "./literals.js";
+import {AST_SPECIAL_TYPES, missing} from "./literals.js";
 
 
 export const typeWeights = {
@@ -296,12 +296,27 @@ export const populateAst = (ast, vars, morphisms) => {
     return [createVar(populatedArgs, ast.type), previousChildrenPopulated];
 }
 
-export const conditionFromAst = (ast, variables) => {
+export const conditionFromAst = (ast, variables, morphisms) => {
     if (ast.type.baseName === 'VARIABLE' && ast.value === '_') {
         return [createCondition(createVar('_', meta.STRING), createVar(createVar(true, primitives.BOOLEAN), primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
     }
 
-    //Populate ast from variables table.  Evaluate what can be evaluated?  Not necessary...but a little bit necessary
+    const [populatedAst, isComplete] = populateAst(ast, variables, morphisms);
+
+    let missingNames = {'var':{}, 'func':{}};
+    if (!isComplete) {
+        missingNames = Object.keys(missing(populatedAst).var);
+    }
+
+    if (populatedAst.type.baseName === 'FUNCTION_INVOCATION') {
+        return createCondition(missingNames[0], populatedAst, patternWeights.EXPRESSION);
+    } else if (populatedAst.type.baseName === 'VARIABLE') {
+        return createCondition(missingNames[0], createVar(true, primitives.BOOLEAN), patternWeights.ANY);
+    } else {
+        const equalityCheck = createVar([createVar('__repr', AST_SPECIAL_TYPES.VARIABLE), ast], AST_SPECIAL_TYPES.FUNCTION_INVOCATION);
+        equalityCheck.functionName = '==';
+        return createCondition('__repr', equalityCheck, patternWeights.VALUE);
+    }
 }
 
 /**

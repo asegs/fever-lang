@@ -1,5 +1,5 @@
 import {
-    charListToJsString, createError, createType,
+    charListToJsString, conditionFromAst, createError, createType,
     createTypedList,
     createTypedTuple, createTypeVar,
     createVar, isAlias,
@@ -369,7 +369,7 @@ export const builtins = {
         newFunction(
             2,
             [meta.STRING, meta.CASE],
-            ([name, func], variables) => {
+            ([name, func], variables, morphisms) => {
                 const realName = charListToJsString(name);
 
                 const signature = func.value[0];
@@ -377,7 +377,7 @@ export const builtins = {
                 const size = signature.value.length;
 
                 const types = typesFromSignature(signature);
-                const conditions = conditionsFromSignature(signature);
+                const conditions = conditionsFromSignature(signature).map(c => conditionFromAst(c.value[1], variables, morphisms));
                 const names = namesFromSignature(signature);
                 const specificities = specificitiesFromSignature(signature);
 

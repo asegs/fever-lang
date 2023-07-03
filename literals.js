@@ -164,7 +164,9 @@ const createPatternAstFromSting = (string) => {
     }  else {
         varName = '__repr';
     }
-    const conditionObj = createVar([varName, conditionAst, 1], meta.CONDITION)
+
+    //Stubbed out, replaced at call time with real condition.
+    const conditionObj = createVar([varName, conditionAst, -1], meta.CONDITION);
     return createVar([conditionObj, realType], meta.PATTERN)
 }
 
