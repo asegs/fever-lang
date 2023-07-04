@@ -1,6 +1,6 @@
 import {lex} from "./prefixer.js";
 import {expressionToAst} from "./literals.js";
-import {typeSatisfaction, createVar, isAlias, createError, createTypeVar} from "./types.js";
+import {typeSatisfaction, createVar, isAlias, createError, createTypeVar, populateAst} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
 import {morphTypes, registerBuiltins, standardLib} from "./builtins.js";
@@ -175,7 +175,7 @@ export const evaluateAst = (node, variables, morphisms) => {
     }
 
     //May need to resolve this.
-    return node;
+    return populateAst(node, variables, morphisms)[0];
 }
 
 export const instance = () => {

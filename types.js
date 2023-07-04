@@ -262,6 +262,10 @@ export const inferTypeFromString = (rawString, variables) => {
 
 //Returns [new populated ast, boolean if all children are populated]
 export const populateAst = (ast, vars, morphisms) => {
+    if (isAlias(ast.type) && ast.type.alias === 'CONDITION' && ast.value[2] === -1) {
+        return [conditionFromAst(ast.value[1], vars, morphisms), true]
+    }
+
     if (!Array.isArray(ast.value)) {
         if (ast.type.baseName === 'VARIABLE') {
             const lookupValue = vars.getOrNull(ast.name);
