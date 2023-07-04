@@ -859,7 +859,12 @@ const conditionsFromSignature = (signature, variables, morphisms) => {
         const pattern = sigPatterns[i];
         const condition = pattern.value[0];
         const conditionExpression = condition.value[1];
-        const conditionObject = conditionFromAst(conditionExpression, variables, morphisms);
+        let conditionObject;
+        if (condition.value[2] === -1) {
+            conditionObject = conditionFromAst(conditionExpression, variables, morphisms);
+        } else {
+            conditionObject = condition;
+        }
         const [conditionName, conditionAstFunction, conditionSpecificity] = conditionObject.value;
         conditions.push((argument, variables, morphisms) => {
             variables.assignValue(conditionName.value, argument);

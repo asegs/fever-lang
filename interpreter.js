@@ -34,7 +34,7 @@ const unassignGenericTableToTypeVars = (vars, genericTable) => {
 export const callFunctionByReference = (ref, args, variables, morphisms, name) => {
     const errors = args.filter(arg => arg.type.baseName === 'ERROR');
 
-    if (errors.length > 0) {
+    if (errors.zlength > 0) {
         if (name !== 'show') {
             return errors[0];
         }
@@ -174,7 +174,6 @@ export const evaluateAst = (node, variables, morphisms) => {
         }
     }
 
-    //May need to resolve this.
     return populateAst(node, variables, morphisms)[0];
 }
 

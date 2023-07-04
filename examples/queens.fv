@@ -1,20 +1,19 @@
 queen = {row:#,col:#}
 
-can_capture_col = {q1:queen, q2:queen} => (col(q1) == col(q2))
-can_capture_diag = {q1:queen, q2: queen} => ((abs(row(q1-q2))) == (abs(col(q1-q2))))
+can_capture_col = {q1, q2} => (col(q1) == col(q2))
+can_capture_diag = {q1, q2} => ((abs(row(q1-q2))) == (abs(col(q1-q2))))
 
-q_can_capture = {q1:queen, q2:queen} => (can_capture_col(q1,q2) | can_capture_diag(q1, q2))
+q_can_capture = {q1, q2} => (can_capture_col(q1,q2) | can_capture_diag(q1, q2))
 can_capture = {queens:[], q:()} => (queens \> (false, ($ | q_can_capture(@,q)), true))
 
-solve = {n:#, queens:[], (can_capture(queens,test)):queen} => false
-solve = {n:#,(len(queens) == n):[], (not(can_capture(queens,test))):queen} => (queens + test)
-solve = {n:#, queens:[], test:queen} => (0..n \> (false, (solve(n, queens + test, new(queen, len(queens) + 1, @))), true))
+solve = {n:#, queens:[], (can_capture(queens,test))} => false
+solve = {n:#,(len(queens) == n):[], (not(can_capture(queens,test)))} => (queens + test)
+solve = {n:#, queens:[], test} => (0..n \> (false, (solve(n, queens + test, new(queen, len(queens) + 1, @))), true))
 
 try_starting_positions = {n:#} => (0..n \> (false, (solve(n, [], new(queen, 0, @))), true))
 
 solve = {n:#} => (try_starting_positions(n-1))
 
-
 before = time(0)
-solve(8)
+show(solve(8))
 show(time(before))
