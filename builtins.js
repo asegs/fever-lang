@@ -9,6 +9,7 @@ import {
 } from './types.js'
 import {callFunction, callFunctionByReference, evaluate, goals} from "./interpreter.js";
 import {feverStringFromJsString, inferListType} from "./literals.js";
+import {readFileSync} from 'fs';
 
 const newFunction = (arity, types, functionOperation, args) => {
     const func = {
@@ -94,6 +95,13 @@ export const builtins = {
             2,
             [primitives.CHARACTER, primitives.NUMBER],
             ([char, shift]) => createVar(String.fromCharCode(char.value.charCodeAt(0) + shift.value), primitives.CHARACTER)
+        ),
+        newFunction(
+            2,
+            [primitives.CHARACTER, primitives.CHARACTER],
+            ([c1, c2]) => {
+                return feverStringFromJsString(c1.value + c2.value);
+            }
         )
     ],
     '*': [
@@ -785,6 +793,57 @@ export const builtins = {
                 return morphTypes(value, toType, variables, morphisms);
             }
         )
+    ],
+    'read': [
+        newFunction(
+            1,
+            [meta.STRING],
+            (([path]) => {
+                // We should have global state based on a passed in file to get its directory.
+                const pathSlug = charListToJsString(path);
+                const dir = process.cwd()
+                const fileText = readFileSync(dir + '/' + pathSlug).toString();
+                const fileLines = fileText.split('\n');
+                return createVar(fileLines.map(line => feverStringFromJsString(line)), createTypedList(meta.STRING));
+            })
+        )
+    ],
+    'to_number': [
+        newFunction(
+            1,
+            [meta.STRING],
+            ([string]) => {
+                const jsString = charListToJsString(string);
+                if (isNumeric(jsString)) {
+                    return createVar(Number(jsString), primitives.NUMBER);
+                } else {
+                    return createError('"' + jsString + '" cannot be interpreted as a number.')
+                }
+            }
+        )
+    ],
+    'is_numeric': [
+        newFunction(
+            1,
+            [meta.STRING],
+            ([string]) => {
+                const jsString = charListToJsString(string);
+                if (isNumeric(jsString)) {
+                    return createVar(true, primitives.BOOLEAN);
+                } else {
+                    return createVar(false, primitives.BOOLEAN);
+                }
+            }
+        )
+    ],
+    'replace': [
+        newFunction(
+            3,
+            [meta.STRING, meta.STRING, meta.STRING],
+            ([original, pattern, replacement]) => {
+                return feverStringFromJsString(charListToJsString(original).replaceAll(charListToJsString(pattern), charListToJsString(replacement)));
+            }
+        )
     ]
 }
 
@@ -834,7 +893,13 @@ export const standardLib = [
     "sum = {str:string} => (str \\> (0, ($ + ord(@))))",
     "hash = {str:string, mod:#} => (sum(str) % mod)",
     "abs = {(a < 0):#} => (a * -1)",
-    "abs = {a:#} => (a)"
+    "abs = {a:#} => (a)",
+    "all = {vs:[], mapper:fn} => (vs \\> (true,(mapper(@) & $)))",
+    "any = {vs:[], mapper:fn} => (vs \\> (false, (mapper(@) | $)))",
+    "reverse = {vs:[]} => (vs -> (get(vs, len(vs) - # - 1)))",
+    "is_numeric = {c:character} => (ord(c) >= 48 & ord(c) <= 57)",
+    "first = {vs:[]} => (get(vs,0))",
+    "last = {vs:[]} => (get(vs, len(vs) - 1))"
 ]
 
 export const registerBuiltins = (variables) => {
@@ -1139,3 +1204,8 @@ const namedFilter = (list, action, variables, morphisms, [element, index, interm
     }
     return result;
 }
+
+const isNumeric = (n) => {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
