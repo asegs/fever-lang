@@ -897,7 +897,6 @@ export const standardLib = [
     "all = {vs:[], mapper:fn} => (vs \\> (true,(mapper(@) & $)))",
     "any = {vs:[], mapper:fn} => (vs \\> (false, (mapper(@) | $)))",
     "reverse = {vs:[]} => (vs -> (get(vs, len(vs) - # - 1)))",
-    "is_numeric = {c:character} => (ord(c) >= 48 & ord(c) <= 57)",
     "first = {vs:[]} => (get(vs,0))",
     "last = {vs:[]} => (get(vs, len(vs) - 1))"
 ]
