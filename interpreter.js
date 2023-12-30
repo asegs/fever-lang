@@ -1,4 +1,4 @@
-import {lex, trimAndSplitArray} from "./prefixer.ts";
+import {lex, trimAndSplitOnCommas} from "./prefixer.ts";
 import {inferTypeAndValue} from "./literals.js";
 import {typeSatisfaction, createVar, isAlias, createError, createTypeVar} from "./types.js";
 import {ScopedVars} from "./vars.js";
@@ -181,7 +181,7 @@ export const evaluate = (text, variables, morphisms, goal) => {
     const cleanText = text;
     if (isFunctionCall(text)) {
         const [name, body] = splitIntoNameAndBody(text);
-        const args = trimAndSplitArray(body).map(e => evaluate(e, variables, morphisms, goal));
+        const args = trimAndSplitOnCommas(body).map(e => evaluate(e, variables, morphisms, goal));
         if (goal === goals.EVALUATE) {
             return callFunction(name, args, variables, morphisms);
         } else {

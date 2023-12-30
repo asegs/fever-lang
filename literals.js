@@ -6,7 +6,7 @@ import {
     createVar, inferTypeFromString, meta,
     primitives, typeAssignableFrom
 } from './types.js'
-import {splitArray} from "./prefixer.ts";
+import {splitOnCommas} from "./prefixer.ts";
 import {evaluate, goals, findMissing} from "./interpreter.js";
 
 const everyCharNumeric = (string) => {
@@ -59,7 +59,7 @@ const getAsTypeVar = (string) => {
 
 
 const parseCollectionToItems = (string) => {
-    return splitArray(string.slice(1, string.length - 1));
+    return splitOnCommas(string.slice(1, string.length - 1));
 }
 
 const recursiveTypeMatch = new RegExp(/^(list|tuple)\[(.*)]$/m);

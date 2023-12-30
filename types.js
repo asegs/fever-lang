@@ -1,4 +1,4 @@
-import {splitGeneral, splitArray} from "./prefixer.ts";
+import {splitGeneral, splitOnCommas} from "./prefixer.ts";
 import {evaluate, goals} from "./interpreter.js";
 
 
@@ -202,7 +202,7 @@ export const inferTypeFromString = (rawString, variables) => {
         return createTypedList(internalType);
     }
     if (string[0] === '(') {
-        const types = splitArray(string.slice(1, string.length - 1)).map(e => inferTypeFromString(e, variables));
+        const types = splitOnCommas(string.slice(1, string.length - 1)).map(e => inferTypeFromString(e, variables));
         return createTypedTuple(types);
     }
 

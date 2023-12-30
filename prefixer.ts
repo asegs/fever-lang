@@ -1,3 +1,4 @@
+// All built in operators and their precedence.  Higher precedence is grouped first.
 const operatorsToPrecedences = {
     '+': 9,
     '-': 9,
@@ -19,37 +20,41 @@ const operatorsToPrecedences = {
     '=': 2
 }
 
+// The opening token for various closing tokens.
 const closingTokenBackRefs = {
     ']': '[',
     '}': '{',
     ')': '('
 }
 
-type SurroundedCharacter = {
-    last: string | null;
+// A character from a string and its next character as well.
+type SucceededCharacter = {
     current: string;
     next: string | null;
 }
 
+// How to handle what looks like it might be a full or partial operator character in source.
 enum OperatorAction {
     IGNORE,
     TAKE,
     TAKE_AND_NEXT
 }
 
-function getSurroundingChars (text: string, idx: number): SurroundedCharacter {
-    const prevChar = idx > 0 ? text[idx - 1] : null;
+// Gets the current and next character (if present) in text at an index.
+function getSucceedingCharacter (text: string, idx: number): SucceededCharacter {
     const char = text[idx];
     const nextChar = text.length > idx - 1 ? text[idx + 1] : null;
     return {
-        last: prevChar,
         current: char,
         next: nextChar
     };
 }
 
+// Checks to see if the next character added to the current is a valid operator.
+// If so, takes those two.  If not, checks the current one.  If it is, takes that.
+// If neither are valid, decides not an operator.
 function handleAmbiguousOperators(text: string, idx: number): OperatorAction {
-    const surroundings = getSurroundingChars(text, idx);
+    const surroundings = getSucceedingCharacter(text, idx);
     if (!surroundings.next) {
         return surroundings.current in operatorsToPrecedences ? OperatorAction.TAKE : OperatorAction.IGNORE;
     }
@@ -63,6 +68,7 @@ function handleAmbiguousOperators(text: string, idx: number): OperatorAction {
 
 }
 
+// Finds the last non-space character in a string at a position.
 const prevCharAfterSpaces = (text: string, idx: number): string | null => {
     for (let i = idx -1 ; i >= 0 ; i -- ) {
         if (text[i] !== ' ') {
@@ -72,6 +78,7 @@ const prevCharAfterSpaces = (text: string, idx: number): string | null => {
     return null;
 }
 
+// Checks if the occurrence of a hyphen in text signifies a negative sign or other operator.
 const isNegation = (text: string, idx: number): boolean => {
     const extras = ['=',','];
     const prev = prevCharAfterSpaces(text,idx);
@@ -81,9 +88,9 @@ const isNegation = (text: string, idx: number): boolean => {
     return (prev in operatorsToPrecedences) || extras.includes(prev);
 }
 
+// Handles cases where more context than the next character is needed to disambiguate a potential operator.
 const specialOperatorCases = {
     '-': (text: string, idx: number): OperatorAction => {
-        const nextChar = getSurroundingChars(text, idx).next;
         const action = handleAmbiguousOperators(text, idx);
         if (action === OperatorAction.TAKE_AND_NEXT) {
             return OperatorAction.TAKE_AND_NEXT;
@@ -92,6 +99,7 @@ const specialOperatorCases = {
     }
 }
 
+// Wraps the special cases and normal operator disambiguation logic into one function.
 function getCharacterAction(char: string, source: string, position: number): OperatorAction {
     if (char in specialOperatorCases) {
         return specialOperatorCases[char](source, position);
@@ -100,8 +108,11 @@ function getCharacterAction(char: string, source: string, position: number): Ope
     return handleAmbiguousOperators(source, position);
 }
 
+// Used when traversing through source with nesting to track current depth in various structures.
 class Tracker {
+    // Only changed when not in double quotes.
     singleQuotes = 0;
+    // Only changed when not in single quotes.
     doubleQuotes = 0;
     openParens = 0;
     openBrackets = 0;
@@ -119,6 +130,7 @@ class Tracker {
         return this.inSingleQuotes() || this.inDoubleQuotes();
     }
 
+    // Switches on input char, mutates proper (if any) nesting tracker.
     handleSyntaxChars(char: string): boolean {
         switch (char) {
             case '"':
@@ -155,25 +167,30 @@ class Tracker {
         return false;
     }
 
+    // Checks if at the top of a statement and therefore not nested at all.
     isInTopLevelContext(): boolean {
         return this.openParens === 0 && this.openBrackets === 0 && this.openBraces === 0 && !this.quoted();
     }
 
+    // Counts the number of open nesting characters.
     syntaxTermCount(): number {
         return this.openParens + this.openBrackets + this.openBraces;
     }
 }
 
+// Used in parsing to tell if a given text token is an operator or plain syntax.
 export enum TokenType {
     SYNTAX,
     OPERATOR
 }
 
+// A source token of text and an operator/syntax type.
 type Token = {
     value: string,
     type: TokenType
 }
 
+// Constructs a new syntax token from text.
 function syntaxToken (text: string): Token {
     return {
         value: text,
@@ -181,6 +198,7 @@ function syntaxToken (text: string): Token {
     }
 }
 
+// Constructs a new operator token from text.
 function operatorToken (text: string): Token {
     return {
         value: text,
@@ -188,6 +206,8 @@ function operatorToken (text: string): Token {
     }
 }
 
+// Splits a piece of source at the top level on a given splitter.
+// Example: "1,2,3" on ',' becomes ["1","2","3"].
 export function splitGeneral (text: string, on: string): string[] {
     const tracker = new Tracker();
     const chunks = [];
@@ -208,18 +228,23 @@ export function splitGeneral (text: string, on: string): string[] {
     return chunks;
 }
 
-export function splitArray (text: string): string[] {
+// Wraps generic splitter with splitter for common comma case.
+export function splitOnCommas (text: string): string[] {
     return splitGeneral(text, ',');
 }
 
+// Checks if an individual character is numeric.
+// Used to disambiguate method calls from decimals and ranges.
 function isNumeric (char: string) {
     return char.charCodeAt(0) >= '0'.charCodeAt(0) && char.charCodeAt(0) <= '9'.charCodeAt(0)
 }
 
+// Checks if the current text buffer is the end of any valid infix operator.
 function infixEndsWith (buf: string) {
     return Object.keys(operatorsToPrecedences).some(key => key.endsWith(buf));
 }
 
+// Takes method calls and rewrites them as function invocations, preserving order.
 function preprocessMethodSyntax (text: string): string {
     let mainTracker = new Tracker();
     mainTracker.handleSyntaxChars(text[0]);
@@ -310,6 +335,7 @@ function preprocessMethodSyntax (text: string): string {
     return text;
 }
 
+// Breaks a string of text into syntax and operator token objects.
 function tokenize (segment: string): Token[] {
     const tokens:Token[] = [];
     let buffer = '';
@@ -354,6 +380,8 @@ function tokenize (segment: string): Token[] {
     return tokens;
 }
 
+
+// Reverses the order of any list.
 function reverse<T>(list: T[]):T[] {
     const reversed: T[] = new Array(list.length);
     for (let i = 0 ; i < list.length ; i ++ ) {
@@ -363,7 +391,8 @@ function reverse<T>(list: T[]):T[] {
     return reversed;
 }
 
-function stringifyTokens (tokens: any[]): string{
+// Given a list of tokens, build them into a prefix string.
+function stringifyTokens (tokens: Token[]): string{
     const scopes = [];
     let index = -1;
     let buffer = '';
@@ -398,12 +427,14 @@ function stringifyTokens (tokens: any[]): string{
     return buffer;
 }
 
+// Data on a nested group found in source to be potentially unnested.
 type CaptureGroupMeta = {
     nestedText: string,
     nestingSeparator: string,
     nestingDimensions: [number, number]
 }
 
+// Gets the nested portion of a piece of source text.
 function getCaptureGroup (text: string): CaptureGroupMeta {
     let firstCaptureIndex = -1;
     const tracker = new Tracker();
@@ -431,14 +462,15 @@ function getCaptureGroup (text: string): CaptureGroupMeta {
     }
 }
 
-function processSyntaxNode (node: object): string {
-    const nodeText = node['value'];
+// Corecursively prefixes and orders infixes on tokens in text with `shunt`.
+function processSyntaxNode (node: Token): string {
+    const nodeText = node.value;
     const group = getCaptureGroup(nodeText);
     const [start, end] = group.nestingDimensions;
     let innerText: string;
     if (start !== -1) {
         const subText = group.nestedText.slice(1, group.nestedText.length - 1);
-        innerText = splitArray(subText).map(e => shunt(e)).join(',');
+        innerText = splitOnCommas(subText).map(e => shunt(e)).join(',');
     }
 
     if (innerText) {
@@ -448,6 +480,8 @@ function processSyntaxNode (node: object): string {
     return nodeText;
 }
 
+// Shunting yard algorithm implementation that recursively applies itself on nested blocks.
+// Treats function calls and non infix/parenthesized operations as simple tokens, akin to numbers.
 export function shunt(segment: string): string{
     const tokens = tokenize(segment);
     const stack = [];
@@ -483,33 +517,14 @@ export function shunt(segment: string): string{
     return stringifyTokens(reverse(result));
 }
 
-export function trimAndSplitArray (text: string): string[] {
-    return splitArray(text.slice(1, text.length - 1));
+// Removes the opening and closing characters of a group and splits it on commas.
+export function trimAndSplitOnCommas (text: string): string[] {
+    return splitOnCommas(text.slice(1, text.length - 1));
 }
 
-const assignmentRegex = new RegExp(/^[^\s()0-9"'[\]][^\s()"'[\]]* ?=[^=].*$/gm);
-
-export function isAssignment (text: string): boolean {
-    assignmentRegex.lastIndex = 0;
-    return assignmentRegex.test(text);
-}
-
-export function splitAssignment (text: string): [string, string] {
-    const firstEq = text.indexOf("=");
-    const name = (firstEq !== -1 ? text.slice(0, firstEq) : "_").trim();
-    const body = (firstEq !== -1 ? text.slice(firstEq + 1) : text).trim();
-    return [name, body];
-}
-
-export function handleAssignment (rawText: string): [string, string]  {
-    return isAssignment(rawText) ? splitAssignment(rawText) : ["_", rawText];
-}
+// Converts infix/prefix mixed string to all prefix string recursively.
+// "x = 3 + 5" becomes "=(x,+(3,5))"
 export function lex (rawText:string): string {
-    const ufcsText = preprocessMethodSyntax(rawText);
-    //This will cause issues if anything with lower precedence than assignment is ever added
-    const [name, body] = handleAssignment(ufcsText);
-    if (name !== '_') {
-        return "=(\"" + name + "\"," + shunt(body) + ")";
-    }
-    return shunt(body);
+    // Convert methods to function calls, then orders infix operators
+    return shunt(preprocessMethodSyntax(rawText));
 }
