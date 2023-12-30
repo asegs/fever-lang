@@ -1,4 +1,4 @@
-import {lex, trimAndSplitArray} from "./prefixer.js";
+import {lex, trimAndSplitArray} from "./prefixer.ts";
 import {inferTypeAndValue} from "./literals.js";
 import {typeSatisfaction, createVar, isAlias, createError, createTypeVar} from "./types.js";
 import {ScopedVars} from "./vars.js";

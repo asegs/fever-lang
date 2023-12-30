@@ -6,7 +6,7 @@ import {
     createVar, inferTypeFromString, meta,
     primitives, typeAssignableFrom
 } from './types.js'
-import {splitArray} from "./prefixer.js";
+import {splitArray} from "./prefixer.ts";
 import {evaluate, goals, findMissing} from "./interpreter.js";
 
 const everyCharNumeric = (string) => {

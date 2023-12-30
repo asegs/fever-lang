@@ -1,4 +1,4 @@
-import {splitGeneral, splitArray} from "./prefixer.js";
+import {splitGeneral, splitArray} from "./prefixer.ts";
 import {evaluate, goals} from "./interpreter.js";
 
 
