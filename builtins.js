@@ -1,5 +1,5 @@
 import {
-    charListToJsString, createError, createType,
+    charListToJsString, conditionFromAst, createError, createType,
     createTypedList,
     createTypedTuple, createTypeVar,
     createVar, isAlias,
@@ -7,7 +7,7 @@ import {
     primitives,
     recursiveToString, typeAssignableFrom, typeWeights
 } from './types.js'
-import {callFunction, callFunctionByReference, evaluate, goals} from "./interpreter.js";
+import {callFunction, callFunctionByReference, evaluateAst, goals} from "./interpreter.js";
 import {feverStringFromJsString, inferListType} from "./literals.js";
 import {readFileSync} from 'fs';
 
@@ -359,7 +359,7 @@ export const builtins = {
             [meta.SIGNATURE, primitives.ANY],
             ([signature, value]) => {
                 return createVar(
-                    [signature, createVar(recursiveToString(value), primitives.EXPRESSION)],
+                    [signature, createVar(value, primitives.EXPRESSION)],
                     meta.CASE
                 );
             }
@@ -377,7 +377,7 @@ export const builtins = {
         newFunction(
             2,
             [meta.STRING, meta.CASE],
-            ([name, func], variables) => {
+            ([name, func], variables, morphisms) => {
                 const realName = charListToJsString(name);
 
                 const signature = func.value[0];
@@ -385,16 +385,13 @@ export const builtins = {
                 const size = signature.value.length;
 
                 const types = typesFromSignature(signature);
-                const conditions = conditionsFromSignature(signature);
-                const names = namesFromSignature(signature);
-                const specificities = specificitiesFromSignature(signature);
-
+                const [conditions, specificities, names] = conditionsFromSignature(signature, variables, morphisms);
                 const operation = (args, variables, morphisms) => {
                     variables.enterScope();
                     for (let i = 0 ; i < args.length ; i ++ ) {
                         variables.assignValue(names[i], args[i]);
                     }
-                    const result = evaluate(expression.value, variables, morphisms, goals.EVALUATE);
+                    const result = evaluateAst(expression.value, variables, morphisms);
                     variables.exitScope();
                     return result;
                 }
@@ -417,7 +414,7 @@ export const builtins = {
         newFunction(
             2,
             [meta.STRING, meta.SIGNATURE],
-            ([name, signature], variables) => {
+            ([name, signature], variables, morphisms) => {
                 const realName = charListToJsString(name);
                 const types = typesFromSignature(signature);
                 const size = types.length;
@@ -426,29 +423,29 @@ export const builtins = {
                 if (isListAlias) {
                     newInnerType = createType("LIST", types[0].types, true);
                 }
-                const newType = isListAlias ? createTypedList(types[0].types[0], realName) :createTypedTuple(types, realName);
+                const newType = isListAlias ? createTypedList(types[0].types[0], realName) : createTypedTuple(types, realName);
                 meta[realName.toUpperCase()] = newType;
 
                 const permutations = [];
 
                 for (let i = 0 ; i < size ; i ++ ) {
                     const condition = signature.value[i].value[0].value;
-                    const name = condition[0];
-
-                    //Handle 1 <-> 1 members
+                    const conditionObject = conditionFromAst(condition[1], variables, morphisms);
+                    const [name, conditionExpr,] = conditionObject.value;
                     const expression = condition[1];
-                    if (expression.value.startsWith('==') || expression.value === 'true') {
-                        permutations.push(arg => arg);
-                    } else {
+                    //We have a function that is not a test
+                    if (conditionExpr.type.baseName === 'FUNCTION_INVOCATION' && conditionExpr.functionName !== '==') {
                         permutations.push(
                             (arg, variables, morphisms) => {
                                 variables.enterScope();
                                 variables.assignValue(name.value, arg);
-                                const result = evaluate(expression.value, variables, morphisms, goals.EVALUATE);
+                                const result = evaluateAst(expression.value, variables, morphisms);
                                 variables.exitScope();
                                 return result;
                             }
                         );
+                    } else {
+                        permutations.push(arg => arg);
                     }
 
 
@@ -910,38 +907,41 @@ export const registerBuiltins = (variables) => {
     }
 }
 
-const typesFromSignature = (signature) => {
+const typesFromSignature = (signature, vars) => {
     return signature.value.map(i => i.value[1].value);
 }
 
-const conditionsFromSignature = (signature) => {
+
+const conditionsFromSignature = (signature, variables, morphisms) => {
     const conditions = [];
+    const specificities = [];
+    const names = [];
 
     const sigPatterns = signature.value;
     const size = sigPatterns.length;
-    for (let i = 0 ; i < size ; i ++ ) {
+    for (let i = 0; i < size; i++) {
         const pattern = sigPatterns[i];
         const condition = pattern.value[0];
-        const conditionName = condition.value[0];
         const conditionExpression = condition.value[1];
+        let conditionObject;
+        if (condition.value[2] === -1) {
+            conditionObject = conditionFromAst(conditionExpression, variables, morphisms);
+        } else {
+            conditionObject = condition;
+        }
+        const [conditionName, conditionAstFunction, conditionSpecificity] = conditionObject.value;
         conditions.push((argument, variables, morphisms) => {
             variables.assignValue(conditionName.value, argument);
-            const result = evaluate(conditionExpression.value, variables, morphisms, goals.EVALUATE);
+            const result = evaluateAst(conditionAstFunction, variables, morphisms);
             if (result.type.baseName === 'ERROR') {
                 return false;
             }
             return result.value;
         });
+        specificities.push(conditionSpecificity.value);
+        names.push(conditionName.value);
     }
-    return conditions;
-}
-
-const namesFromSignature = (signature) => {
-    return signature.value.map(i => i.value[0].value[0].value);
-}
-
-const specificitiesFromSignature = (signature) => {
-    return signature.value.map(i => i.value[0].value[2].value);
+    return [conditions, specificities, names];
 }
 
 const registerNewFunction = (name, variables, functionObject, rawCase) => {
@@ -1140,7 +1140,7 @@ const namedMap = (list, action, variables, morphisms, [element, index, intermedi
         variables.assignValue(element, item);
         variables.assignValue(index, createVar(i, primitives.NUMBER));
         variables.assignValue(intermediate, createVar([...internalList], createTypedList(internalList.length > 0 ? internalList[0].type : primitives.ANY)));
-        const result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
+        const result = evaluateAst(action.value, variables, morphisms);
         internalList.push(result);
         variables.exitScope();
     }
@@ -1164,7 +1164,7 @@ const namedReduce = (list, acc, expr, variables, morphisms, [element, index, acc
         variables.assignValue(element, item);
         variables.assignValue(index, createVar(i, primitives.NUMBER));
         variables.assignValue(accumulator, acc);
-        acc = evaluate(expr.value, variables, morphisms, goals.EVALUATE);
+        acc = evaluateAst(expr.value, variables, morphisms);
         variables.exitScope();
         if (earlyTerminateIfNotFalse && acc.value !== false) {
             return acc;
@@ -1185,7 +1185,7 @@ const namedFilter = (list, action, variables, morphisms, [element, index, interm
         if (funcRef) {
             result = callFunctionByReference(funcRef, [item], variables, morphisms, 'lambda')
         } else {
-            result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
+            result = evaluateAst(action.value, variables, morphisms);
         }
         if (result.value) {
             internalList.push(item);

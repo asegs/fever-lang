@@ -1,6 +1,6 @@
-import {lex, trimAndSplitArray} from "./prefixer.js";
-import {inferTypeAndValue} from "./literals.js";
-import {typeSatisfaction, createVar, isAlias, createError, createTypeVar} from "./types.js";
+import {lex} from "./prefixer.js";
+import {expressionToAst} from "./literals.js";
+import {typeSatisfaction, createVar, isAlias, createError, createTypeVar, populateAst} from "./types.js";
 import {ScopedVars} from "./vars.js";
 import {Morphisms} from "./morphisms.js";
 import {morphTypes, registerBuiltins, standardLib} from "./builtins.js";
@@ -12,28 +12,13 @@ export const goals = {
 
 //.. as infix function
 
-export const interpret = (text, variables, morphisms ,goal) => {
+export const interpret = (text, variables, morphisms) => {
     const lexed = lex(text)
+    const ast = expressionToAst(lexed);
     //Uncomment for lexer debugging
     //console.log(lexed)
-    return evaluate(lexed, variables, morphisms, goal);
+    return evaluateAst(ast, variables, morphisms);
 }
-const stripRedundantParens = (text) => {
-    while (text.startsWith("(") && text.endsWith(")")) {
-        text = text.slice(1, text.length - 1);
-    }
-    return text;
-}
-
-const isFunctionCall = (text) => {
-    return /^[^(]+\(.*\)$/gm.test(text);
-}
-
-const splitIntoNameAndBody = (text) => {
-    const firstParen = text.indexOf("(");
-    return [text.slice(0, firstParen), text.slice(firstParen)]
-}
-
 const assignGenericTableToTypeVars = (vars, genericTable) => {
     for (const genericName of Object.keys(genericTable)) {
         vars.assignValue(genericName, createTypeVar(genericTable[genericName]));
@@ -49,7 +34,7 @@ const unassignGenericTableToTypeVars = (vars, genericTable) => {
 export const callFunctionByReference = (ref, args, variables, morphisms, name) => {
     const errors = args.filter(arg => arg.type.baseName === 'ERROR');
 
-    if (errors.length > 0) {
+    if (errors.zlength > 0) {
         if (name !== 'show') {
             return errors[0];
         }
@@ -174,42 +159,22 @@ export const findMissing = (args) => {
     return missingLeaves.concat(flattenedLeaves);
 }
 
-
-
-export const evaluate = (text, variables, morphisms, goal) => {
-    //const cleanText = stripRedundantParens(text);
-    const cleanText = text;
-    if (isFunctionCall(text)) {
-        const [name, body] = splitIntoNameAndBody(text);
-        const args = trimAndSplitArray(body).map(e => evaluate(e, variables, morphisms, goal));
-        if (goal === goals.EVALUATE) {
-            return callFunction(name, args, variables, morphisms);
+export const evaluateAst = (node, variables, morphisms) => {
+    if (node.type.baseName === 'FUNCTION_INVOCATION') {
+        const name = node.functionName;
+        const args = node.value.map(argNode => evaluateAst(argNode, variables, morphisms));
+        return callFunction(name, args, variables, morphisms);
+    }
+    if (node.type.baseName === 'VARIABLE') {
+        const resolved = variables.getOrNull(node.value);
+        if (resolved) {
+            return resolved;
         } else {
-            if (variables.hasVariable(name)) {
-                return findMissing(args, variables, morphisms);
-            } else {
-                return findMissing([{'name': name, 'type': 'FUNCTION'}, ...args], variables, morphisms);
-            }
-
+            return createError("No variable named " + node.value);
         }
     }
 
-    const result = inferTypeAndValue(cleanText, variables, morphisms, goal);
-    if (goal === goals.MISSING ) {
-        if (('value' in result) && Array.isArray(result.value)) {
-            return findMissing(result.value);
-        }
-        if ('name' in result) {
-            return [result];
-        }
-
-        if (Array.isArray(result)) {
-            return findMissing(result);
-        }
-
-        return [];
-    }
-    return result;
+    return populateAst(node, variables, morphisms)[0];
 }
 
 export const instance = () => {
@@ -219,7 +184,7 @@ export const instance = () => {
     registerBuiltins(variables);
 
     standardLib.forEach(line => {
-        interpret(line, variables, morphisms, goals.EVALUATE);
+        interpret(line, variables, morphisms);
     });
 
     //internalFile('../examples/lib.fv', variables, morphisms);

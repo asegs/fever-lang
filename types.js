@@ -1,5 +1,6 @@
-import {splitGeneral, splitArray} from "./prefixer.js";
-import {evaluate, goals} from "./interpreter.js";
+import {splitArray} from "./prefixer.js";
+import {evaluateAst} from "./interpreter.js";
+import {AST_SPECIAL_TYPES, missing} from "./literals.js";
 
 
 export const typeWeights = {
@@ -176,6 +177,43 @@ export const createCondition = (name, expr, specificity) => {
     return createVar([name, expr, specificity], meta.CONDITION);
 }
 
+export const typeFromString = (typeString) => {
+    const string = typeString.trim();
+    for (const [, prim] of Object.entries(primitives)) {
+        if (string.toLowerCase() === prim.baseName.toLowerCase()) {
+            return prim;
+        }
+        if (isAlias(prim) && (string.toLowerCase() === prim.alias.toLowerCase())) {
+            return prim;
+        }
+    }
+
+    for (const [, m] of Object.entries(meta)) {
+        if (isAlias(m) && (string.toLowerCase() === m.alias.toLowerCase())) {
+            return m;
+        }
+    }
+
+    if (string in shorthands) {
+        return shorthands[string];
+    }
+
+    if (string[0] === '[') {
+        const internalType = typeFromString(string.slice(1, string.length - 1));
+        return createTypedList(internalType);
+    }
+    if (string[0] === '(') {
+        const types = splitArray(string.slice(1, string.length - 1)).map(e => typeFromString(e));
+        return createTypedTuple(types);
+    }
+
+    return primitives.ANY;
+}
+
+export const typeFromStringWithContext = (typeString, variables) => {
+    return inferTypeFromString(typeString, variables);
+}
+
 export const inferTypeFromString = (rawString, variables) => {
     const string = rawString.trim();
     for (const [, prim] of Object.entries(primitives)) {
@@ -222,81 +260,67 @@ export const inferTypeFromString = (rawString, variables) => {
     return createGeneric(primitives.ANY, string);
 }
 
-/**
- Patterns can be:
- a (unknown)
-
- [_,_3] (later)
- (len(a) % 2 == 0) (expression with unknown)
- */
-export const inferConditionFromString = (rawString, vars, morphisms, takenVars) => {
-    const string = rawString.trim();
-
-    if (string === '_') {
-        return [createCondition(createVar('_', meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, null];
+//Returns [new populated ast, boolean if all children are populated]
+export const populateAst = (ast, vars, morphisms) => {
+    if (isAlias(ast.type) && ast.type.alias === 'CONDITION' && ast.value[2] === -1) {
+        return [conditionFromAst(ast.value[1], vars, morphisms), true]
     }
 
-    const missing = evaluate(string, vars, morphisms, goals.MISSING);
-    if (missing.length === 0) {
-        /**
-         123
-         [1,2,3]
-         b (known)
-         (b + 3) (expression with known)
-         */
-            // Catch case where it's just a function, we want to be able to redefine function names.
-            //ie. type 1 is: {name: string, price:#}
-            //and type 2 is: {name: string, size: #}
-            // Even though declaring type 1 introduced name as a function, we will never want to match function equality
-        let isPreviouslyDeclaredFunction = false;
-        if (!string.startsWith('(')) {
-            const consideredValue = vars.getOrNull(string);
-            if (consideredValue && isAlias(consideredValue.type) && consideredValue.type.alias === 'FUNCTION') {
-                isPreviouslyDeclaredFunction = true;
-                missing.push({'name': string, 'type': 'VARIABLE'});
+    if (!Array.isArray(ast.value)) {
+        if (ast.type.baseName === 'VARIABLE') {
+            const lookupValue = vars.getOrNull(ast.name);
+            if (lookupValue) {
+                return [lookupValue, true];
             }
+            return [ast, false];
         }
-        if (!isPreviouslyDeclaredFunction) {
-            const result = evaluate(string, vars, morphisms, goals.EVALUATE);
-            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + recursiveToString(result) + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), result.type, null];
-        }
-       }
-
-    const acceptedMissing = missing.filter(item => !takenVars.has(item.name));
-
-    if (acceptedMissing.length === 0) {
-        //Then we have an expression or variable entirely using previous variables.
-        if (string[0] === '(') {
-            //Only reasonable case is (b * 2) where b is defined
-            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + string + ")", primitives.EXPRESSION), createVar(patternWeights.EXPRESSION, primitives.NUMBER)), primitives.ANY, null];
-            //b where b is defined
-        } else {
-            //Only reasonable case is (b * 2) where b is defined
-            return [createCondition(createVar('__repr', meta.STRING), createVar("==(__repr," + missing[0].name + ")", primitives.EXPRESSION), createVar(patternWeights.VALUE, primitives.NUMBER)), primitives.ANY, null];
-        }
+        return [ast, true];
     }
 
-    /**
-     Distinguish between a, [1,2, a] (len(a) % 2 == 0)...let's just use parens.
-     */
-    const name = acceptedMissing[0].name;
-    if (string[0] === '(') {
-        // (len(a) % 2 == 0)
-        return [createCondition(createVar(name, meta.STRING), createVar(string, primitives.EXPRESSION), createVar(patternWeights.EXPRESSION, primitives.NUMBER)), primitives.ANY, name];
+    const populatedArgs = [];
+    let previousChildrenPopulated = true;
+    for (const child of ast.value) {
+        const [newChild, allPopulated] = populateAst(child, vars, morphisms);
+        previousChildrenPopulated = allPopulated && previousChildrenPopulated;
+        populatedArgs.push(newChild);
     }
 
-    // a, won't support [1,2,a] yet, will need to destructure (what if we are actually testing for [1, 2, sublist]?)
-    return [createCondition(createVar(name, meta.STRING), createVar("true", primitives.EXPRESSION), createVar(patternWeights.ANY, primitives.NUMBER)), primitives.ANY, name];
+    if (previousChildrenPopulated && ast.type.baseName === 'FUNCTION_INVOCATION') {
+        const populatedFunctionCall = createVar(populatedArgs, AST_SPECIAL_TYPES.FUNCTION_INVOCATION);
+        populatedFunctionCall.functionName = ast.functionName;
+        return [evaluateAst(populatedFunctionCall, vars, morphisms), true];
+    }
+
+    if (ast.type.baseName === 'FUNCTION_INVOCATION') {
+        const unpopulatedFunctionCall = createVar(populatedArgs, AST_SPECIAL_TYPES.FUNCTION_INVOCATION);
+        unpopulatedFunctionCall.functionName = ast.functionName;
+        return [unpopulatedFunctionCall, false];
+    }
+
+    return [createVar(populatedArgs, ast.type), previousChildrenPopulated];
 }
 
-export const createPatternFromString = (string, vars, morphisms, takenVars) => {
-    const conditionAndType = splitGeneral(string, ':');
-    let type = conditionAndType.length === 1 ? primitives.ANY : inferTypeFromString(conditionAndType[1], vars);
-    const [condition, inferredType, namedVar] = inferConditionFromString(conditionAndType[0], vars, morphisms, takenVars);
-    if (type === primitives.ANY) {
-        type = inferredType;
+export const conditionFromAst = (ast, variables, morphisms) => {
+    if (ast.type.baseName === 'VARIABLE' && ast.value === '_') {
+        return createCondition(createVar('_', meta.STRING), createVar(true, primitives.BOOLEAN), createVar(patternWeights.ANY, primitives.NUMBER));
     }
-    return [createPattern(condition, createTypeVar(type)), namedVar];
+
+    const [populatedAst, isComplete] = populateAst(ast, variables, morphisms);
+
+    let missingNames = {'var':{}, 'func':{}};
+    if (!isComplete) {
+        missingNames = Object.keys(missing(populatedAst).var);
+    }
+
+    if (populatedAst.type.baseName === 'FUNCTION_INVOCATION') {
+        return createCondition(createVar(missingNames[0], meta.STRING), populatedAst, createVar(patternWeights.EXPRESSION, primitives.NUMBER));
+    } else if (populatedAst.type.baseName === 'VARIABLE') {
+        return createCondition(createVar(missingNames[0], meta.STRING), createVar(true, primitives.BOOLEAN), createVar(patternWeights.ANY, primitives.NUMBER));
+    } else {
+        const equalityCheck = createVar([createVar('__repr', AST_SPECIAL_TYPES.VARIABLE), ast], AST_SPECIAL_TYPES.FUNCTION_INVOCATION);
+        equalityCheck.functionName = '==';
+        return createCondition(createVar('__repr', meta.STRING), equalityCheck, createVar(patternWeights.VALUE, primitives.NUMBER));
+    }
 }
 
 const STRING = createTypedList(primitives.CHARACTER, "STRING");

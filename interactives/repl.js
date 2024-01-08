@@ -22,7 +22,7 @@ export const prompt = (v, m) => {
 
 const promptRec = (int) => {
     int.question(">", (inp) => {
-        const result = interpret(inp, vars, morphisms, goals.EVALUATE);
+        const result = interpret(inp, vars, morphisms);
         callFunction('show', [result], vars, morphisms);
         promptRec(int);
     })
