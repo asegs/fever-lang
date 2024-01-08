@@ -20,13 +20,6 @@ const operatorsToPrecedences = {
     '=': 2
 }
 
-// The opening token for various closing tokens.
-const closingTokenBackRefs = {
-    ']': '[',
-    '}': '{',
-    ')': '('
-}
-
 // A character from a string and its next character as well.
 type SucceededCharacter = {
     current: string;
@@ -178,31 +171,21 @@ class Tracker {
     }
 }
 
-// Used in parsing to tell if a given text token is an operator or plain syntax.
-export enum TokenType {
-    SYNTAX,
-    OPERATOR
-}
-
-// A source token of text and an operator/syntax type.
-type Token = {
-    value: string,
-    type: TokenType
-}
-
 // Constructs a new syntax token from text.
-function syntaxToken (text: string): Token {
+function syntaxToken (text: string): Node {
     return {
-        value: text,
-        type: TokenType.SYNTAX
+        text: text,
+        type: NodeType.TERM,
+        children: []
     }
 }
 
 // Constructs a new operator token from text.
-function operatorToken (text: string): Token {
+function operatorToken (text: string): Node {
     return {
-        value: text,
-        type: TokenType.OPERATOR
+        text: text,
+        type: NodeType.OPERATOR_TERM,
+        children: []
     }
 }
 
@@ -336,8 +319,8 @@ function preprocessMethodSyntax (text: string): string {
 }
 
 // Breaks a string of text into syntax and operator token objects.
-function tokenize (segment: string): Token[] {
-    const tokens:Token[] = [];
+function tokenize (segment: string): Node[] {
+    const tokens:Node[] = [];
     let buffer = '';
     const tracker = new Tracker();
 
@@ -392,19 +375,19 @@ function reverse<T>(list: T[]):T[] {
 }
 
 // Given a list of tokens, build them into a prefix string.
-function stringifyTokens (tokens: Token[]): string{
+function stringifyTokens (tokens: Node[]): string{
     const scopes = [];
     let index = -1;
     let buffer = '';
 
     for (let i = 0 ; i < tokens.length ; i ++) {
         const token = tokens[i];
-        if (token.type === TokenType.OPERATOR) {
-            buffer += token.value + '(';
+        if (token.type === NodeType.OPERATOR_TERM) {
+            buffer += token.text + '(';
             index ++;
             scopes.push(2);
         } else {
-            buffer += token.value;
+            buffer += token.text;
             scopes[index]--;
             if (scopes[index] === 1) {
                 buffer += ',';
@@ -463,37 +446,104 @@ function getCaptureGroup (text: string): CaptureGroupMeta {
 }
 
 // Corecursively prefixes and orders infixes on tokens in text with `shunt`.
-function processSyntaxNode (node: Token): string {
-    const nodeText = node.value;
+function processSyntaxNode (node: Node): Node {
+    const nodeText = node.text;
     const group = getCaptureGroup(nodeText);
     const [start, end] = group.nestingDimensions;
-    let innerText: string;
+    let entries: Node[] = [];
     if (start !== -1) {
         const subText = group.nestedText.slice(1, group.nestedText.length - 1);
-        innerText = splitOnCommas(subText).map(e => shunt(e)).join(',');
+        entries = splitOnCommas(subText).map(e => shunt(e));
     }
 
-    if (innerText) {
-        return nodeText.slice(0, start) + closingTokenBackRefs[group.nestingSeparator] + innerText + group.nestingSeparator + nodeText.slice(end + 1);
+    if (entries.length > 0) {
+        const type = NODE_TYPES_FOR_CLOSING_TOKEN[group.nestingSeparator];
+        // Handle function call case
+        const prefix = nodeText.slice(0, start);
+        const isFunctionCall = type === NodeType.TUPLE && prefix;
+        return {
+            text: isFunctionCall ? prefix : '',
+            type: isFunctionCall ? NodeType.FUNCTION_CALL : NODE_TYPES_FOR_CLOSING_TOKEN[group.nestingSeparator],
+            children: entries
+        }
     }
 
-    return nodeText;
+    return node;
+}
+
+enum NodeType {
+    TERM,
+    OPERATOR_TERM,
+    FUNCTION_CALL,
+    LIST,
+    TUPLE,
+    SIGNATURE
+}
+
+type Node = {
+    text: string
+    type: NodeType
+    children: Node[]
+}
+
+// The node type for various closing tokens.
+const NODE_TYPES_FOR_CLOSING_TOKEN = {
+    ']': NodeType.LIST,
+    '}': NodeType.SIGNATURE,
+    ')': NodeType.TUPLE
+}
+
+function leafNode(leafText: string): Node {
+    return {
+        text: leafText,
+        type: NodeType.TERM,
+        children: []
+    }
+}
+
+function operatorNode(operator: string, leftTerm: Node, rightTerm: Node): Node {
+    return {
+        text: operator,
+        type: NodeType.FUNCTION_CALL,
+        children: [leftTerm, rightTerm]
+    }
+}
+
+function nodeListToNodeTreeRec(tokens: Node[], offset: number): [Node, number] {
+    if (tokens[offset].type !== NodeType.OPERATOR_TERM) {
+        return [tokens[offset], ++offset];
+    }
+    const operatorName = tokens[offset++].text;
+
+    const firstTermResult = nodeListToNodeTreeRec(tokens, offset);
+    const firstNode = firstTermResult[0];
+    offset = firstTermResult[1];
+
+    const secondTermResult = nodeListToNodeTreeRec(tokens, offset);
+    const secondNode = secondTermResult[0];
+    offset = secondTermResult[1];
+
+    return [operatorNode(operatorName, firstNode, secondNode), offset];
+}
+
+function nodeListToNodeTree(tokens: Node[]): Node {
+    return nodeListToNodeTreeRec(tokens, 0)[0];
 }
 
 // Shunting yard algorithm implementation that recursively applies itself on nested blocks.
 // Treats function calls and non infix/parenthesized operations as simple tokens, akin to numbers.
-export function shunt(segment: string): string{
+export function shunt(segment: string): Node{
     const tokens = tokenize(segment);
     const stack = [];
     const result = [];
     for (let i = tokens.length - 1 ; i >= 0 ; i -- ) {
         const token = tokens[i];
-        if (token.type === TokenType.SYNTAX) {
-            result.push(syntaxToken(processSyntaxNode(token)));
+        if (token.type === NodeType.TERM) {
+            result.push(processSyntaxNode(token));
             continue;
         }
 
-        const precedence = operatorsToPrecedences[token.value];
+        const precedence = operatorsToPrecedences[token.text];
 
         if (stack.length === 0) {
             stack.push(token);
@@ -513,8 +563,7 @@ export function shunt(segment: string): string{
     while (stack.length > 0) {
         result.push(stack.pop());
     }
-
-    return stringifyTokens(reverse(result));
+    return nodeListToNodeTree(reverse(result));
 }
 
 // Removes the opening and closing characters of a group and splits it on commas.
@@ -524,7 +573,7 @@ export function trimAndSplitOnCommas (text: string): string[] {
 
 // Converts infix/prefix mixed string to all prefix string recursively.
 // "x = 3 + 5" becomes "=(x,+(3,5))"
-export function lex (rawText:string): string {
+export function lex (rawText:string): Node {
     // Convert methods to function calls, then orders infix operators
     return shunt(preprocessMethodSyntax(rawText));
 }
