@@ -1,4 +1,4 @@
-import {lex, trimAndSplitOnCommas} from "./prefixer.ts";
+import {lex, trimAndSplitOnCommas} from "./parser.ts";
 import {inferTypeAndValue} from "./literals.js";
 import {typeSatisfaction, createVar, isAlias, createError, createTypeVar} from "./types.js";
 import {ScopedVars} from "./vars.js";

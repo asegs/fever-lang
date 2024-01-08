@@ -1,4 +1,4 @@
-import {splitGeneral, splitOnCommas} from "./prefixer.ts";
+import {splitGeneral, splitOnCommas} from "./parser.ts";
 import {evaluate, goals} from "./interpreter.js";
 
 
