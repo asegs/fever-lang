@@ -18,7 +18,10 @@ const isStringLiteral = (string) => {
 }
 
 const isWord = (string) => {
-
+    return (
+        text.match(/^[a-zA-z]$/g) !== null ||
+        text.match(/^[a-zA-Z][a-zA-Z0-9]+$/g) !== null
+    );
 }
 
 const wordIsBoolean = (string) => {
