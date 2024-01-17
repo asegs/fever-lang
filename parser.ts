@@ -182,19 +182,19 @@ class Tracker {
 }
 
 // Constructs a new syntax token from text.
-function syntaxToken(text: string): Node {
+function syntaxToken(text: string): ParseNode {
   return {
     text: text,
-    type: NodeType.TERM,
+    type: ParseNodeType.TERM,
     children: [],
   };
 }
 
 // Constructs a new operator token from text.
-function operatorToken(text: string): Node {
+function operatorToken(text: string): ParseNode {
   return {
     text: text,
-    type: NodeType.OPERATOR_TERM,
+    type: ParseNodeType.OPERATOR_TERM,
     children: [],
   };
 }
@@ -337,8 +337,8 @@ function preprocessMethodSyntax(text: string): string {
 }
 
 // Breaks a string of text into syntax and operator token objects.
-function tokenize(segment: string): Node[] {
-  const tokens: Node[] = [];
+function tokenize(segment: string): ParseNode[] {
+  const tokens: ParseNode[] = [];
   let buffer = "";
   const tracker = new Tracker();
 
@@ -392,14 +392,14 @@ function reverse<T>(list: T[]): T[] {
 }
 
 // Given a list of tokens, build them into a prefix string.
-function stringifyTokens(tokens: Node[]): string {
+function stringifyTokens(tokens: ParseNode[]): string {
   const scopes = [];
   let index = -1;
   let buffer = "";
 
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
-    if (token.type === NodeType.OPERATOR_TERM) {
+    if (token.type === ParseNodeType.OPERATOR_TERM) {
       buffer += token.text + "(";
       index++;
       scopes.push(2);
@@ -463,11 +463,11 @@ function getCaptureGroup(text: string): CaptureGroupMeta {
 }
 
 // Corecursively prefixes and orders infixes on tokens in text with `shunt`.
-function processSyntaxNode(node: Node): Node {
+function processSyntaxNode(node: ParseNode): ParseNode {
   const nodeText = node.text;
   const group = getCaptureGroup(nodeText);
   const [start, end] = group.nestingDimensions;
-  let entries: Node[] = [];
+  let entries: ParseNode[] = [];
   if (start !== -1) {
     const subText = group.nestedText.slice(1, group.nestedText.length - 1);
     entries = splitOnCommas(subText).map((e) => shunt(e));
@@ -477,11 +477,11 @@ function processSyntaxNode(node: Node): Node {
     const type = NODE_TYPES_FOR_CLOSING_TOKEN[group.nestingSeparator];
     // Handle function call case
     const prefix = nodeText.slice(0, start);
-    const isFunctionCall = type === NodeType.TUPLE && prefix;
+    const isFunctionCall = type === ParseNodeType.TUPLE && prefix;
     return {
       text: isFunctionCall ? prefix : "",
       type: isFunctionCall
-        ? NodeType.FUNCTION_CALL
+        ? ParseNodeType.FUNCTION_CALL
         : NODE_TYPES_FOR_CLOSING_TOKEN[group.nestingSeparator],
       children: entries,
     };
@@ -490,7 +490,7 @@ function processSyntaxNode(node: Node): Node {
   return node;
 }
 
-enum NodeType {
+export enum ParseNodeType {
   TERM,
   OPERATOR_TERM,
   FUNCTION_CALL,
@@ -499,38 +499,45 @@ enum NodeType {
   SIGNATURE,
 }
 
-type Node = {
+export type ParseNode = {
   text: string;
-  type: NodeType;
-  children: Node[];
+  type: ParseNodeType;
+  children: ParseNode[];
 };
 
 // The node type for various closing tokens.
 const NODE_TYPES_FOR_CLOSING_TOKEN = {
-  "]": NodeType.LIST,
-  "}": NodeType.SIGNATURE,
-  ")": NodeType.TUPLE,
+  "]": ParseNodeType.LIST,
+  "}": ParseNodeType.SIGNATURE,
+  ")": ParseNodeType.TUPLE,
 };
 
-function leafNode(leafText: string): Node {
+function leafNode(leafText: string): ParseNode {
   return {
     text: leafText,
-    type: NodeType.TERM,
+    type: ParseNodeType.TERM,
     children: [],
   };
 }
 
-function operatorNode(operator: string, leftTerm: Node, rightTerm: Node): Node {
+function operatorNode(
+  operator: string,
+  leftTerm: ParseNode,
+  rightTerm: ParseNode,
+): ParseNode {
   return {
     text: operator,
-    type: NodeType.FUNCTION_CALL,
+    type: ParseNodeType.FUNCTION_CALL,
     children: [leftTerm, rightTerm],
   };
 }
 
 // Given a flat list of operator and non-operator nodes, builds a tree.
-function nodeListToNodeTreeRec(tokens: Node[], offset: number): [Node, number] {
-  if (tokens[offset].type !== NodeType.OPERATOR_TERM) {
+function nodeListToNodeTreeRec(
+  tokens: ParseNode[],
+  offset: number,
+): [ParseNode, number] {
+  if (tokens[offset].type !== ParseNodeType.OPERATOR_TERM) {
     return [tokens[offset], ++offset];
   }
   const operatorName = tokens[offset++].text;
@@ -546,19 +553,19 @@ function nodeListToNodeTreeRec(tokens: Node[], offset: number): [Node, number] {
   return [operatorNode(operatorName, firstNode, secondNode), offset];
 }
 
-function nodeListToNodeTree(tokens: Node[]): Node {
+function nodeListToNodeTree(tokens: ParseNode[]): ParseNode {
   return nodeListToNodeTreeRec(tokens, 0)[0];
 }
 
 // Shunting yard algorithm implementation that recursively applies itself on nested blocks.
 // Treats function calls and non infix/parenthesized operations as simple tokens, akin to numbers.
-export function shunt(segment: string): Node {
+export function shunt(segment: string): ParseNode {
   const tokens = tokenize(segment);
   const stack = [];
   const result = [];
   for (let i = tokens.length - 1; i >= 0; i--) {
     const token = tokens[i];
-    if (token.type === NodeType.TERM) {
+    if (token.type === ParseNodeType.TERM) {
       result.push(processSyntaxNode(token));
       continue;
     }
@@ -570,13 +577,13 @@ export function shunt(segment: string): Node {
       continue;
     }
 
-    if (operatorsToPrecedences[stack[stack.length - 1]] <= precedence) {
+    if (operatorsToPrecedences[stack[stack.length - 1].text] <= precedence) {
       stack.push(token);
     }
 
     while (
       stack.length > 0 &&
-      operatorsToPrecedences[stack[stack.length - 1].value] > precedence
+      operatorsToPrecedences[stack[stack.length - 1].text] > precedence
     ) {
       result.push(stack.pop());
     }
@@ -596,7 +603,7 @@ export function trimAndSplitOnCommas(text: string): string[] {
 
 // Converts infix/prefix mixed string to all prefix string recursively.
 // "x = 3 + 5" becomes "=(x,+(3,5))"
-export function parse(rawText: string): Node {
+export function parse(rawText: string): ParseNode {
   // Convert methods to function calls, then orders infix operators
   return shunt(preprocessMethodSyntax(rawText));
 }
