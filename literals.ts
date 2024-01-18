@@ -74,7 +74,7 @@ export function maybeVarFromLiteral(parent: ParseNode): FeverVar | null {
   if (parentText === "[]") {
     return createVar([], Meta.LIST);
   }
-  if (parentText === '""') {
+  if (parentText === '""' || parentText === "''") {
     return createVar([], Meta.STRING);
   }
   if (parentText === "()") {
@@ -88,7 +88,7 @@ export function maybeVarFromLiteral(parent: ParseNode): FeverVar | null {
     return createVar(Number(parentText), Primitives.NUMBER);
   }
   if (isStringLiteral(parentText)) {
-    return feverStringFromJsString(parentText);
+    return feverStringFromJsString(parentText.slice(1, parentText.length - 1));
   }
   if (isWord(parentText)) {
     if (wordIsBoolean(parentText)) {
@@ -109,7 +109,12 @@ export function abstractNodeToRealNode(parent: ParseNode): FeverVar {
       case ParseNodeType.LIST:
         return createList(realChildren);
       case ParseNodeType.TUPLE:
-        return createTuple(realChildren);
+        if (realChildren.length > 1) {
+          return createTuple(realChildren);
+        } else {
+          return createVar(realChildren[0], Primitives.EXPRESSION);
+        }
+
       case ParseNodeType.SIGNATURE:
         return null;
       default:

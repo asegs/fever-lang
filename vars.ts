@@ -14,4 +14,8 @@ export class Context {
   get(name: string): FeverVar {
     return this.vars[name];
   }
+
+  exists(name: string): boolean {
+    return name in this.vars;
+  }
 }
