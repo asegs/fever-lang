@@ -6,7 +6,7 @@ import {
     createVar, inferTypeFromString, meta,
     primitives, typeAssignableFrom
 } from './types.js'
-import {splitArray} from "./prefixer.js";
+import {splitOnCommas} from "./parser.ts";
 import {evaluate, goals, findMissing} from "./interpreter.js";
 
 const everyCharNumeric = (string) => {
@@ -18,7 +18,10 @@ const isStringLiteral = (string) => {
 }
 
 const isWord = (string) => {
-    return string.match(/^[a-zA-z]$/g) || string.match(/^[a-zA-Z][a-zA-Z0-9]+$/g);
+    return (
+        text.match(/^[a-zA-z]$/g) !== null ||
+        text.match(/^[a-zA-Z][a-zA-Z0-9]+$/g) !== null
+    );
 }
 
 const wordIsBoolean = (string) => {
@@ -59,7 +62,7 @@ const getAsTypeVar = (string) => {
 
 
 const parseCollectionToItems = (string) => {
-    return splitArray(string.slice(1, string.length - 1));
+    return splitOnCommas(string.slice(1, string.length - 1));
 }
 
 const recursiveTypeMatch = new RegExp(/^(list|tuple)\[(.*)]$/m);

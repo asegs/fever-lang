@@ -2,7 +2,7 @@
   "name": "fever-lang",
   "version": "1.0.0",
   "description": "",
-  "main": "builtins.js",
+  "main": "fever.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/asegs/fever-lang/issues"
   },
-  "homepage": "https://github.com/asegs/fever-lang#readme"
+  "homepage": "https://github.com/asegs/fever-lang#readme",
+  "devDependencies": {
+    "tsx": "^4.7.0"
+  }
 }
