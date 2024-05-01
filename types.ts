@@ -1,23 +1,24 @@
-export const TYPE_WEIGHTS = {
-  ANY: 0.5,
-  BASE_TUPLE: 0.75,
-  NOMINAL: 1.1,
-  EQUIVALENT: 1,
-  GENERIC: 1,
-};
+export enum TypeWeights {
+  ANY = 0.5,
+  BASE_TUPLE = 0.75,
+  NOMINAL = 1.1,
+  EQUIVALENT = 1,
+  GENERIC = 1,
+}
 
-export const PATTERN_WEIGHTS = {
-  ANY: 0.5,
-  EXPRESSION: 1,
-  TYPE: 1,
-  VALUE: 1.2,
-};
+export enum PatternWeights {
+  ANY = 0.5,
+  EXPRESSION = 1,
+  TYPE = 1,
+  VALUE = 1.2,
+}
 
 export type FeverType = {
   baseName: string;
   types: FeverType[];
   meta: boolean;
   alias?: string;
+  generic?: string;
 };
 
 export type FeverVar = {
@@ -152,3 +153,111 @@ export function feverStringFromJsString(jsString: string): FeverVar {
     Meta.STRING,
   );
 }
+
+export function isAlias(t: FeverType): boolean {
+  return "alias" in t;
+}
+
+export function isGeneric(t: FeverType): boolean {
+  return "generic" in t;
+}
+
+function weightedAnyType(depth: number): number {
+  return (TypeWeights.ANY + TypeWeights.EQUIVALENT * depth) / (depth + 1);
+}
+
+export const typeSatisfaction = (
+  child: FeverType,
+  parent: FeverType,
+  genericTable: { [key: string]: FeverType },
+  depth: number,
+  actualChild: FeverVar,
+) => {
+  if (parent.baseName === "ANY") {
+    if (isGeneric(parent)) {
+      //We are either matching against a known type
+      if (parent.generic in genericTable) {
+        return typeSatisfaction(
+          child,
+          genericTable[parent.generic],
+          genericTable,
+          depth,
+          actualChild,
+        );
+      }
+
+      //Or we just encountered some generic for the first time
+      genericTable[parent.generic] = child;
+      return [TypeWeights.GENERIC, genericTable];
+    }
+
+    return [weightedAnyType(depth), genericTable];
+  }
+
+  if (isAlias(parent)) {
+    if (isAlias(child)) {
+      if (child["alias"] === parent["alias"]) {
+        return [TypeWeights.NOMINAL, genericTable];
+      }
+    }
+    return [0, genericTable];
+  }
+
+  if (!child.meta && !parent.meta) {
+    return [
+      child.baseName === parent.baseName ? TypeWeights.NOMINAL : 0,
+      genericTable,
+    ];
+  }
+
+  if (child.types.length !== parent.types.length) {
+    return [
+      parent.baseName === "TUPLE" && parent.types.length === 0
+        ? TypeWeights.BASE_TUPLE
+        : 0,
+      genericTable,
+    ];
+  }
+
+  let combinedScore = 0;
+
+  if (
+    parent.baseName === "LIST" &&
+    child.baseName === "LIST" &&
+    actualChild.value.length === 0
+  ) {
+    return [TypeWeights.EQUIVALENT, genericTable];
+  }
+
+  for (let i = 0; i < child.types.length; i++) {
+    let subChild;
+    if (child.baseName === "LIST") {
+      subChild = actualChild;
+    } else {
+      subChild = actualChild.value[i];
+    }
+    const [satisfaction, gt] = typeSatisfaction(
+      child.types[i],
+      parent.types[i],
+      genericTable,
+      depth + 1,
+      subChild,
+    );
+    if (satisfaction === 0) {
+      return [0, genericTable];
+    }
+
+    combinedScore += satisfaction;
+    genericTable = { ...genericTable, ...gt };
+  }
+
+  return [combinedScore / child.types.length, genericTable];
+  //Exact match is 1
+  //Same base type is something
+  //Handle [String, String, Int] never working with [String, String, String] (aside from morphisms)
+  //String <-> String => 1
+  //String <-> List => 0.5?
+  //String <-> List(Character) => 1 or 0.75 etc..
+  //Tuple(String, Number, Character) <-> Tuple => 0.5
+  //Tuple(String, Number, Character) <-> Tuple(String, Character, Character) => 0.8333 (assuming 1 step morphism from number to character)
+};

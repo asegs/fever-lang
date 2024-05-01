@@ -80,10 +80,4 @@ export class ScopedVars {
     }
     return vars;
   }
-
-  mergeHere(map) {
-    for (const [key, value] of Object.entries(map)) {
-      this.scopes[this.depth][key] = value;
-    }
-  }
 }
