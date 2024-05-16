@@ -13,7 +13,7 @@ import {
 } from "./types.ts";
 import { registerBuiltins } from "./builtins.ts";
 
-const ctx = new Context();
+export const ctx = new Context();
 
 const assignGenericTableToTypeVars = (
   ctx: Context,
@@ -210,13 +210,11 @@ export function evaluate(realNode: FeverVar): FeverVar {
   return realNode;
 }
 
-function handle(text: string): void {
+export function handle(text: string): FeverVar {
   const parsedTree = parse(text);
   const realNode = abstractNodeToRealNode(parsedTree);
   const result = evaluate(realNode);
   console.dir(result, { depth: null });
+  return result;
 }
 registerBuiltins(ctx);
-
-handle("[1,2,3]");
-handle("[1,2,3] -> (@ + 1)");

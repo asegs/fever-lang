@@ -149,6 +149,11 @@ export const Meta = {
   CALL: createTypedTuple([Primitives.VARIABLE, DEFAULT_TUPLE], "CALL"),
 };
 
+export const Shorthands = {
+  "#": Primitives.NUMBER,
+  fn: Meta.FUNCTION,
+};
+
 export function feverStringFromJsString(jsString: string): FeverVar {
   return createVar(
     jsString.split("").map((char) => createVar(char, Primitives.CHARACTER)),

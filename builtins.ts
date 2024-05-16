@@ -357,9 +357,9 @@ export const builtins = {
   "=": [
     newFunction(
       2,
-      [Meta.STRING, Primitives.ANY],
+      [Primitives.VARIABLE, Primitives.ANY],
       ([name, value], variables) => {
-        variables.assignValue(charListToJsString(name), value);
+        variables.assignValue(name.value, value);
         return value;
       },
     ),
