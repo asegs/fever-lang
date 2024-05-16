@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/asegs/fever-lang#readme",
   "devDependencies": {
+    "@types/node": "^20.12.12",
     "tsx": "^4.7.0"
   }
 }

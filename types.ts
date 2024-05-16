@@ -24,6 +24,8 @@ export type FeverType = {
 export type FeverVar = {
   value: any;
   type: FeverType;
+  invocations?: FeverVar[];
+  types?: FeverType[];
 };
 
 export function createType(

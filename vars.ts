@@ -1,4 +1,4 @@
-import { FeverVar } from "./types";
+import { FeverType, FeverVar } from "./types";
 
 export class Context {
   scopes: { [key: string]: FeverVar }[];
@@ -81,5 +81,9 @@ export class Context {
       vars = { ...vars, ...this.scopes[i] };
     }
     return vars;
+  }
+
+  registerMorphism(from: FeverType, to: FeverType, by: FeverVar) {
+    // TODO
   }
 }

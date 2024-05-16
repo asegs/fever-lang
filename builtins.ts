@@ -6,6 +6,8 @@ import {
   createTypedTuple,
   createTypeVar,
   createVar,
+  FeverType,
+  FeverVar,
   isAlias,
   Meta,
   Primitives,
@@ -20,8 +22,14 @@ import {
 } from "./interpreter.ts";
 import { feverStringFromJsString, inferListType } from "./literals.ts";
 import { readFileSync } from "fs";
+import { Context } from "./vars";
 
-const newFunction = (arity, types, functionOperation, args) => {
+function newFunction(
+  arity: number,
+  types: FeverType[],
+  functionOperation: (args: FeverVar[], ctx: Context) => FeverVar,
+  args?,
+) {
   const func = {
     arity: arity,
     types: types,
@@ -45,7 +53,7 @@ const newFunction = (arity, types, functionOperation, args) => {
   }
 
   return func;
-};
+}
 
 export const builtins = {
   "+": [
@@ -152,8 +160,8 @@ export const builtins = {
     newFunction(
       2,
       [Meta.LIST, Primitives.EXPRESSION],
-      ([list, action], variables, morphisms) => {
-        return namedMap(list, action, variables, morphisms, ["@", "#", "^"]);
+      ([list, action], ctx) => {
+        return namedMap(list, action, ctx, ["@", "#", "^"]);
       },
     ),
     // [1,2,3] -> (['item','index','intermediate'], (item + 1))
@@ -163,83 +171,67 @@ export const builtins = {
         Meta.LIST,
         createTypedTuple([createTypedList(Meta.STRING), Primitives.EXPRESSION]),
       ],
-      ([list, namedAction], variables, morphisms) => {
+      ([list, namedAction], ctx) => {
         const [names, action] = namedAction.value;
         const nameTable = ["@", "#", "^"];
         const providedNames = names.value;
         for (let i = 0; i < Math.min(3, providedNames.length); i++) {
           nameTable[i] = charListToJsString(providedNames[i]);
         }
-        return namedMap(list, action, variables, morphisms, nameTable);
+        return namedMap(list, action, ctx, nameTable);
       },
     ),
-    newFunction(
-      2,
-      [Meta.LIST, Primitives.ANY],
-      ([list, result], variables, morphisms) => {
-        const results = list.value.map((ignored) => result);
-        const res = createVar(
-          results,
-          createTypedList(
-            results.length > 0 ? results[0].type : Primitives.ANY,
-            list.type.alias,
-          ),
-        );
+    newFunction(2, [Meta.LIST, Primitives.ANY], ([list, result], ctx) => {
+      const results = list.value.map((ignored) => result);
+      const res = createVar(
+        results,
+        createTypedList(
+          results.length > 0 ? results[0].type : Primitives.ANY,
+          list.type.alias,
+        ),
+      );
 
-        if (isAlias(res.type)) {
-          const created = newOfType(res.type, [res], variables, morphisms);
-          if (created.type.baseName !== "ERROR") {
-            return created;
-          }
+      if (isAlias(res.type)) {
+        const created = newOfType(res.type, [res], ctx);
+        if (created.type.baseName !== "ERROR") {
+          return created;
         }
-        return res;
-      },
-    ),
-    newFunction(
-      2,
-      [Meta.LIST, Meta.FUNCTION],
-      ([list, func], variables, morphisms) => {
-        const results = list.value.map((item) =>
-          callFunctionByReference(func, [item], variables, morphisms, "lambda"),
-        );
-        const errors = results.filter((res) => res.type.baseName === "ERROR");
-        if (errors.length > 0) {
-          return errors[0];
-        }
-        const res = createVar(
-          results,
-          createTypedList(
-            results.length > 0 ? results[0].type : Primitives.ANY,
-            list.type.alias,
-          ),
-        );
+      }
+      return res;
+    }),
+    newFunction(2, [Meta.LIST, Meta.FUNCTION], ([list, func], ctx) => {
+      const results = list.value.map((item) =>
+        callFunctionByReference(func, [item], ctx, "lambda"),
+      );
+      const errors = results.filter((res) => res.type.baseName === "ERROR");
+      if (errors.length > 0) {
+        return errors[0];
+      }
+      const res = createVar(
+        results,
+        createTypedList(
+          results.length > 0 ? results[0].type : Primitives.ANY,
+          list.type.alias,
+        ),
+      );
 
-        if (isAlias(res.type)) {
-          const created = newOfType(res.type, [res], variables, morphisms);
-          if (created.type.baseName !== "ERROR") {
-            return created;
-          }
+      if (isAlias(res.type)) {
+        const created = newOfType(res.type, [res], ctx);
+        if (created.type.baseName !== "ERROR") {
+          return created;
         }
+      }
 
-        return res;
-      },
-    ),
+      return res;
+    }),
   ],
   "\\>": [
     newFunction(
       2,
       [Meta.LIST, createTypedTuple([Primitives.ANY, Primitives.EXPRESSION])],
-      ([list, reduce], variables, morphisms) => {
+      ([list, reduce], ctx) => {
         const [acc, reduction] = reduce.value;
-        return namedReduce(
-          list,
-          acc,
-          reduction,
-          variables,
-          morphisms,
-          ["@", "#", "$"],
-          false,
-        );
+        return namedReduce(list, acc, reduction, ctx, ["@", "#", "$"], false);
       },
     ),
     newFunction(
@@ -252,22 +244,14 @@ export const builtins = {
           Primitives.EXPRESSION,
         ]),
       ],
-      ([list, namedReduction], variables, morphisms) => {
+      ([list, namedReduction], ctx) => {
         const [names, acc, reduction] = namedReduction.value;
         const nameTable = ["@", "#", "$"];
         const providedNames = names.value;
         for (let i = 0; i < Math.min(3, providedNames.length); i++) {
           nameTable[i] = charListToJsString(providedNames[i]);
         }
-        return namedReduce(
-          list,
-          acc,
-          reduction,
-          variables,
-          morphisms,
-          nameTable,
-          false,
-        );
+        return namedReduce(list, acc, reduction, ctx, nameTable, false);
       },
     ),
     newFunction(
@@ -280,14 +264,13 @@ export const builtins = {
           Primitives.BOOLEAN,
         ]),
       ],
-      ([list, reduce], variables, morphisms) => {
+      ([list, reduce], ctx) => {
         const [acc, reduction, flag] = reduce.value;
         return namedReduce(
           list,
           acc,
           reduction,
-          variables,
-          morphisms,
+          ctx,
           ["@", "#", "$"],
           flag.value,
         );
@@ -304,22 +287,14 @@ export const builtins = {
           Primitives.BOOLEAN,
         ]),
       ],
-      ([list, namedReduction], variables, morphisms) => {
+      ([list, namedReduction], ctx) => {
         const [names, acc, reduction, flag] = namedReduction.value;
         const nameTable = ["@", "#", "$"];
         const providedNames = names.value;
         for (let i = 0; i < Math.min(3, providedNames.length); i++) {
           nameTable[i] = charListToJsString(providedNames[i]);
         }
-        return namedReduce(
-          list,
-          acc,
-          reduction,
-          variables,
-          morphisms,
-          nameTable,
-          flag.value,
-        );
+        return namedReduce(list, acc, reduction, ctx, nameTable, flag.value);
       },
     ),
   ],
@@ -327,15 +302,8 @@ export const builtins = {
     newFunction(
       2,
       [Meta.LIST, Primitives.EXPRESSION],
-      ([list, action], variables, morphisms) => {
-        return namedFilter(
-          list,
-          action,
-          variables,
-          morphisms,
-          ["@", "#", "^"],
-          null,
-        );
+      ([list, action], ctx) => {
+        return namedFilter(list, action, ctx, ["@", "#", "^"], null);
       },
     ),
     newFunction(
@@ -344,30 +312,19 @@ export const builtins = {
         Meta.LIST,
         createTypedTuple([createTypedList(Meta.STRING), Primitives.EXPRESSION]),
       ],
-      ([list, namedAction], variables, morphisms) => {
+      ([list, namedAction], ctx) => {
         const [names, filter] = namedAction.value;
         const nameTable = ["@", "#", "^"];
         const providedNames = names.value;
         for (let i = 0; i < Math.min(3, providedNames.length); i++) {
           nameTable[i] = charListToJsString(providedNames[i]);
         }
-        return namedFilter(list, filter, variables, morphisms, nameTable, null);
+        return namedFilter(list, filter, ctx, nameTable, null);
       },
     ),
-    newFunction(
-      2,
-      [Meta.LIST, Meta.FUNCTION],
-      ([list, funcRef], variables, morphisms) => {
-        return namedFilter(
-          list,
-          null,
-          variables,
-          morphisms,
-          ["@", "#", "^"],
-          funcRef,
-        );
-      },
-    ),
+    newFunction(2, [Meta.LIST, Meta.FUNCTION], ([list, funcRef], ctx) => {
+      return namedFilter(list, null, ctx, ["@", "#", "^"], funcRef);
+    }),
   ],
   "==": [
     newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) =>
@@ -418,17 +375,12 @@ export const builtins = {
       const names = namesFromSignature(signature);
       const specificities = specificitiesFromSignature(signature);
 
-      const operation = (args, variables, morphisms) => {
+      const operation = (args, ctx) => {
         variables.enterScope();
         for (let i = 0; i < args.length; i++) {
           variables.assignValue(names[i], args[i]);
         }
-        const result = evaluate(
-          expression.value,
-          variables,
-          morphisms,
-          goals.EVALUATE,
-        );
+        const result = evaluate(expression.value);
         variables.exitScope();
         return result;
       };
@@ -457,7 +409,7 @@ export const builtins = {
         const newType = isListAlias
           ? createTypedList(types[0].types[0], realName)
           : createTypedTuple(types, realName);
-        meta[realName.toUpperCase()] = newType;
+        Meta[realName.toUpperCase()] = newType;
 
         const permutations = [];
 
@@ -473,15 +425,10 @@ export const builtins = {
           ) {
             permutations.push((arg) => arg);
           } else {
-            permutations.push((arg, variables, morphisms) => {
+            permutations.push((arg, ctx) => {
               variables.enterScope();
               variables.assignValue(name.value, arg);
-              const result = evaluate(
-                expression.value,
-                variables,
-                morphisms,
-                goals.EVALUATE,
-              );
+              const result = evaluate(expression.value);
               variables.exitScope();
               return result;
             });
@@ -506,27 +453,19 @@ export const builtins = {
           registerNewFunction(
             name.value,
             variables,
-            newFunction(
-              2,
-              [newType, types[i]],
-              ([ofType, newValue], variables, morphisms) => {
-                ofType.value[i] = permutations[i](
-                  newValue,
-                  variables,
-                  morphisms,
-                );
-                return ofType;
-              },
-            ),
+            newFunction(2, [newType, types[i]], ([ofType, newValue], ctx) => {
+              ofType.value[i] = permutations[i](newValue, ctx);
+              return ofType;
+            }),
           );
         }
 
         //Apply relevant condition to each arg if not simple var name.
-        const operation = ([, ...args], variables, morphisms) => {
+        const operation = ([, ...args], ctx) => {
           const mutatedArgs = [];
 
           for (let i = 0; i < size; i++) {
-            mutatedArgs.push(permutations[i](args[i], variables, morphisms));
+            mutatedArgs.push(permutations[i](args[i], ctx));
           }
           return isListAlias
             ? createVar(
@@ -560,12 +499,8 @@ export const builtins = {
     newFunction(
       1,
       [Primitives.ANY],
-      ([v], variables, morphisms) => {
-        console.log(
-          charListToJsString(
-            dispatchFunction("stringify", [v], variables, morphisms),
-          ),
-        );
+      ([v], ctx) => {
+        console.log(charListToJsString(dispatchFunction("stringify", [v])));
         return v;
       },
       {
@@ -707,7 +642,7 @@ export const builtins = {
       1,
       [Primitives.TYPE],
       ([typeVar]) => {
-        return feverStringFromJsString(typeToString(typeVar.value, ""));
+        return feverStringFromJsString(typeToString(typeVar.value));
       },
       {
         specificities: [0.6],
@@ -745,9 +680,9 @@ export const builtins = {
     newFunction(
       2,
       [Meta.FUNCTION, Primitives.TYPE],
-      ([transformation, toType], variables, morphisms) => {
+      ([transformation, toType], ctx) => {
         const fromType = transformation.invocations[0].types[0];
-        morphisms.registerMorphism(fromType, toType.value, transformation);
+        ctx.registerMorphism(fromType, toType.value, transformation);
         return createVar(true, Primitives.BOOLEAN);
       },
       {
@@ -765,12 +700,8 @@ export const builtins = {
     newFunction(
       3,
       [Meta.FUNCTION, Primitives.TYPE, Primitives.TYPE],
-      ([transformation, fromType, toType], variables, morphisms) => {
-        morphisms.registerMorphism(
-          fromType.value,
-          toType.value,
-          transformation,
-        );
+      ([transformation, fromType, toType], ctx) => {
+        ctx.registerMorphism(fromType.value, toType.value, transformation);
         return createVar(true, Primitives.BOOLEAN);
       },
       {
@@ -791,8 +722,8 @@ export const builtins = {
     newFunction(
       2,
       [Primitives.ANY, Primitives.TYPE],
-      ([value, toType], variables, morphisms) => {
-        return morphTypes(value, toType, variables, morphisms);
+      ([value, toType], ctx) => {
+        return morphTypes(value, toType, ctx);
       },
     ),
   ],
@@ -847,16 +778,15 @@ export const builtins = {
   ],
 };
 
-export const morphTypes = (value, toType, variables, morphisms) => {
+export const morphTypes = (value, toType, ctx) => {
   let intermediateValue = value;
-  const typePath = morphisms.pathBetween(value.type, toType.value);
+  const typePath = ctx.morphisms.pathBetween(value.type, toType.value);
   for (let i = 0; i < typePath.length - 1; i++) {
-    const transformation = morphisms.table[typePath[i]][typePath[i + 1]];
+    const transformation = ctx.morphisms.table[typePath[i]][typePath[i + 1]];
     intermediateValue = callFunctionByReference(
       transformation,
       [intermediateValue],
-      variables,
-      morphisms,
+      ctx,
       "morph_transform",
     );
   }
@@ -930,14 +860,9 @@ const conditionsFromSignature = (signature) => {
     const condition = pattern.value[0];
     const conditionName = condition.value[0];
     const conditionExpression = condition.value[1];
-    conditions.push((argument, variables, morphisms) => {
-      variables.assignValue(conditionName.value, argument);
-      const result = evaluate(
-        conditionExpression.value,
-        variables,
-        morphisms,
-        goals.EVALUATE,
-      );
+    conditions.push((argument, ctx) => {
+      ctx.assignValue(conditionName.value, argument);
+      const result = evaluate(conditionExpression.value);
       if (result.type.baseName === "ERROR") {
         return false;
       }
@@ -955,7 +880,7 @@ const specificitiesFromSignature = (signature) => {
   return signature.value.map((i) => i.value[0].value[2].value);
 };
 
-const registerNewFunction = (name, variables, functionObject, rawCase) => {
+const registerNewFunction = (name, variables, functionObject, rawCase?) => {
   let newCase;
 
   if (rawCase) {
@@ -1019,9 +944,9 @@ const generateCaseFromNative = (functionObject) => {
   );
 };
 
-const newOfType = (t, args, vars, morphisms) => {
+const newOfType = (t, args, ctx: Context) => {
   const typeVar = createTypeVar(t);
-  return dispatchFunction("new", [typeVar, ...args], vars, morphisms);
+  return dispatchFunction("new", [typeVar, ...args]);
 };
 
 const argNamesFromFunction = (functionBody) => {
@@ -1154,17 +1079,16 @@ const typeToStringRec = (t, contents) => {
 const namedMap = (
   list,
   action,
-  variables,
-  morphisms,
-  [element, index, intermediate],
+  ctx,
+  [element, index, intermediate]: string[],
 ) => {
   const internalList = [];
   for (let i = 0; i < list.value.length; i++) {
     const item = list.value[i];
-    variables.enterScope();
-    variables.assignValue(element, item);
-    variables.assignValue(index, createVar(i, Primitives.NUMBER));
-    variables.assignValue(
+    ctx.enterScope();
+    ctx.assignValue(element, item);
+    ctx.assignValue(index, createVar(i, Primitives.NUMBER));
+    ctx.assignValue(
       intermediate,
       createVar(
         [...internalList],
@@ -1175,7 +1099,7 @@ const namedMap = (
     );
     const result = evaluate(action.value);
     internalList.push(result);
-    variables.exitScope();
+    ctx.exitScope();
   }
 
   const result = createVar(
@@ -1184,7 +1108,7 @@ const namedMap = (
   );
 
   if (isAlias(list.type)) {
-    const created = newOfType(result.type, [result], variables, morphisms);
+    const created = newOfType(result.type, [result], ctx);
     if (created.type.baseName !== "ERROR") {
       return created;
     }
@@ -1196,19 +1120,18 @@ const namedReduce = (
   list,
   acc,
   expr,
-  variables,
-  morphisms,
-  [element, index, accumulator],
+  ctx: Context,
+  [element, index, accumulator]: string[],
   earlyTerminateIfNotFalse,
 ) => {
   for (let i = 0; i < list.value.length; i++) {
     const item = list.value[i];
-    variables.enterScope();
-    variables.assignValue(element, item);
-    variables.assignValue(index, createVar(i, Primitives.NUMBER));
-    variables.assignValue(accumulator, acc);
-    acc = evaluate(expr.value, variables, morphisms, goals.EVALUATE);
-    variables.exitScope();
+    ctx.enterScope();
+    ctx.assignValue(element, item);
+    ctx.assignValue(index, createVar(i, Primitives.NUMBER));
+    ctx.assignValue(accumulator, acc);
+    acc = evaluate(expr.value);
+    ctx.exitScope();
     if (earlyTerminateIfNotFalse && acc.value !== false) {
       return acc;
     }
@@ -1219,18 +1142,17 @@ const namedReduce = (
 const namedFilter = (
   list,
   action,
-  variables,
-  morphisms,
-  [element, index, intermediate],
+  ctx: Context,
+  [element, index, intermediate]: string[],
   funcRef,
 ) => {
   const internalList = [];
   for (let i = 0; i < list.value.length; i++) {
     const item = list.value[i];
-    variables.enterScope();
-    variables.assignValue(element, item);
-    variables.assignValue(index, createVar(i, Primitives.NUMBER));
-    variables.assignValue(
+    ctx.enterScope();
+    ctx.assignValue(element, item);
+    ctx.assignValue(index, createVar(i, Primitives.NUMBER));
+    ctx.assignValue(
       intermediate,
       createVar(
         internalList,
@@ -1241,20 +1163,14 @@ const namedFilter = (
     );
     let result;
     if (funcRef) {
-      result = callFunctionByReference(
-        funcRef,
-        [item],
-        variables,
-        morphisms,
-        "lambda",
-      );
+      result = callFunctionByReference(funcRef, [item], ctx, "lambda");
     } else {
-      result = evaluate(action.value, variables, morphisms, goals.EVALUATE);
+      result = evaluate(action.value);
     }
     if (result.value) {
       internalList.push(item);
     }
-    variables.exitScope();
+    ctx.exitScope();
   }
 
   const result = createVar(
@@ -1263,7 +1179,7 @@ const namedFilter = (
   );
 
   if (isAlias(list.type)) {
-    const created = newOfType(result.type, [result], variables, morphisms);
+    const created = newOfType(result.type, [result], ctx);
     if (created.type.baseName !== "ERROR") {
       return created;
     }

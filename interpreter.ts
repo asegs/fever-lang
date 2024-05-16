@@ -9,8 +9,6 @@ import {
   FeverVar,
   getFunctionNameAndArgs,
   isAlias,
-  Meta,
-  Primitives,
   typeSatisfaction,
 } from "./types.ts";
 import { registerBuiltins } from "./builtins.ts";
