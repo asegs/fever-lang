@@ -261,3 +261,50 @@ export const typeSatisfaction = (
   //Tuple(String, Number, Character) <-> Tuple => 0.5
   //Tuple(String, Number, Character) <-> Tuple(String, Character, Character) => 0.8333 (assuming 1 step morphism from number to character)
 };
+
+//Could definitely tune performance!
+export const charListToJsString = (v) => {
+  let concatenated = "";
+  for (let i = 0; i < v.value.length; i++) {
+    concatenated += v.value[i].value;
+  }
+  return concatenated;
+};
+
+export function typeAssignableFrom(child, parent) {
+  if (parent === Primitives.ANY) {
+    return true;
+  }
+
+  if (isAlias(parent)) {
+    if (isAlias(child)) {
+      if (child["alias"] === parent["alias"]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  if (!child.meta && !parent.meta) {
+    return child.baseName === parent.baseName;
+  }
+
+  if (child.types.length !== parent.types.length) {
+    return parent.baseName === "TUPLE" && parent.types.length === 0;
+  }
+
+  return child.types.every((item, index) =>
+    typeAssignableFrom(item, parent.types[index]),
+  );
+}
+
+export function recursiveToString(v) {
+  if (Array.isArray(v.value)) {
+    if (v.type.types[0] === Primitives.CHARACTER) {
+      return '"' + charListToJsString(v) + '"';
+    }
+    const [open, close] = v.type.baseName === "TUPLE" ? ["(", ")"] : ["[", "]"];
+    return open + v.value.map((i) => recursiveToString(i)).join(",") + close;
+  }
+  return v.value.toString();
+}

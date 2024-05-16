@@ -2,13 +2,14 @@ import {
   createCall,
   createList,
   createTuple,
+  createTypedList,
   createTypeVar,
   createVar,
-  feverStringFromJsString,
   FeverType,
   FeverVar,
   Meta,
   Primitives,
+  typeAssignableFrom,
 } from "./types.ts";
 import { ParseNode, ParseNodeType, trimAndSplitOnCommas } from "./parser";
 
@@ -121,4 +122,21 @@ export function abstractNodeToRealNode(parent: ParseNode): FeverVar {
         return createVar(parent.text, Primitives.VARIABLE);
     }
   }
+}
+
+export function feverStringFromJsString(jsString) {
+  return createVar(
+    jsString.split("").map((char) => createVar(char, Primitives.CHARACTER)),
+    Meta.STRING,
+  );
+}
+
+export function inferListType(items, optionalAlias) {
+  if (items.length > 0) {
+    const first = items[0];
+    if (items.every((i) => typeAssignableFrom(i.type, first.type))) {
+      return createTypedList(first.type, optionalAlias);
+    }
+  }
+  return Meta.LIST;
 }

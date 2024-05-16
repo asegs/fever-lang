@@ -13,7 +13,7 @@ import {
   Primitives,
   typeSatisfaction,
 } from "./types.ts";
-import { registerBuiltins } from "./builtins";
+import { registerBuiltins } from "./builtins.ts";
 
 const ctx = new Context();
 
@@ -159,7 +159,7 @@ export function callFunctionByReference(
   return result;
 }
 
-function dispatchFunction(fnName: string, args: FeverVar[]): FeverVar {
+export function dispatchFunction(fnName: string, args: FeverVar[]): FeverVar {
   let named = ctx.getOrNull(fnName);
 
   // Here is where we handle optional ? and ! functions
@@ -195,7 +195,7 @@ function dispatchFunction(fnName: string, args: FeverVar[]): FeverVar {
   return callFunctionByReference(named, args, ctx, fnName);
 }
 
-function evaluate(realNode: FeverVar): FeverVar {
+export function evaluate(realNode: FeverVar): FeverVar {
   if (realNode.type.baseName === "EXPRESSION") {
     return realNode;
   }
@@ -221,3 +221,4 @@ function handle(text: string): void {
 registerBuiltins(ctx);
 
 handle("[1,2,3]");
+handle("[1,2,3] -> (@ + 1)");
