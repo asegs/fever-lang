@@ -1,6 +1,7 @@
 import {
   createCall,
   createList,
+  createPatternFromString,
   createTuple,
   createTypedList,
   createTypeVar,
@@ -12,6 +13,7 @@ import {
   typeAssignableFrom,
 } from "./types.ts";
 import { ParseNode, ParseNodeType, trimAndSplitOnCommas } from "./parser";
+import { ctx } from "./interpreter.ts";
 
 function everyCharNumeric(text: string): boolean {
   return (
@@ -117,7 +119,20 @@ export function abstractNodeToRealNode(parent: ParseNode): FeverVar {
         }
 
       case ParseNodeType.SIGNATURE:
-        return null;
+        const takenVars = new Set();
+        const signatureItems = [];
+        for (let i = 0; i < realChildren.length; i++) {
+          const [pattern, varName] = createPatternFromString(
+            realChildren[i],
+            ctx,
+            takenVars,
+          );
+          if (varName !== null) {
+            takenVars.add(varName);
+          }
+          signatureItems.push(pattern);
+        }
+        return createVar(signatureItems, Meta.SIGNATURE);
       default:
         return createVar(parent.text, Primitives.VARIABLE);
     }

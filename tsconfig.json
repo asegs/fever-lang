@@ -5,6 +5,8 @@
             "dom",
             "es2021"
         ],
-        "target": "es5"
+        "target": "es5",
+        "allowImportingTsExtensions": true
+
     }
 }
