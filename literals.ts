@@ -12,7 +12,12 @@ import {
   typeAssignableFrom,
 } from "./types.ts";
 import { ParseNode, ParseNodeType, trimAndSplitOnCommas } from "./parser";
-import { ctx } from "./interpreter.ts";
+import {
+  ctx,
+  evaluate,
+  parseToExpr,
+  unknownVariablesInExpression,
+} from "./interpreter.ts";
 
 function everyCharNumeric(text: string): boolean {
   return (
@@ -86,6 +91,11 @@ export function maybeVarFromLiteral(parent: ParseNode): FeverVar | null {
   if (asTypeVar) {
     return asTypeVar;
   }
+
+  const normalVar = ctx.getOrNull(parentText);
+  if (normalVar) {
+    return normalVar;
+  }
   if (everyCharNumeric(parentText)) {
     return createVar(Number(parentText), Primitives.NUMBER);
   }
@@ -109,12 +119,16 @@ export function abstractNodeToRealNode(parent: ParseNode): FeverVar {
       case ParseNodeType.FUNCTION_CALL:
         return createCall(parent.text, realChildren);
       case ParseNodeType.LIST:
+        console.log(realChildren);
         return createVar(realChildren, inferListType(realChildren));
       case ParseNodeType.TUPLE:
         if (realChildren.length > 1) {
           return createTuple(realChildren);
         } else {
-          return createVar(realChildren[0], Primitives.EXPRESSION);
+          if (unknownVariablesInExpression(realChildren[0]).length > 0) {
+            return createVar(realChildren[0], Primitives.EXPRESSION);
+          }
+          return evaluate(realChildren[0]);
         }
 
       case ParseNodeType.SIGNATURE:

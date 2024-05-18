@@ -189,6 +189,9 @@ export const typeSatisfaction = (
   depth: number,
   actualChild: FeverVar,
 ) => {
+  if (child.baseName === "VARIABLE" && parent.baseName !== "VARIABLE") {
+    return [0, genericTable];
+  }
   if (parent.baseName === "ANY") {
     if (isGeneric(parent)) {
       //We are either matching against a known type

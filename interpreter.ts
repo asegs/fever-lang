@@ -225,12 +225,15 @@ function unknownVariablesInExpressionRec(
     table.push(expr);
     return;
   }
-
   // List type value
   if (Symbol.iterator in Object(expr.value)) {
     for (const child of expr.value) {
       unknownVariablesInExpressionRec(child, table);
     }
+  }
+  // Object type value
+  if (typeof expr.value === "object" && "value" in expr.value) {
+    unknownVariablesInExpressionRec(expr.value, table);
   }
 }
 
