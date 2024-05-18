@@ -159,7 +159,6 @@ export function callFunctionByReference(
 
 export function dispatchFunction(fnName: string, args: FeverVar[]): FeverVar {
   let named = ctx.getOrNull(fnName);
-
   // Here is where we handle optional ? and ! functions
   if (!named) {
     const booleanName = ctx.getOrNull(fnName + "?");

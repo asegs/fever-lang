@@ -6,7 +6,6 @@ import {
   createTypedList,
   createTypeVar,
   createVar,
-  FeverType,
   FeverVar,
   Meta,
   Primitives,
@@ -102,7 +101,7 @@ export function maybeVarFromLiteral(parent: ParseNode): FeverVar | null {
 
 export function abstractNodeToRealNode(parent: ParseNode): FeverVar {
   const maybeVar = maybeVarFromLiteral(parent);
-  if (maybeVar) {
+  if (maybeVar && parent.type !== ParseNodeType.FUNCTION_CALL) {
     return maybeVar;
   } else {
     const realChildren = parent.children.map(abstractNodeToRealNode);
@@ -110,7 +109,7 @@ export function abstractNodeToRealNode(parent: ParseNode): FeverVar {
       case ParseNodeType.FUNCTION_CALL:
         return createCall(parent.text, realChildren);
       case ParseNodeType.LIST:
-        return createList(realChildren);
+        return createVar(realChildren, inferListType(realChildren));
       case ParseNodeType.TUPLE:
         if (realChildren.length > 1) {
           return createTuple(realChildren);
