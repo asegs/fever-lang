@@ -119,11 +119,11 @@ export function abstractNodeToRealNode(parent: ParseNode): FeverVar {
         }
 
       case ParseNodeType.SIGNATURE:
-        const takenVars = new Set();
+        const takenVars: Set<string> = new Set();
         const signatureItems = [];
         for (let i = 0; i < realChildren.length; i++) {
           const [pattern, varName] = createPatternFromString(
-            realChildren[i],
+            realChildren[i].value,
             ctx,
             takenVars,
           );

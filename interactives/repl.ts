@@ -1,5 +1,5 @@
 import { createInterface } from "readline";
-import { ctx, dispatchFunction, handle } from "../interpreter.ts";
+import { ctx, dispatchFunction, interpret } from "../interpreter.ts";
 import { Meta, Primitives, Shorthands } from "../types.ts";
 
 export const prompt = () => {
@@ -14,7 +14,7 @@ export const prompt = () => {
 
 const promptRec = (int) => {
   int.question(">", (inp) => {
-    const result = handle(inp);
+    const result = interpret(inp);
     dispatchFunction("show", [result]);
     promptRec(int);
   });

@@ -1,5 +1,11 @@
 import { splitGeneral, splitOnCommas } from "./parser.ts";
-import { evaluate } from "./interpreter.ts";
+import {
+  evaluate,
+  interpret,
+  parseToExpr,
+  unknownVariablesInExpression,
+} from "./interpreter.ts";
+import { Context } from "./vars.ts";
 
 export enum TypeWeights {
   ANY = 0.5,
@@ -97,7 +103,7 @@ export function createError(message: string): FeverVar {
   return createVar(message, Primitives.ERROR);
 }
 
-export function createPattern(condition: FeverVar, type: FeverType): FeverVar {
+export function createPattern(condition: FeverVar, type: FeverVar): FeverVar {
   return createVar([condition, type], Meta.PATTERN);
 }
 
@@ -110,8 +116,6 @@ export function createTuple(items: FeverVar[]): FeverVar {
 }
 
 export function createCall(name: string, args: FeverVar[]): FeverVar {
-  console.log(name);
-  console.log(args);
   return createVar(
     createTuple([createVar(name, Primitives.VARIABLE), createTuple(args)]),
     Meta.CALL,
@@ -318,7 +322,11 @@ export function recursiveToString(v) {
     const [open, close] = v.type.baseName === "TUPLE" ? ["(", ")"] : ["[", "]"];
     return open + v.value.map((i) => recursiveToString(i)).join(",") + close;
   }
-  return v.value.toString();
+  if (v.value) {
+    return v.value.toString();
+  }
+
+  return "";
 }
 
 export const inferTypeFromString = (rawString, variables) => {
@@ -379,14 +387,18 @@ export const inferTypeFromString = (rawString, variables) => {
  [_,_3] (later)
  (len(a) % 2 == 0) (expression with unknown)
  */
-export const inferConditionFromString = (rawString, ctx, takenVars) => {
+export const inferConditionFromString = (
+  rawString: string,
+  ctx: Context,
+  takenVars: Set<string>,
+) => {
   const string = rawString.trim();
 
   if (string === "_") {
     return [
       createCondition(
         createVar("_", Meta.STRING),
-        createVar("true", Primitives.EXPRESSION),
+        createVar(createVar(true, Primitives.BOOLEAN), Primitives.EXPRESSION),
         createVar(PatternWeights.ANY, Primitives.NUMBER),
       ),
       Primitives.ANY,
@@ -394,8 +406,8 @@ export const inferConditionFromString = (rawString, ctx, takenVars) => {
     ];
   }
 
-  // TODO: Make this find all unknown vars in the result
-  const missing = evaluate(string);
+  const expressionObject = parseToExpr(string);
+  const missing = unknownVariablesInExpression(expressionObject);
   if (missing.length === 0) {
     /**
      123
@@ -416,16 +428,19 @@ export const inferConditionFromString = (rawString, ctx, takenVars) => {
         consideredValue.type.alias === "FUNCTION"
       ) {
         isPreviouslyDeclaredFunction = true;
-        missing.push({ name: string, type: "VARIABLE" });
+        missing.push({
+          value: string,
+          type: { baseName: "VARIABLE", types: [], meta: false },
+        });
       }
     }
     if (!isPreviouslyDeclaredFunction) {
-      const result = evaluate(string);
+      const result = interpret(string);
       return [
         createCondition(
           createVar("__repr", Meta.STRING),
           createVar(
-            "==(__repr," + recursiveToString(result) + ")",
+            parseToExpr("==(__repr," + recursiveToString(result) + ")"),
             Primitives.EXPRESSION,
           ),
           createVar(PatternWeights.VALUE, Primitives.NUMBER),
@@ -436,7 +451,7 @@ export const inferConditionFromString = (rawString, ctx, takenVars) => {
     }
   }
 
-  const acceptedMissing = missing.filter((item) => !takenVars.has(item.name));
+  const acceptedMissing = missing.filter((item) => !takenVars.has(item.value));
 
   if (acceptedMissing.length === 0) {
     //Then we have an expression or variable entirely using previous variables.
@@ -445,7 +460,10 @@ export const inferConditionFromString = (rawString, ctx, takenVars) => {
       return [
         createCondition(
           createVar("__repr", Meta.STRING),
-          createVar("==(__repr," + string + ")", Primitives.EXPRESSION),
+          createVar(
+            parseToExpr("==(__repr," + string + ")"),
+            Primitives.EXPRESSION,
+          ),
           createVar(PatternWeights.EXPRESSION, Primitives.NUMBER),
         ),
         Primitives.ANY,
@@ -458,7 +476,7 @@ export const inferConditionFromString = (rawString, ctx, takenVars) => {
         createCondition(
           createVar("__repr", Meta.STRING),
           createVar(
-            "==(__repr," + missing[0].name + ")",
+            parseToExpr("==(__repr," + missing[0].value + ")"),
             Primitives.EXPRESSION,
           ),
           createVar(PatternWeights.VALUE, Primitives.NUMBER),
@@ -472,13 +490,13 @@ export const inferConditionFromString = (rawString, ctx, takenVars) => {
   /**
    Distinguish between a, [1,2, a] (len(a) % 2 == 0)...let's just use parens.
    */
-  const name = acceptedMissing[0].name;
+  const name = acceptedMissing[0].value;
   if (string[0] === "(") {
     // (len(a) % 2 == 0)
     return [
       createCondition(
         createVar(name, Meta.STRING),
-        createVar(string, Primitives.EXPRESSION),
+        createVar(parseToExpr(string), Primitives.EXPRESSION),
         createVar(PatternWeights.EXPRESSION, Primitives.NUMBER),
       ),
       Primitives.ANY,
@@ -490,7 +508,7 @@ export const inferConditionFromString = (rawString, ctx, takenVars) => {
   return [
     createCondition(
       createVar(name, Meta.STRING),
-      createVar("true", Primitives.EXPRESSION),
+      createVar(createVar(true, Primitives.BOOLEAN), Primitives.EXPRESSION),
       createVar(PatternWeights.ANY, Primitives.NUMBER),
     ),
     Primitives.ANY,
@@ -498,8 +516,12 @@ export const inferConditionFromString = (rawString, ctx, takenVars) => {
   ];
 };
 
-export const createPatternFromString = (string, ctx, takenVars) => {
-  const conditionAndType = splitGeneral(string, ":");
+export const createPatternFromString = (
+  pattern: string,
+  ctx: Context,
+  takenVars: Set<string>,
+) => {
+  const conditionAndType = splitGeneral(pattern, ":");
   let type =
     conditionAndType.length === 1
       ? Primitives.ANY

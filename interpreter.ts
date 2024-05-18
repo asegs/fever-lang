@@ -210,11 +210,38 @@ export function evaluate(realNode: FeverVar): FeverVar {
   return realNode;
 }
 
-export function handle(text: string): FeverVar {
+export function unknownVariablesInExpression(expr: FeverVar): FeverVar[] {
+  const foundVars: FeverVar[] = [];
+  unknownVariablesInExpressionRec(expr, foundVars);
+
+  return foundVars;
+}
+
+function unknownVariablesInExpressionRec(
+  expr: FeverVar,
+  table: FeverVar[],
+): void {
+  // Probably need to check context for variable being defined
+  if (expr.type.baseName === "VARIABLE") {
+    table.push(expr);
+    return;
+  }
+
+  // List type value
+  if (Symbol.iterator in Object(expr.value)) {
+    for (const child of expr.value) {
+      unknownVariablesInExpressionRec(child, table);
+    }
+  }
+}
+
+export function parseToExpr(text: string): FeverVar {
   const parsedTree = parse(text);
-  const realNode = abstractNodeToRealNode(parsedTree);
-  const result = evaluate(realNode);
-  console.dir(result, { depth: null });
-  return result;
+  return abstractNodeToRealNode(parsedTree);
+}
+
+export function interpret(text: string): FeverVar {
+  const realNode = parseToExpr(text);
+  return evaluate(realNode);
 }
 registerBuiltins(ctx);

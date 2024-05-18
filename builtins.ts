@@ -363,37 +363,39 @@ export const builtins = {
         return value;
       },
     ),
-    newFunction(2, [Meta.STRING, Meta.CASE], ([name, func], variables) => {
-      const realName = charListToJsString(name);
+    newFunction(
+      2,
+      [Primitives.VARIABLE, Meta.CASE],
+      ([name, func], variables) => {
+        const signature = func.value[0];
+        const expression = func.value[1];
+        const size = signature.value.length;
 
-      const signature = func.value[0];
-      const expression = func.value[1];
-      const size = signature.value.length;
+        const types = typesFromSignature(signature);
+        const conditions = conditionsFromSignature(signature);
+        const names = namesFromSignature(signature);
+        const specificities = specificitiesFromSignature(signature);
 
-      const types = typesFromSignature(signature);
-      const conditions = conditionsFromSignature(signature);
-      const names = namesFromSignature(signature);
-      const specificities = specificitiesFromSignature(signature);
-
-      const operation = (args, ctx) => {
-        variables.enterScope();
-        for (let i = 0; i < args.length; i++) {
-          variables.assignValue(names[i], args[i]);
-        }
-        const result = evaluate(expression.value);
-        variables.exitScope();
-        return result;
-      };
-      return registerNewFunction(
-        realName,
-        variables,
-        newFunction(size, types, operation, {
-          conditions: conditions,
-          specificities: specificities,
-        }),
-        func,
-      );
-    }),
+        const operation = (args, ctx) => {
+          variables.enterScope();
+          for (let i = 0; i < args.length; i++) {
+            variables.assignValue(names[i], args[i]);
+          }
+          const result = evaluate(expression.value);
+          variables.exitScope();
+          return result;
+        };
+        return registerNewFunction(
+          name.value,
+          variables,
+          newFunction(size, types, operation, {
+            conditions: conditions,
+            specificities: specificities,
+          }),
+          func,
+        );
+      },
+    ),
     newFunction(
       2,
       [Meta.STRING, Meta.SIGNATURE],
