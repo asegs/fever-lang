@@ -443,7 +443,7 @@ export const inferConditionFromString = (
         createCondition(
           createVar("__repr", Meta.STRING),
           createVar(
-            parseToExpr("__repr ==," + recursiveToString(result)),
+            parseToExpr("__repr ==" + recursiveToString(result)),
             Primitives.EXPRESSION,
           ),
           createVar(PatternWeights.VALUE, Primitives.NUMBER),

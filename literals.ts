@@ -1,6 +1,5 @@
 import {
   createCall,
-  createList,
   createPatternFromString,
   createTuple,
   createTypedList,
@@ -12,12 +11,7 @@ import {
   typeAssignableFrom,
 } from "./types.ts";
 import { ParseNode, ParseNodeType, trimAndSplitOnCommas } from "./parser";
-import {
-  ctx,
-  evaluate,
-  parseToExpr,
-  unknownVariablesInExpression,
-} from "./interpreter.ts";
+import { ctx, evaluate, unknownVariablesInExpression } from "./interpreter.ts";
 
 function everyCharNumeric(text: string): boolean {
   return (
@@ -109,17 +103,28 @@ export function maybeVarFromLiteral(parent: ParseNode): FeverVar | null {
   }
 }
 
-export function abstractNodeToRealNode(parent: ParseNode): FeverVar {
+export function abstractNodeToRealNode(
+  parent: ParseNode,
+  skipVarLookup?: boolean,
+): FeverVar {
   const maybeVar = maybeVarFromLiteral(parent);
-  if (maybeVar && parent.type !== ParseNodeType.FUNCTION_CALL) {
+  if (
+    maybeVar &&
+    parent.type !== ParseNodeType.FUNCTION_CALL &&
+    !skipVarLookup
+  ) {
     return maybeVar;
   } else {
-    const realChildren = parent.children.map(abstractNodeToRealNode);
+    //Let's not look up var names that we are about to assign to, it makes no sense
+    const isAssignment =
+      parent.type === ParseNodeType.FUNCTION_CALL && parent.text === "=";
+    const realChildren = parent.children.map((child, index) =>
+      abstractNodeToRealNode(child, index === 0 && isAssignment),
+    );
     switch (parent.type) {
       case ParseNodeType.FUNCTION_CALL:
         return createCall(parent.text, realChildren);
       case ParseNodeType.LIST:
-        console.log(realChildren);
         return createVar(realChildren, inferListType(realChildren));
       case ParseNodeType.TUPLE:
         if (realChildren.length > 1) {

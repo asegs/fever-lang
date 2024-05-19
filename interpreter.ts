@@ -1,5 +1,5 @@
 import { abstractNodeToRealNode } from "./literals.ts";
-import { parse } from "./parser.ts";
+import { parse, ParseNodeType } from "./parser.ts";
 import { Context } from "./vars.ts";
 import {
   createError,
@@ -192,15 +192,22 @@ export function dispatchFunction(fnName: string, args: FeverVar[]): FeverVar {
   return callFunctionByReference(named, args, ctx, fnName);
 }
 
-export function evaluate(realNode: FeverVar): FeverVar {
+export function evaluate(
+  realNode: FeverVar,
+  skipVarLookup?: boolean,
+): FeverVar {
   if (realNode.type.baseName === "EXPRESSION") {
     return realNode;
   }
   if (realNode.type.alias && realNode.type.alias === "CALL") {
     const [name, args] = getFunctionNameAndArgs(realNode);
-    return dispatchFunction(name, args.map(evaluate));
+    const isAssignment = name === "=";
+    return dispatchFunction(
+      name,
+      args.map((arg, index) => evaluate(arg, isAssignment && index === 0)),
+    );
   }
-  if (realNode.type.baseName === "VARIABLE") {
+  if (realNode.type.baseName === "VARIABLE" && !skipVarLookup) {
     const varName = realNode.value;
     if (ctx.hasVariable(varName)) {
       return ctx.lookupValue(varName);

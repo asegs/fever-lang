@@ -349,7 +349,7 @@ export const builtins = {
     ),
     newFunction(2, [Meta.SIGNATURE, Primitives.ANY], ([signature, value]) => {
       return createVar(
-        [signature, createVar(recursiveToString(value), Primitives.EXPRESSION)],
+        [signature, createVar(value, Primitives.EXPRESSION)],
         Meta.CASE,
       );
     }),
@@ -366,35 +366,10 @@ export const builtins = {
     newFunction(
       2,
       [Primitives.VARIABLE, Meta.CASE],
-      ([name, func], variables) => {
-        const signature = func.value[0];
-        const expression = func.value[1];
-        const size = signature.value.length;
-
-        const types = typesFromSignature(signature);
-        const conditions = conditionsFromSignature(signature);
-        const names = namesFromSignature(signature);
-        const specificities = specificitiesFromSignature(signature);
-
-        const operation = (args, ctx) => {
-          variables.enterScope();
-          for (let i = 0; i < args.length; i++) {
-            variables.assignValue(names[i], args[i]);
-          }
-          const result = evaluate(expression.value);
-          variables.exitScope();
-          return result;
-        };
-        return registerNewFunction(
-          name.value,
-          variables,
-          newFunction(size, types, operation, {
-            conditions: conditions,
-            specificities: specificities,
-          }),
-          func,
-        );
-      },
+      ([name, func], variables) => addFunctionCase(name, func, variables),
+    ),
+    newFunction(2, [Meta.FUNCTION, Meta.CASE], ([def, func], variables) =>
+      addFunctionCase(null, func, variables),
     ),
     newFunction(
       2,
@@ -1192,3 +1167,35 @@ const namedFilter = (
 const isNumeric = (n) => {
   return !isNaN(parseFloat(n)) && isFinite(n);
 };
+
+function addFunctionCase(name: FeverVar, func: FeverVar, ctx: Context) {
+  {
+    const signature = func.value[0];
+    const expression = func.value[1];
+    const size = signature.value.length;
+
+    const types = typesFromSignature(signature);
+    const conditions = conditionsFromSignature(signature);
+    const names = namesFromSignature(signature);
+    const specificities = specificitiesFromSignature(signature);
+
+    const operation = (args, ctx) => {
+      ctx.enterScope();
+      for (let i = 0; i < args.length; i++) {
+        ctx.assignValue(names[i], args[i]);
+      }
+      const result = evaluate(expression.value);
+      ctx.exitScope();
+      return result;
+    };
+    return registerNewFunction(
+      name.value,
+      ctx,
+      newFunction(size, types, operation, {
+        conditions: conditions,
+        specificities: specificities,
+      }),
+      func,
+    );
+  }
+}
