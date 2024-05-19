@@ -221,12 +221,12 @@ function unknownVariablesInExpressionRec(
   table: FeverVar[],
 ): void {
   // Probably need to check context for variable being defined
-  if (expr.type.baseName === "VARIABLE") {
+  if (expr.type.baseName === "VARIABLE" && !ctx.hasVariable(expr.value)) {
     table.push(expr);
     return;
   }
   // List type value
-  if (Symbol.iterator in Object(expr.value)) {
+  if (Array.isArray(expr.value)) {
     for (const child of expr.value) {
       unknownVariablesInExpressionRec(child, table);
     }

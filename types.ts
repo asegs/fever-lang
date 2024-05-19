@@ -325,7 +325,7 @@ export function recursiveToString(v) {
     const [open, close] = v.type.baseName === "TUPLE" ? ["(", ")"] : ["[", "]"];
     return open + v.value.map((i) => recursiveToString(i)).join(",") + close;
   }
-  if (v.value) {
+  if (v.value !== undefined && v.value !== null) {
     return v.value.toString();
   }
 
