@@ -135,8 +135,9 @@ export function abstractNodeToRealNode(parent: ParseNode): FeverVar {
         const takenVars: Set<string> = new Set();
         const signatureItems = [];
         for (let i = 0; i < realChildren.length; i++) {
+          // .toString() might be a problem here, we should use the calculated value if we can
           const [pattern, varName] = createPatternFromString(
-            realChildren[i].value,
+            realChildren[i].value.toString(),
             ctx,
             takenVars,
           );

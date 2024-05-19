@@ -443,7 +443,7 @@ export const inferConditionFromString = (
         createCondition(
           createVar("__repr", Meta.STRING),
           createVar(
-            parseToExpr("==(__repr," + recursiveToString(result) + ")"),
+            parseToExpr("__repr ==," + recursiveToString(result)),
             Primitives.EXPRESSION,
           ),
           createVar(PatternWeights.VALUE, Primitives.NUMBER),
@@ -463,10 +463,7 @@ export const inferConditionFromString = (
       return [
         createCondition(
           createVar("__repr", Meta.STRING),
-          createVar(
-            parseToExpr("==(__repr," + string + ")"),
-            Primitives.EXPRESSION,
-          ),
+          createVar(parseToExpr("__repr ==" + string), Primitives.EXPRESSION),
           createVar(PatternWeights.EXPRESSION, Primitives.NUMBER),
         ),
         Primitives.ANY,
@@ -479,7 +476,7 @@ export const inferConditionFromString = (
         createCondition(
           createVar("__repr", Meta.STRING),
           createVar(
-            parseToExpr("==(__repr," + missing[0].value + ")"),
+            parseToExpr("__repr ==" + missing[0].value),
             Primitives.EXPRESSION,
           ),
           createVar(PatternWeights.VALUE, Primitives.NUMBER),
