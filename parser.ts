@@ -567,6 +567,7 @@ export function shunt(segment: string): ParseNode {
   const stack = [];
   const result = [];
   for (let i = tokens.length - 1; i >= 0; i--) {
+    let pushedToken = false;
     const token = tokens[i];
     if (token.type === ParseNodeType.TERM) {
       result.push(processSyntaxNode(token));
@@ -579,9 +580,9 @@ export function shunt(segment: string): ParseNode {
       stack.push(token);
       continue;
     }
-
     if (operatorsToPrecedences[stack[stack.length - 1].text] <= precedence) {
       stack.push(token);
+      pushedToken = true;
     }
 
     while (
@@ -590,8 +591,9 @@ export function shunt(segment: string): ParseNode {
     ) {
       result.push(stack.pop());
     }
-
-    stack.push(token);
+    if (!pushedToken) {
+      stack.push(token);
+    }
   }
   while (stack.length > 0) {
     result.push(stack.pop());
