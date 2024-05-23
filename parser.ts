@@ -466,11 +466,14 @@ function getCaptureGroup(text: string): CaptureGroupMeta {
 function processSyntaxNode(node: ParseNode): ParseNode {
   const nodeText = node.text;
   const group = getCaptureGroup(nodeText);
-  const [start, end] = group.nestingDimensions;
+  const [start, _] = group.nestingDimensions;
   let entries: ParseNode[] = [];
   if (start !== -1) {
     const subText = group.nestedText.slice(1, group.nestedText.length - 1);
-    entries = splitOnCommas(subText).map((e) => shunt(e));
+    const isSignature = group.nestedText[0] === "{";
+    entries = splitOnCommas(subText).map((e) =>
+      isSignature ? makeSignatureFromText(e) : shunt(e),
+    );
   }
 
   if (entries.length > 0) {
@@ -606,4 +609,12 @@ export function trimAndSplitOnCommas(text: string): string[] {
 export function parse(rawText: string): ParseNode {
   // Convert methods to function calls, then orders infix operators
   return shunt(preprocessMethodSyntax(rawText));
+}
+
+function makeSignatureFromText(signatureText: string): ParseNode {
+  return {
+    text: signatureText,
+    type: ParseNodeType.SIGNATURE,
+    children: [],
+  };
 }

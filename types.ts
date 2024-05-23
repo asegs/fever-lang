@@ -455,7 +455,6 @@ export const inferConditionFromString = (
   }
 
   const acceptedMissing = missing.filter((item) => !takenVars.has(item.value));
-
   if (acceptedMissing.length === 0) {
     //Then we have an expression or variable entirely using previous variables.
     if (string[0] === "(") {
@@ -496,14 +495,13 @@ export const inferConditionFromString = (
     return [
       createCondition(
         createVar(name, Meta.STRING),
-        createVar(parseToExpr(string), Primitives.EXPRESSION),
+        createVar(parseToExpr(string).value, Primitives.EXPRESSION),
         createVar(PatternWeights.EXPRESSION, Primitives.NUMBER),
       ),
       Primitives.ANY,
       name,
     ];
   }
-
   // a, won't support [1,2,a] yet, will need to destructure (what if we are actually testing for [1, 2, sublist]?)
   return [
     createCondition(
@@ -516,7 +514,7 @@ export const inferConditionFromString = (
   ];
 };
 
-export const createPatternFromString = (
+export const createPatternFromVar = (
   pattern: string,
   ctx: Context,
   takenVars: Set<string>,

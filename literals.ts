@@ -1,6 +1,6 @@
 import {
   createCall,
-  createPatternFromString,
+  createPatternFromVar,
   createTuple,
   createTypedList,
   createTypeVar,
@@ -140,9 +140,8 @@ export function abstractNodeToRealNode(
         const takenVars: Set<string> = new Set();
         const signatureItems = [];
         for (let i = 0; i < realChildren.length; i++) {
-          // .toString() might be a problem here, we should use the calculated value if we can
-          const [pattern, varName] = createPatternFromString(
-            realChildren[i].value.toString(),
+          const [pattern, varName] = createPatternFromVar(
+            parent.children[i].text,
             ctx,
             takenVars,
           );

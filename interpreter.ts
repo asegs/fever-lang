@@ -196,9 +196,13 @@ export function evaluate(
   realNode: FeverVar,
   skipVarLookup?: boolean,
 ): FeverVar {
-  if (realNode.type.baseName === "EXPRESSION") {
+  if (
+    realNode.type.baseName === "EXPRESSION" &&
+    unknownVariablesInExpression(realNode.value).length > 0
+  ) {
     return realNode;
   }
+
   if (realNode.type.alias && realNode.type.alias === "CALL") {
     const [name, args] = getFunctionNameAndArgs(realNode);
     const isAssignment = name === "=";
