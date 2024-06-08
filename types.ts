@@ -17,7 +17,7 @@ export enum TypeWeights {
 
 export enum PatternWeights {
   ANY = 0.5,
-  EXPRESSION = 1,
+  EXPRESSION = 1.15,
   TYPE = 1,
   VALUE = 1.2,
 }

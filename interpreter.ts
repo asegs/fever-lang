@@ -96,6 +96,11 @@ export function callFunctionByReference(
 
       const intScore =
         typeScore * (condition(tempArgs[i], ctx) ? 1 : 0) * specificity;
+      if (name === "f") {
+        console.log(condition(tempArgs[i], ctx));
+        console.log(typeScore);
+        console.log(specificity);
+      }
       if (intScore === 0) {
         score = -1;
         break;
