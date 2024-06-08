@@ -368,14 +368,11 @@ export const builtins = {
       [Primitives.VARIABLE, Meta.CASE],
       ([name, func], variables) => addFunctionCase(name, func, variables),
     ),
-    newFunction(2, [Meta.FUNCTION, Meta.CASE], ([def, func], variables) =>
-      addFunctionCase(null, func, variables),
-    ),
     newFunction(
       2,
-      [Meta.STRING, Meta.SIGNATURE],
+      [Primitives.VARIABLE, Meta.SIGNATURE],
       ([name, signature], variables) => {
-        const realName = charListToJsString(name);
+        const realName = name.value;
         const types = typesFromSignature(signature);
         const size = types.length;
         const isListAlias = size === 1 && types[0].baseName === "LIST";
@@ -396,10 +393,7 @@ export const builtins = {
 
           //Handle 1 <-> 1 members
           const expression = condition[1];
-          if (
-            expression.value.startsWith("==") ||
-            expression.value === "true"
-          ) {
+          if (expression.value.value === true) {
             permutations.push((arg) => arg);
           } else {
             permutations.push((arg, ctx) => {
