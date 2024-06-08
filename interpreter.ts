@@ -11,7 +11,7 @@ import {
   isAlias,
   typeSatisfaction,
 } from "./types.ts";
-import { registerBuiltins } from "./builtins.ts";
+import { morphTypes, registerBuiltins } from "./builtins.ts";
 
 export const ctx = new Context();
 
@@ -83,21 +83,15 @@ export function callFunctionByReference(
       );
       genericTable = { ...genericTable, ...gt };
       if (typeScore === 0) {
-        //Try to find a morphism path
-        // Let's save this for a better time
-        // const path = morphisms.pathBetween(args[i].type, type);
-        // if (path.length === 0) {
-        //   score = -1;
-        //   break;
-        // }
-        // tempArgs[i] = morphTypes(
-        //   args[i],
-        //   createTypeVar(type),
-        //   variables,
-        //   morphisms,
-        // );
-        // //Farther morphism step means lower type score
-        // typeScore = Math.pow(0.5, path.length - 1);
+        // Try to find a morphism path
+        const path = ctx.pathBetween(args[i].type, type);
+        if (path.length === 0) {
+          score = -1;
+          break;
+        }
+        tempArgs[i] = morphTypes(args[i], createTypeVar(type), ctx);
+        //Farther morphism step means lower type score
+        typeScore = Math.pow(0.5, path.length - 1);
       }
 
       const intScore =

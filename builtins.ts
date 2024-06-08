@@ -751,9 +751,9 @@ export const builtins = {
 
 export const morphTypes = (value, toType, ctx) => {
   let intermediateValue = value;
-  const typePath = ctx.morphisms.pathBetween(value.type, toType.value);
+  const typePath = ctx.pathBetween(value.type, toType.value);
   for (let i = 0; i < typePath.length - 1; i++) {
-    const transformation = ctx.morphisms.table[typePath[i]][typePath[i + 1]];
+    const transformation = ctx.morphisms[typePath[i]][typePath[i + 1]];
     intermediateValue = callFunctionByReference(
       transformation,
       [intermediateValue],
@@ -1020,7 +1020,7 @@ const simpleTypeSpec = (t) => {
   return TypeWeights.EQUIVALENT;
 };
 
-export const typeToString = (t) => {
+export const typeToString = (t: FeverType): string => {
   return typeToStringRec(t, "");
 };
 

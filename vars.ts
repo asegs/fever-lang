@@ -1,4 +1,5 @@
 import { FeverType, FeverVar } from "./types";
+import { typeToString } from "./builtins.ts";
 
 export class Context {
   scopes: { [key: string]: FeverVar }[];
@@ -84,6 +85,45 @@ export class Context {
   }
 
   registerMorphism(from: FeverType, to: FeverType, by: FeverVar) {
-    // TODO
+    const fromName = typeToString(from);
+    const toName = typeToString(to);
+    if (!(fromName in this.morphisms)) {
+      this.morphisms[fromName] = {};
+    }
+
+    this.morphisms[fromName][toName] = by;
+  }
+
+  setDiff(a, b): Set<any> {
+    const c = new Set();
+    a.forEach((e) => c.add(e));
+    b.forEach((e) => c.delete(e));
+
+    return c;
+  }
+
+  pathBetweenRec(end: string, path: string[]): string[] {
+    const pathEnd = path[path.length - 1];
+    const keys = new Set(
+      pathEnd in this.morphisms ? Object.keys(this.morphisms[pathEnd]) : [],
+    );
+    if (keys.has(end)) {
+      return [...path, end];
+    }
+
+    const freshKeys = this.setDiff(keys, new Set(path));
+
+    for (const key of freshKeys) {
+      const result = this.pathBetweenRec(end, [...path, key]);
+      if (result.length > 0) {
+        return result;
+      }
+    }
+
+    return [];
+  }
+
+  pathBetween(start: FeverType, end: FeverType): string[] {
+    return this.pathBetweenRec(typeToString(end), [typeToString(start)]);
   }
 }
