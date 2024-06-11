@@ -534,3 +534,7 @@ export const createPatternFromVar = (
   }
   return [createPattern(condition, createTypeVar(type)), namedVar];
 };
+
+export function aliasMatches(type: FeverType, alias: string): boolean {
+  return type.alias && type.alias === alias;
+}

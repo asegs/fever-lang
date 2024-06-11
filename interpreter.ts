@@ -1,7 +1,8 @@
 import { abstractNodeToRealNode } from "./literals.ts";
-import { parse, ParseNodeType } from "./parser.ts";
+import { parse } from "./parser.ts";
 import { Context } from "./vars.ts";
 import {
+  aliasMatches,
   createError,
   createTypeVar,
   createVar,
@@ -96,11 +97,6 @@ export function callFunctionByReference(
 
       const intScore =
         typeScore * (condition(tempArgs[i], ctx) ? 1 : 0) * specificity;
-      if (name === "f") {
-        console.log(condition(tempArgs[i], ctx));
-        console.log(typeScore);
-        console.log(specificity);
-      }
       if (intScore === 0) {
         score = -1;
         break;
@@ -201,8 +197,10 @@ export function evaluate(
   ) {
     return realNode;
   }
-
-  if (realNode.type.alias && realNode.type.alias === "CALL") {
+  while (realNode.type.baseName === "EXPRESSION") {
+    realNode = realNode.value;
+  }
+  if (aliasMatches(realNode.type, "CALL")) {
     const [name, args] = getFunctionNameAndArgs(realNode);
     const isAssignment = name === "=";
     return dispatchFunction(
