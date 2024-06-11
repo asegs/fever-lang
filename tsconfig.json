@@ -6,7 +6,8 @@
             "es2021"
         ],
         "target": "es6",
-        "allowImportingTsExtensions": true
+        "allowImportingTsExtensions": true,
+        "module": "ESNext"
 
     }
 }
