@@ -14,8 +14,12 @@ export const prompt = () => {
 
 const promptRec = (int) => {
   int.question(">", (inp) => {
-    const result = interpret(inp);
-    dispatchFunction("show", [result]);
+    try {
+      const result = interpret(inp);
+      dispatchFunction("show", [result]);
+    } catch (e) {
+      console.log(e);
+    }
     promptRec(int);
   });
 };

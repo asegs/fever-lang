@@ -214,6 +214,7 @@ export function evaluate(
       return ctx.lookupValue(varName);
     }
   }
+
   return realNode;
 }
 
