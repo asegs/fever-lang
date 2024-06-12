@@ -190,6 +190,7 @@ export function dispatchFunction(fnName: string, args: FeverVar[]): FeverVar {
 export function evaluate(
   realNode: FeverVar,
   skipVarLookup?: boolean,
+  ignoreExpressions?: boolean,
 ): FeverVar {
   if (
     realNode.type.baseName === "EXPRESSION" &&
@@ -197,7 +198,7 @@ export function evaluate(
   ) {
     return realNode;
   }
-  while (realNode.type.baseName === "EXPRESSION") {
+  while (!ignoreExpressions && realNode.type.baseName === "EXPRESSION") {
     realNode = realNode.value;
   }
   if (aliasMatches(realNode.type, "CALL")) {
@@ -215,6 +216,18 @@ export function evaluate(
     }
   }
 
+  if (
+    Array.isArray(realNode.value) &&
+    !aliasMatches(realNode.type, "CONDITION") &&
+    !aliasMatches(realNode.type, "PATTERN") &&
+    !aliasMatches(realNode.type, "SIGNATURE") &&
+    !aliasMatches(realNode.type, "FUNCTION") &&
+    realNode.type.baseName !== "EXPRESSION"
+  ) {
+    realNode.value = realNode.value.map((item) =>
+      evaluate(item, skipVarLookup, true),
+    );
+  }
   return realNode;
 }
 
