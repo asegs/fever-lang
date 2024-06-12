@@ -1101,7 +1101,7 @@ const namedReduce = (
     ctx.assignValue(element, item);
     ctx.assignValue(index, createVar(i, Primitives.NUMBER));
     ctx.assignValue(accumulator, acc);
-    acc = evaluate(expr.value);
+    acc = evaluate(expr);
     ctx.exitScope();
     if (earlyTerminateIfNotFalse && acc.value !== false) {
       return acc;

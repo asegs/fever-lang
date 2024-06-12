@@ -18,5 +18,5 @@ solve = {n:#} => (try_starting_positions(n-1))
 
 
 before = time(0)
-solve(8)
+show(solve(8))
 show(time(before))
