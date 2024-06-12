@@ -1,6 +1,5 @@
 import { splitGeneral, splitOnCommas } from "./parser.ts";
 import {
-  evaluate,
   interpret,
   parseToExpr,
   unknownVariablesInExpression,
@@ -35,6 +34,8 @@ export type FeverVar = {
   type: FeverType;
   invocations?: FeverVar[];
   types?: FeverType[];
+  arity?: number;
+  conditions?: any[];
 };
 
 export function createType(
@@ -71,7 +72,7 @@ export function createVar(value: any, type: FeverType): FeverVar {
   };
 }
 
-export const Primitives = {
+export const Primitives: { [key: string]: FeverType } = {
   NUMBER: createType("NUMBER"),
   BOOLEAN: createType("BOOLEAN"),
   CHARACTER: createType("CHARACTER"),
