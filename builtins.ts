@@ -1,4 +1,5 @@
 import {
+  aliasMatches,
   charListToJsString,
   createError,
   createType,
@@ -954,7 +955,7 @@ const serializeCase = (c) => {
     const [condition, type] = pattern.value;
     const [varName, conditionExpr] = condition.value;
     caseText +=
-      conditionExpr.value === "true" ? varName.value : conditionExpr.value;
+      conditionExpr.value.value === true ? varName.value : "<condition>";
     if (type.value.baseName !== "ANY") {
       caseText +=
         ":" +
@@ -968,7 +969,13 @@ const serializeCase = (c) => {
       caseText += ") => ";
     }
   }
-  caseText += expression.value;
+  if (aliasMatches(expression.value.type, "CALL")) {
+    caseText += "<action>";
+  } else {
+    caseText += charListToJsString(
+      dispatchFunction("stringify", [expression.value]),
+    );
+  }
 
   return caseText;
 };
