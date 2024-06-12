@@ -969,7 +969,10 @@ const serializeCase = (c) => {
       caseText += ") => ";
     }
   }
-  if (aliasMatches(expression.value.type, "CALL")) {
+  if (!(typeof expression.value === "object")) {
+    // Natively defined function
+    caseText += expression.value;
+  } else if (aliasMatches(expression.value.type, "CALL")) {
     caseText += "<action>";
   } else {
     caseText += charListToJsString(
