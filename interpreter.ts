@@ -224,8 +224,10 @@ export function evaluate(
     !aliasMatches(realNode.type, "FUNCTION") &&
     realNode.type.baseName !== "EXPRESSION"
   ) {
-    realNode.value = realNode.value.map((item) =>
-      evaluate(item, skipVarLookup, true),
+    // Make a copy, otherwise fully resolved values will overwrite expressions
+    return createVar(
+      realNode.value.map((item) => evaluate(item, skipVarLookup, true)),
+      realNode.type,
     );
   }
   return realNode;

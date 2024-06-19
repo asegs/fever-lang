@@ -20,6 +20,7 @@ import {
   dispatchFunction,
   callFunctionByReference,
   evaluate,
+  interpret,
 } from "./interpreter.ts";
 import { feverStringFromJsString, inferListType } from "./literals.ts";
 import { readFileSync } from "fs";
@@ -785,8 +786,7 @@ export const standardLib = [
   "head = {(len(lst) > 0):[]} => (get(lst,0))",
   "tail = {lst:[]} => (slice(lst,1))",
   "set = {(unique(entries)):[]}",
-  "+ = {s:set, item} => (new(set, entries(s) + item))",
-  "halve = {lst:[]} => ([(slice(lst,0,floor(len(lst) / 2))), (slice(lst, floor(len(lst) / 2 )))])",
+  "halve = {lst:[]} => ([slice(lst,0,floor(len(lst) / 2)), slice(lst, floor(len(lst) / 2 ))])",
   "merge = {_:fn, [], l2:[]} => (l2)",
   "merge = {_:fn, l1:[], []} => (l1)",
   "merge = {compare:fn, l1:[], ((compare(get(l1,0),get(l2,0))) < 0):[]} => ((get(l1,0)) + (merge(compare,tail(l1),l2)))",
@@ -809,12 +809,17 @@ export const standardLib = [
   "last = {vs:[]} => (get(vs, len(vs) - 1))",
 ];
 
-export const registerBuiltins = (variables) => {
+// Defining adds doesn't work, ie.   "+ = {s:set, item} => (new(set, entries(s) + item))",
+
+export const registerBuiltins = (ctx: Context) => {
   for (const functionName of Object.keys(builtins)) {
     const patterns = builtins[functionName];
     for (const pattern of patterns) {
-      registerNewFunction(functionName, variables, pattern);
+      registerNewFunction(functionName, ctx, pattern);
     }
+  }
+  for (const line of standardLib) {
+    interpret(line);
   }
 };
 
@@ -974,6 +979,8 @@ const serializeCase = (c) => {
     caseText += expression.value;
   } else if (aliasMatches(expression.value.type, "CALL")) {
     caseText += "<action>";
+  } else if (expression.value.type.baseName === "VARIABLE") {
+    caseText += expression.value.value;
   } else {
     caseText += charListToJsString(
       dispatchFunction("stringify", [expression.value]),
