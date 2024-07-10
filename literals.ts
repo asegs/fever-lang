@@ -35,6 +35,10 @@ function wordIsBoolean(text: string): boolean {
   return text === "true" || text === "false";
 }
 
+function wordIsNull(text: string): boolean {
+  return text === "null";
+}
+
 function isList(text: string): boolean {
   return text.match(/^\[.+]$/g) !== null;
 }
@@ -81,6 +85,9 @@ export function maybeVarFromLiteral(parent: ParseNode): FeverVar | null {
   if (parentText === "()") {
     return createVar([], Meta.TUPLE);
   }
+  if (parentText === "{}") {
+    return createVar([], Meta.SIGNATURE);
+  }
   const asTypeVar = getAsTypeVar(parentText);
   if (asTypeVar) {
     return asTypeVar;
@@ -99,6 +106,9 @@ export function maybeVarFromLiteral(parent: ParseNode): FeverVar | null {
   if (isWord(parentText)) {
     if (wordIsBoolean(parentText)) {
       return createVar(parentText === "true", Primitives.BOOLEAN);
+    }
+    if (wordIsNull(parentText)) {
+      return createVar(null, Primitives.VOID);
     }
   }
 }

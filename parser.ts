@@ -475,17 +475,23 @@ function processSyntaxNode(node: ParseNode): ParseNode {
       isSignature ? makeSignatureFromText(e) : shunt(e),
     );
   }
+  const prefix = nodeText.slice(0, start);
+  const type = NODE_TYPES_FOR_CLOSING_TOKEN[group.nestingSeparator];
+  // Handle function call case
+  const isFunctionCall = type === ParseNodeType.TUPLE && prefix;
 
   if (entries.length > 0) {
-    const type = NODE_TYPES_FOR_CLOSING_TOKEN[group.nestingSeparator];
-    // Handle function call case
-    const prefix = nodeText.slice(0, start);
-    const isFunctionCall = type === ParseNodeType.TUPLE && prefix;
     return {
       text: isFunctionCall ? prefix : "",
       type: isFunctionCall
         ? ParseNodeType.FUNCTION_CALL
         : NODE_TYPES_FOR_CLOSING_TOKEN[group.nestingSeparator],
+      children: entries,
+    };
+  } else if (isFunctionCall) {
+    return {
+      text: prefix,
+      type: ParseNodeType.FUNCTION_CALL,
       children: entries,
     };
   }
@@ -562,8 +568,17 @@ function nodeListToNodeTree(tokens: ParseNode[]): ParseNode {
 
 // Shunting yard algorithm implementation that recursively applies itself on nested blocks.
 // Treats function calls and non infix/parenthesized operations as simple tokens, akin to numbers.
-export function shunt(segment: string): ParseNode {
+export function shunt(segment: string, isTopLevel?: boolean): ParseNode {
   const tokens = tokenize(segment);
+  //If we are assigning to an operator, we aren't calling it.
+  if (
+    isTopLevel &&
+    tokens.length >= 3 &&
+    tokens[1].type === ParseNodeType.OPERATOR_TERM &&
+    tokens[1].text === "="
+  ) {
+    tokens[0].type = ParseNodeType.TERM;
+  }
   const stack = [];
   const result = [];
   for (let i = tokens.length - 1; i >= 0; i--) {
@@ -610,7 +625,7 @@ export function trimAndSplitOnCommas(text: string): string[] {
 // "x = 3 + 5" becomes "=(x,+(3,5))"
 export function parse(rawText: string): ParseNode {
   // Convert methods to function calls, then orders infix operators
-  return shunt(preprocessMethodSyntax(rawText));
+  return shunt(preprocessMethodSyntax(rawText), true);
 }
 
 function makeSignatureFromText(signatureText: string): ParseNode {

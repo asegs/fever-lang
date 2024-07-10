@@ -58,6 +58,10 @@ export function callFunctionByReference(
     );
   }
 
+  if (args.length === 0) {
+    return candidates[0].function([], ctx);
+  }
+
   let bestScore = 0;
   let bestCandidate = undefined;
   let modifiedArgs = args;
@@ -103,6 +107,7 @@ export function callFunctionByReference(
       }
       score += intScore;
     }
+
     if (score >= bestScore) {
       bestScore = score;
       bestCandidate = candidateFunction;
@@ -114,7 +119,7 @@ export function callFunctionByReference(
 
   //Auto-operations on tuples
   //Best match was maybe an ANY for condition and type
-  if (bestScore / modifiedArgs.length <= 0.25) {
+  if (bestScore / modifiedArgs.length < 0.25) {
     //All arguments are tuples
     if (modifiedArgs.every((entry) => entry.type.baseName === "TUPLE")) {
       const tupleSize = modifiedArgs[0].value.length;
@@ -212,7 +217,7 @@ export function evaluate(
   if (realNode.type.baseName === "VARIABLE" && !skipVarLookup) {
     const varName = realNode.value;
     if (ctx.hasVariable(varName)) {
-      return ctx.lookupValue(varName);
+      return ctx.getOrNull(varName);
     }
   }
 
@@ -256,7 +261,11 @@ function unknownVariablesInExpressionRec(
     }
   }
   // Object type value
-  if (typeof expr.value === "object" && "value" in expr.value) {
+  if (
+    typeof expr.value === "object" &&
+    expr.value !== null &&
+    "value" in expr.value
+  ) {
     unknownVariablesInExpressionRec(expr.value, table);
   }
 }

@@ -36,6 +36,7 @@ export type FeverVar = {
   types?: FeverType[];
   arity?: number;
   conditions?: any[];
+  function?: (args: FeverVar[], ctx: Context) => FeverVar;
 };
 
 export function createType(
@@ -319,6 +320,9 @@ export function typeAssignableFrom(child, parent) {
 }
 
 export function recursiveToString(v) {
+  if (v.type.baseName === "VOID" && v.value === null) {
+    return "null";
+  }
   if (Array.isArray(v.value)) {
     if (v.type.types[0] === Primitives.CHARACTER) {
       return '"' + charListToJsString(v) + '"';
@@ -443,10 +447,7 @@ export const inferConditionFromString = (
       return [
         createCondition(
           createVar("__repr", Meta.STRING),
-          createVar(
-            parseToExpr("__repr ==" + recursiveToString(result)),
-            Primitives.EXPRESSION,
-          ),
+          createVarEqualityCheckExpression("__repr", result),
           createVar(PatternWeights.VALUE, Primitives.NUMBER),
         ),
         result.type,
@@ -538,4 +539,14 @@ export const createPatternFromVar = (
 
 export function aliasMatches(type: FeverType, alias: string): boolean {
   return type.alias && type.alias === alias;
+}
+
+function createVarEqualityCheckExpression(
+  varName: string,
+  comparedTo: FeverVar,
+): FeverVar {
+  return createVar(
+    createCall("==", [createVar(varName, Primitives.VARIABLE), comparedTo]),
+    Primitives.EXPRESSION,
+  );
 }

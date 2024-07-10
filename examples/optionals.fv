@@ -1,0 +1,21 @@
+Optional = {value}
+
+empty = {} => new(Optional,null)
+full = {v} => (new(Optional, v))
+
+-> = {empty(), _:fn} => empty()
+-> = {o:Optional, lambda:fn} => (full(lambda(value(o))))
+~> = {empty(), _:fn} => empty()
+~> = {o:Optional, lambda:fn} => (lambda(value(o)).?(o, empty()))
+stringify = {empty():Optional} => "<empty>"
+stringify = {o:Optional} => ("<" + value(o) + ">")
+
+g = full(6)
+f = full([1,2,3])
+e = empty()
+
+is_even = {n:#} => (n % 2 == 0)
+show(e -> sum)
+show(f -> sum)
+show(e ~> is_even)
+show(g ~> is_even)

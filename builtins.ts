@@ -74,9 +74,9 @@ export const builtins = {
       const l = [a, ...b.value];
       return createVar(l, inferListType(l));
     }),
-    newFunction(2, [Meta.STRING, Meta.STRING], ([a, b]) =>
-      createVar(a.value.concat(b.value), a.type),
-    ),
+    newFunction(2, [Meta.STRING, Meta.STRING], ([a, b]) => {
+      return createVar(a.value.concat(b.value), a.type);
+    }),
     newFunction(2, [Primitives.ANY, Meta.LIST], ([a, b]) => {
       const l = [a, ...b.value];
       return createVar(l, inferListType(l));
@@ -84,6 +84,14 @@ export const builtins = {
     newFunction(2, [Meta.LIST, Primitives.ANY], ([a, b]) => {
       const l = [...a.value, b];
       return createVar(l, inferListType(l));
+    }),
+    newFunction(2, [Meta.STRING, Primitives.ANY], ([a, b]) => {
+      const jsString = charListToJsString(a);
+      return feverStringFromJsString(jsString + b.value);
+    }),
+    newFunction(2, [Primitives.ANY, Meta.STRING], ([a, b]) => {
+      const jsString = charListToJsString(b);
+      return feverStringFromJsString(a.value + jsString);
     }),
     newFunction(2, [Primitives.CHARACTER, Primitives.NUMBER], ([char, shift]) =>
       createVar(
@@ -171,14 +179,17 @@ export const builtins = {
       2,
       [
         Meta.LIST,
-        createTypedTuple([createTypedList(Meta.STRING), Primitives.EXPRESSION]),
+        createTypedTuple([
+          createTypedList(Primitives.VARIABLE),
+          Primitives.EXPRESSION,
+        ]),
       ],
       ([list, namedAction], ctx) => {
         const [names, action] = namedAction.value;
         const nameTable = ["@", "#", "^"];
         const providedNames = names.value;
         for (let i = 0; i < Math.min(3, providedNames.length); i++) {
-          nameTable[i] = charListToJsString(providedNames[i]);
+          nameTable[i] = providedNames[i].value;
         }
         return namedMap(list, action, ctx, nameTable);
       },
@@ -241,7 +252,7 @@ export const builtins = {
       [
         Meta.LIST,
         createTypedTuple([
-          createTypedList(Meta.STRING),
+          createTypedList(Primitives.VARIABLE),
           Primitives.ANY,
           Primitives.EXPRESSION,
         ]),
@@ -251,7 +262,7 @@ export const builtins = {
         const nameTable = ["@", "#", "$"];
         const providedNames = names.value;
         for (let i = 0; i < Math.min(3, providedNames.length); i++) {
-          nameTable[i] = charListToJsString(providedNames[i]);
+          nameTable[i] = providedNames[i].value;
         }
         return namedReduce(list, acc, reduction, ctx, nameTable, false);
       },
@@ -283,7 +294,7 @@ export const builtins = {
       [
         Meta.LIST,
         createTypedTuple([
-          createTypedList(Meta.STRING),
+          createTypedList(Primitives.VARIABLE),
           Primitives.ANY,
           Primitives.EXPRESSION,
           Primitives.BOOLEAN,
@@ -294,7 +305,7 @@ export const builtins = {
         const nameTable = ["@", "#", "$"];
         const providedNames = names.value;
         for (let i = 0; i < Math.min(3, providedNames.length); i++) {
-          nameTable[i] = charListToJsString(providedNames[i]);
+          nameTable[i] = providedNames[i].value;
         }
         return namedReduce(list, acc, reduction, ctx, nameTable, flag.value);
       },
@@ -312,14 +323,17 @@ export const builtins = {
       2,
       [
         Meta.LIST,
-        createTypedTuple([createTypedList(Meta.STRING), Primitives.EXPRESSION]),
+        createTypedTuple([
+          createTypedList(Primitives.VARIABLE),
+          Primitives.EXPRESSION,
+        ]),
       ],
       ([list, namedAction], ctx) => {
         const [names, filter] = namedAction.value;
         const nameTable = ["@", "#", "^"];
         const providedNames = names.value;
         for (let i = 0; i < Math.min(3, providedNames.length); i++) {
-          nameTable[i] = charListToJsString(providedNames[i]);
+          nameTable[i] = providedNames[i].value;
         }
         return namedFilter(list, filter, ctx, nameTable, null);
       },
@@ -648,6 +662,9 @@ export const builtins = {
     newFunction(1, [Primitives.NUMBER], ([diff]) => {
       return createVar(Date.now() - diff.value, Primitives.NUMBER);
     }),
+    newFunction(0, [], () => {
+      return createVar(Date.now(), Primitives.NUMBER);
+    }),
   ],
   morph: [
     newFunction(
@@ -807,6 +824,7 @@ export const standardLib = [
   "reverse = {vs:[]} => (vs -> (get(vs, len(vs) - # - 1)))",
   "first = {vs:[]} => (get(vs,0))",
   "last = {vs:[]} => (get(vs, len(vs) - 1))",
+  "time_diff = {result: []} => (last(result) - first(result))",
 ];
 
 // Defining adds doesn't work, ie.   "+ = {s:set, item} => (new(set, entries(s) + item))",
@@ -1065,9 +1083,9 @@ const typeToStringRec = (t, contents) => {
 };
 
 const namedMap = (
-  list,
-  action,
-  ctx,
+  list: FeverVar,
+  action: FeverVar,
+  ctx: Context,
   [element, index, intermediate]: string[],
 ) => {
   const internalList = [];
