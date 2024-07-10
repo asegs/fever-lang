@@ -970,9 +970,10 @@ const argNamesFromFunction = (functionBody) => {
 };
 
 const serializeCase = (c) => {
-  let caseText = "(";
   const [signature, expression] = c.value;
   const patterns = signature.value;
+
+  let caseText = patterns.length >= 1 ? "(" : "() => ";
   for (let i = 0; i < patterns.length; i++) {
     const pattern = patterns[i];
     const [condition, type] = pattern.value;
