@@ -15,7 +15,7 @@ contexts:
       captures:
         0: constant.language.fever
 
-    - match: '(\b[a-z][a-z0-9_]*)\('
+    - match: '(\b[a-zA-Z][a-zA-Z0-9_]*)\('
       captures:
         0: punctuation.section.parens.begin.fever
         1: entity.name.function.fever
@@ -25,7 +25,7 @@ contexts:
           captures:
             0: punctuation.section.parens.end.fever
         - include: main
-    - match: '(\b[a-z][a-z0-9_]*)'
+    - match: '(\b[a-zA-Z][a-zA-Z0-9_]*)'
       captures:
         0: keyword.fever
     - match: '(@|#|^|\$|_)'
@@ -105,4 +105,3 @@ contexts:
     - match: '(.)'
       captures:
         0: text.fever
-

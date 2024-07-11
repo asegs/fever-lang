@@ -2,20 +2,25 @@ Optional = {value}
 
 empty = {} => new(Optional,null)
 full = {v} => (new(Optional, v))
+maybe = {v, lambda:fn} => (lambda(v).?(new(Optional, v), empty()))
+
+not_null = {v} => true
+not_null = {null} => false
+
+nullable = {v} => (maybe(v, not_null))
 
 -> = {empty(), _:fn} => empty()
 -> = {o:Optional, lambda:fn} => (full(lambda(value(o))))
 ~> = {empty(), _:fn} => empty()
 ~> = {o:Optional, lambda:fn} => (lambda(value(o)).?(o, empty()))
+\> = {empty(), v} => (v)
+\> = {o:Optional, _} => (value(o))
+
+is_present = {empty()} => false
+is_present = {o:Optional} => true
+
+if_present = {empty(), _:fn} => ()
+if_present = {o:Optional, lambda:fn} => (lambda(value(o)))
+
 stringify = {empty():Optional} => "<empty>"
 stringify = {o:Optional} => ("<" + value(o) + ">")
-
-g = full(6)
-f = full([1,2,3])
-e = empty()
-
-is_even = {n:#} => (n % 2 == 0)
-show(e -> sum)
-show(f -> sum)
-show(e ~> is_even)
-show(g ~> is_even)
