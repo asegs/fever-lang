@@ -1,5 +1,7 @@
+abs = {(a<0):#} => (-1*a)
+abs = {a:#} => (a)
 queen = {row:#,col:#}
-
+- = {q1:queen, q2:queen} => (new(queen,row(q1)-row(q2),col(q1)-col(q2)))
 can_capture_col = {q1:queen, q2:queen} => (col(q1) == col(q2))
 can_capture_diag = {q1:queen, q2: queen} => ((abs(row(q1-q2))) == (abs(col(q1-q2))))
 
@@ -16,5 +18,5 @@ solve = {n:#} => (try_starting_positions(n-1))
 
 
 before = time(0)
-solve(8)
+show(solve(8))
 show(time(before))

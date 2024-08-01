@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "es6",
+            "dom",
+            "es2021"
+        ],
+        "target": "es6",
+        "allowImportingTsExtensions": true,
+        "module": "ESNext"
+
+    }
+}

@@ -1,0 +1,43 @@
+// Defines the Optional type
+Optional = {value}
+
+// A function that creates an empty Optional
+empty = {} => new(Optional,null)
+// A function that creates a full Optional
+full = {v} => (new(Optional, v))
+// A function creates a full Optional if the provided condition is true with the value
+maybe = {v, lambda:fn} => (lambda(v).?(new(Optional, v), empty()))
+
+// Helper function for nullable checks
+not_null = {v} => true
+not_null = {null} => false
+
+// Returns an Optional of a value that could be null
+nullable = {v} => (maybe(v, not_null))
+
+// If a value is present, create an Optional of the provided function called on its value
+-> = {empty(), _:fn} => empty()
+-> = {o:Optional, lambda:fn} => (full(lambda(value(o))))
+// If a value is present and satisfies the provided condition, return the initial value
+~> = {empty(), _:fn} => empty()
+~> = {o:Optional, lambda:fn} => (lambda(value(o)).?(o, empty()))
+// Returns the value wrapped in the Optional, or else a provided default value
+\> = {empty(), v} => (v)
+\> = {o:Optional, _} => (value(o))
+
+// Boolean check if the value is present
+is_present = {empty()} => false
+is_present = {o:Optional} => true
+
+// If the value is present, passes the wrapped value to a consumer function
+if_present = {empty(), _:fn} => ()
+if_present = {o:Optional, lambda:fn} => (lambda(value(o)))
+
+// Formats empty and full Optionals
+stringify = {empty():Optional} => "<empty>"
+stringify = {o:Optional} => ("<" + value(o) + ">")
+
+
+
+
+
