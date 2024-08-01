@@ -18,5 +18,5 @@ mandel_iter = {xo, yo, x, y, iter_limit} => iter_limit
 get_count = {x:#,y:#} => (mandel_iter(to_scaled_x(x), to_scaled_y(y), 0,0,0))
 render_row = {y_val} => (0..r_width -> (show(palette(get_count(@,y_val)), "")))
 mandelbrot = {row_count} => (0..row_count -> (nl(render_row(@))))
-//mandelbrot(r_height)
-0..r_height -> ([y],(nl(render_row(y))))
+mandelbrot(r_height)
+//0..r_height -> ([y],(nl(render_row(y))))

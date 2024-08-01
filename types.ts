@@ -124,8 +124,18 @@ export function createCall(name: string, args: FeverVar[]): FeverVar {
   );
 }
 
+export function createConcreteCall(fn: FeverVar, args: FeverVar[]): FeverVar {
+  return createVar(createTuple([fn, createTuple(args)]), Meta.CONCRETE_CALL);
+}
+
 export function getFunctionNameAndArgs(call: FeverVar): [string, FeverVar[]] {
   return [call.value.value[0].value, call.value.value[1].value];
+}
+
+export function getFunctionObjectAndArgs(
+  call: FeverVar,
+): [FeverVar, FeverVar[]] {
+  return [call.value.value[0], call.value.value[1].value];
 }
 
 export function createCondition(
@@ -158,6 +168,7 @@ export const Meta = {
   FUNCTION: FUNCTION,
   TUPLE: DEFAULT_TUPLE,
   CALL: createTypedTuple([Primitives.VARIABLE, DEFAULT_TUPLE], "CALL"),
+  CONCRETE_CALL: createTypedTuple([FUNCTION, DEFAULT_TUPLE], "CONCRETE_CALL"),
 };
 
 export const Shorthands = {

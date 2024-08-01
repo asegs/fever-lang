@@ -15,14 +15,15 @@ import {
   recursiveToString,
   typeAssignableFrom,
   TypeWeights,
-} from "./types.ts";
+} from "./types";
 import {
-  dispatchFunction,
   callFunctionByReference,
+  dispatchFunction,
   evaluate,
   interpret,
-} from "./interpreter.ts";
-import { feverStringFromJsString, inferListType } from "./literals.ts";
+  recreateExpressionWithVariables,
+} from "./interpreter";
+import { feverStringFromJsString, inferListType } from "./literals";
 import { readFileSync } from "fs";
 import { Context } from "./vars";
 
@@ -1092,21 +1093,19 @@ const namedMap = (
   const internalList = [];
   for (let i = 0; i < list.value.length; i++) {
     const item = list.value[i];
-    ctx.enterScope();
-    ctx.assignValue(element, item);
-    ctx.assignValue(index, createVar(i, Primitives.NUMBER));
-    ctx.assignValue(
-      intermediate,
-      createVar(
-        [...internalList],
-        createTypedList(
-          internalList.length > 0 ? internalList[0].type : Primitives.ANY,
-        ),
+    const mapping = {};
+    mapping[element] = item;
+    mapping[index] = createVar(i, Primitives.NUMBER);
+    mapping[intermediate] = createVar(
+      [...internalList],
+      createTypedList(
+        internalList.length > 0 ? internalList[0].type : Primitives.ANY,
       ),
     );
-    const result = evaluate(action.value);
+    const result = evaluate(
+      recreateExpressionWithVariables(action.value, mapping),
+    );
     internalList.push(result);
-    ctx.exitScope();
   }
 
   const result = createVar(
@@ -1133,12 +1132,11 @@ const namedReduce = (
 ) => {
   for (let i = 0; i < list.value.length; i++) {
     const item = list.value[i];
-    ctx.enterScope();
-    ctx.assignValue(element, item);
-    ctx.assignValue(index, createVar(i, Primitives.NUMBER));
-    ctx.assignValue(accumulator, acc);
-    acc = evaluate(expr);
-    ctx.exitScope();
+    const mapping = {};
+    mapping[element] = item;
+    mapping[index] = createVar(i, Primitives.NUMBER);
+    mapping[accumulator] = acc;
+    acc = evaluate(recreateExpressionWithVariables(expr, mapping));
     if (earlyTerminateIfNotFalse && acc.value !== false) {
       return acc;
     }
@@ -1156,28 +1154,25 @@ const namedFilter = (
   const internalList = [];
   for (let i = 0; i < list.value.length; i++) {
     const item = list.value[i];
-    ctx.enterScope();
-    ctx.assignValue(element, item);
-    ctx.assignValue(index, createVar(i, Primitives.NUMBER));
-    ctx.assignValue(
-      intermediate,
-      createVar(
-        internalList,
-        createTypedList(
-          internalList.length > 0 ? internalList[0].type : Primitives.ANY,
-        ),
+    const mapping = {};
+    mapping[element] = item;
+    mapping[index] = createVar(i, Primitives.NUMBER);
+    mapping[intermediate] = createVar(
+      [...internalList],
+      createTypedList(
+        internalList.length > 0 ? internalList[0].type : Primitives.ANY,
       ),
     );
     let result;
     if (funcRef) {
+      // Hmmm...how do we supply vars here?
       result = callFunctionByReference(funcRef, [item], ctx, "lambda");
     } else {
-      result = evaluate(action.value);
+      result = evaluate(recreateExpressionWithVariables(action, mapping).value);
     }
     if (result.value) {
       internalList.push(item);
     }
-    ctx.exitScope();
   }
 
   const result = createVar(
@@ -1210,13 +1205,13 @@ function addFunctionCase(name: FeverVar, func: FeverVar, ctx: Context) {
     const specificities = specificitiesFromSignature(signature);
 
     const operation = (args, ctx) => {
-      ctx.enterScope();
+      const mapping = {};
       for (let i = 0; i < args.length; i++) {
-        ctx.assignValue(names[i], args[i]);
+        mapping[names[i]] = args[i];
       }
-      const result = evaluate(expression.value);
-      ctx.exitScope();
-      return result;
+      return evaluate(
+        recreateExpressionWithVariables(expression, mapping).value,
+      );
     };
     return registerNewFunction(
       name.value,

@@ -3,12 +3,15 @@ import { parse } from "./parser.ts";
 import { Context } from "./vars.ts";
 import {
   aliasMatches,
+  createCall,
+  createConcreteCall,
   createError,
   createTypeVar,
   createVar,
   FeverType,
   FeverVar,
   getFunctionNameAndArgs,
+  getFunctionObjectAndArgs,
   isAlias,
   typeSatisfaction,
 } from "./types.ts";
@@ -214,6 +217,15 @@ export function evaluate(
       args.map((arg, index) => evaluate(arg, isAssignment && index === 0)),
     );
   }
+  if (aliasMatches(realNode.type, "CONCRETE_CALL")) {
+    const [fn, args] = getFunctionObjectAndArgs(realNode);
+    return callFunctionByReference(
+      fn,
+      args.map((arg) => evaluate(arg)),
+      ctx,
+      "lambda",
+    );
+  }
   if (realNode.type.baseName === "VARIABLE" && !skipVarLookup) {
     const varName = realNode.value;
     if (ctx.hasVariable(varName)) {
@@ -249,6 +261,9 @@ function unknownVariablesInExpressionRec(
   expr: FeverVar,
   table: FeverVar[],
 ): void {
+  if (aliasMatches(expr.type, "FUNCTION")) {
+    return;
+  }
   // Probably need to check context for variable being defined
   if (expr.type.baseName === "VARIABLE" && !ctx.hasVariable(expr.value)) {
     table.push(expr);
@@ -268,6 +283,64 @@ function unknownVariablesInExpressionRec(
   ) {
     unknownVariablesInExpressionRec(expr.value, table);
   }
+}
+
+export function recreateExpressionWithVariables(
+  expr: FeverVar,
+  mapping: { [key: string]: FeverVar },
+): FeverVar {
+  if (expr === null || expr.value === undefined) {
+    return expr;
+  }
+  let newValue;
+  if (aliasMatches(expr.type, "CALL")) {
+    // Possibly substitute in function object for first value
+    // Then recreate arguments recursively and build back better
+    const [name, args] = getFunctionNameAndArgs(expr);
+    const newArgs = args.map((arg) =>
+      recreateExpressionWithVariables(arg, mapping),
+    );
+    if (name in mapping) {
+      return createConcreteCall(mapping[name], newArgs);
+    }
+    // Return standard call
+    return createCall(name, newArgs);
+  } else if (Array.isArray(expr.value)) {
+    // Should check if any were actually evaled for performance
+    // Make variable types into new type
+    newValue = createVar(
+      expr.value.map((v) => recreateExpressionWithVariables(v, mapping)),
+      expr.type,
+    );
+
+    // Fields that may be set on functions
+    if ("invocations" in expr) {
+      newValue.invocations = expr.invocations;
+    }
+    if ("arity" in expr) {
+      newValue.arity = expr.arity;
+    }
+  } else {
+    // Are we in a function name?
+    // Probably could have a call dynamically contain either function name to dispatch or function object
+    // Or we could just eval functions into scope
+    if (expr.type.baseName === "VARIABLE") {
+      if (expr.value in mapping) {
+        newValue = mapping[expr.value];
+      }
+      // In function, mapping might have extra properties
+    } else {
+      return createVar(
+        recreateExpressionWithVariables(expr.value, mapping),
+        expr.type,
+      );
+    }
+  }
+  if (newValue) {
+    return newValue;
+  }
+
+  return expr;
 }
 
 export function parseToExpr(text: string): FeverVar {

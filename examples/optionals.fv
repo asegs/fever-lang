@@ -36,3 +36,8 @@ if_present = {o:Optional, lambda:fn} => (lambda(value(o)))
 // Formats empty and full Optionals
 stringify = {empty():Optional} => "<empty>"
 stringify = {o:Optional} => ("<" + value(o) + ">")
+
+
+
+
+

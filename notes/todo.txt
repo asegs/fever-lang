@@ -23,9 +23,14 @@ When is this behavior good and when is it bad?  The problem also is that we pass
 When the value is supplied as a function param it makes sense to keep it in scope longer
 f = {y} => (show(time(y))) makes sense because it is passed down and internal functions with a param called y just override it
 
+A lot of this is that we pass variables instead of evaling them at pass time
+
+New var handling is breaking complex expression passing functions, like slice, that's the easiest one
+Looks like pass by value breaks down when a function arg is passed, naturally
+Also, since maps use their own assignment system, we probably need to copy what we already do in the operation runner
+
 Also, since we don't split explicitly on assignment, assigning to higher order functions breaks stuff
 
-And zero arg functions don't work
-User defined maps can't use default field names, confusing
+User defined maps can't use default field names, confusing, ie. optional -> (@ * 2) would be nice but you need a full function
 Auto operations on tuples seems cool, but really causes a lot of problems
 Type expansion making objects way too big and redundant, store on either value or type

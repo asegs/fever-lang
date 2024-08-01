@@ -1,2 +1,0 @@
-Node = {value, children:Nodes}
-+ = {n:Node, c:Node} => (children(n,children(n)+c))
