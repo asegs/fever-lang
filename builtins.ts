@@ -556,6 +556,11 @@ export const builtins = {
       );
     }),
   ],
+  append: [
+    newFunction(2, [Meta.LIST, Primitives.ANY], ([list, item]) => {
+      return createVar([...list.value, item], list.type);
+    }),
+  ],
   floor: [
     newFunction(1, [Primitives.NUMBER], ([num]) => {
       return createVar(Math.floor(num.value), Primitives.NUMBER);
@@ -785,6 +790,7 @@ export const morphTypes = (value, toType, ctx) => {
 };
 
 export const standardLib = [
+  "copies = {of, count:#} => (1..count -> (of))",
   "contains? = {lst:[], item} => (lst \\> (false, (item == @ | $), true))",
   "unique_add = {lst:[], (contains?(lst, item))} => (lst)",
   "unique_add = {lst:[], item} => (lst + item)",
@@ -1130,6 +1136,7 @@ const namedReduce = (
   [element, index, accumulator]: string[],
   earlyTerminateIfNotFalse,
 ) => {
+  const initialAcc = acc;
   for (let i = 0; i < list.value.length; i++) {
     const item = list.value[i];
     const mapping = {};
@@ -1137,7 +1144,11 @@ const namedReduce = (
     mapping[index] = createVar(i, Primitives.NUMBER);
     mapping[accumulator] = acc;
     acc = evaluate(recreateExpressionWithVariables(expr, mapping));
-    if (earlyTerminateIfNotFalse && acc.value !== false) {
+    // Maybe this will be slow but it seems ok
+    if (
+      earlyTerminateIfNotFalse &&
+      !dispatchFunction("==", [initialAcc, acc]).value
+    ) {
       return acc;
     }
   }

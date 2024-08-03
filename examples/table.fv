@@ -1,0 +1,52 @@
+// Define a Node type (string -> any)
+Node = {key: string, value}
+// Define table containing lists of Nodes
+Table = {buckets: Nodess}
+// The max average size a list of Nodes can be before the table rebalances
+max_avg_bucket = 3
+// Shorthand for an empty Table with only one bucket
+empty_table = {} => (new(Table, [[]]))
+// Shorthand for a Node with a key and value
+node_of = {k: string, v} => (new(Node, k, v))
+// If the position of the bucket matches the intended insertion position in the Table, add the item to the bucket
+add_to_bucket = {row: Nodes, item: Node, position: #, position: #} => (row + item)
+// Otherwise, keep the bucket intact
+add_to_bucket = {row: Nodes, _: Node, position: #, _:#} => (row)
+// Insert an item into the Table in a specified bucket.  Checks that the bucket position is in the table
+// Does this by creating a new Table, and for each bucket calling the add_to_bucket function for each bucket in the old table
+// When it hits the bucket that matches the goal position, the bucket will be added there
+add_to_table = {t: Table, item: Node, (position < len(buckets(t)))} => (new(Table, buckets(t) -> (add_to_bucket(@, item, position, #))))
+// Defines the len (length) function for Table as the number of buckets
+len = {t: Table} => (len(buckets(t)))
+// For each bucket in the Table, adds the contents to an accumulated list
+all_nodes = {t: Table} => (buckets(t) \> ([], ($ + @)))
+// Adds an item to the Table at the bucket that the key hashes to
+raw_add = {t:Table, item:Node} => (add_to_table(t, item, hash(key(item), len(t))))
+// Defines the + operator for Tables, and adds a rebalance function to make sure the table isn't getting overloaded
++ = {t: Table, item: Node} => (raw_add(rebalance_if_necessary(t), item))
+// Iterates through a bucket until we find an item with a key matching the provided one, or return null.
+// The last argument, true, indicates an early return if the value of the accumulator ever changes from it's initial state.
+find = {bucket: Nodes, k: string} => (bucket \> (null, (?(key(@) == k, value(@), null)), true))
+// Gets a value (not Node) by key using the hash function on the provided key
+get = {t: Table, k:string} => (find(get(buckets(t), hash(k, len(t))), k))
+// Counts the number of all nodes in the Table, then divides it by bucket count to get an average count.
+avg_row_size = {t: Table} => (len(all_nodes(t)) / len(t))
+// This is confusing but cool.
+// Creates a new Table with double the buckets, all empty.
+// For each Node in the original Table, adds it to the new large Table since the new Table is the accumulator
+// Each Node, we effectively get Table = Table + Node until all have been added to it, then the value is returned
+rebalance_if_necessary = {(avg_row_size(t) > max_avg_bucket): Table} => (all_nodes(t) \> (new(Table, copies([], len(t) * 2)), ($ + @)))
+// If the table is not oversized, just skip this step and return it.
+rebalance_if_necessary = {t:Table} => (t)
+
+
+// Example
+tbl = empty_table()
+tbl = tbl + node_of("hello", 10)
+tbl = tbl + node_of("worlds",11)
+tbl = tbl + node_of("city", 12)
+tbl = tbl + node_of("district", 9)
+tbl = tbl + node_of("village", 6)
+tbl = tbl + node_of("town", 1)
+tbl = tbl + node_of("hi", 6)
+show(tbl.get("district"))
