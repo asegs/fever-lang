@@ -17,6 +17,7 @@ import {
 } from "./types.ts";
 import { morphTypes, registerBuiltins } from "./builtins.ts";
 import { LOCAL_ONLY_BUILTINS } from "./localOnlyBuiltins.ts";
+import { lineShouldBeEvaluated } from "./interactives/file.js";
 
 export const ctx = new Context();
 
@@ -350,8 +351,11 @@ export function parseToExpr(text: string): FeverVar {
 }
 
 export function interpret(text: string): FeverVar {
-  const realNode = parseToExpr(text);
-  return evaluate(realNode);
+  if (lineShouldBeEvaluated(text)) {
+    const realNode = parseToExpr(text);
+    return evaluate(realNode);
+  }
+  return null;
 }
 registerBuiltins(ctx);
 registerBuiltins(ctx, LOCAL_ONLY_BUILTINS);

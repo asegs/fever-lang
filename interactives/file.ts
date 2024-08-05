@@ -4,7 +4,7 @@ import { interpret } from "../interpreter.ts";
 import { Context } from "../vars.ts";
 
 //Handle comments better later on
-const lineShouldBeEvaluated = (line: string) => {
+export const lineShouldBeEvaluated = (line: string) => {
   return line.length > 0 && !line.startsWith("//");
 };
 
