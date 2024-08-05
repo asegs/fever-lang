@@ -24,10 +24,9 @@ import {
   recreateExpressionWithVariables,
 } from "./interpreter";
 import { feverStringFromJsString, inferListType } from "./literals";
-import { readFileSync } from "fs";
 import { Context } from "./vars";
 
-function newFunction(
+export function newFunction(
   arity: number,
   types: FeverType[],
   functionOperation: (args: FeverVar[], ctx: Context) => FeverVar,
@@ -723,19 +722,6 @@ export const builtins = {
       },
     ),
   ],
-  read: [
-    newFunction(1, [Meta.STRING], ([path]) => {
-      // We should have global state based on a passed in file to get its directory.
-      const pathSlug = charListToJsString(path);
-      const dir = process.cwd();
-      const fileText = readFileSync(dir + "/" + pathSlug).toString();
-      const fileLines = fileText.split("\n");
-      return createVar(
-        fileLines.map((line) => feverStringFromJsString(line)),
-        createTypedList(Meta.STRING),
-      );
-    }),
-  ],
   to_number: [
     newFunction(1, [Meta.STRING], ([string]) => {
       const jsString = charListToJsString(string);
@@ -836,15 +822,20 @@ export const standardLib = [
 
 // Defining adds doesn't work, ie.   "+ = {s:set, item} => (new(set, entries(s) + item))",
 
-export const registerBuiltins = (ctx: Context) => {
-  for (const functionName of Object.keys(builtins)) {
-    const patterns = builtins[functionName];
+export const registerBuiltins = (ctx: Context, extraBuiltins?: any) => {
+  const builtinReference = !!extraBuiltins ? extraBuiltins : builtins;
+  for (const functionName of Object.keys(builtinReference)) {
+    const patterns = builtinReference[functionName];
     for (const pattern of patterns) {
       registerNewFunction(functionName, ctx, pattern);
     }
   }
-  for (const line of standardLib) {
-    interpret(line);
+
+  // Only use text std lib if no extra builtins were supplied here
+  if (!extraBuiltins) {
+    for (const line of standardLib) {
+      interpret(line);
+    }
   }
 };
 

@@ -16,6 +16,7 @@ import {
   typeSatisfaction,
 } from "./types.ts";
 import { morphTypes, registerBuiltins } from "./builtins.ts";
+import { LOCAL_ONLY_BUILTINS } from "./localOnlyBuiltins.ts";
 
 export const ctx = new Context();
 
@@ -353,3 +354,4 @@ export function interpret(text: string): FeverVar {
   return evaluate(realNode);
 }
 registerBuiltins(ctx);
+registerBuiltins(ctx, LOCAL_ONLY_BUILTINS);
