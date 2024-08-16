@@ -1,15 +1,17 @@
 import { readFileSync } from "fs";
 import readlineSync from "readline-sync";
-import { newFunction } from "./builtins.ts";
+import { morphTypes, newFunction } from "./builtins.ts";
 import {
   charListToJsString,
+  createList,
   createTypedList,
   createVar,
   feverStringFromJsString,
   Meta,
   Primitives,
 } from "./types.ts";
-import { interpret } from "./interpreter.js";
+import { ctx, interpret } from "./interpreter.js";
+import { inferListType } from "./literals.js";
 
 export const LOCAL_ONLY_BUILTINS = {
   read: [
@@ -34,7 +36,10 @@ export const LOCAL_ONLY_BUILTINS = {
   import: [
     newFunction(1, [Meta.STRING], ([path]) => {
       // This is the dumbest import ever
-      const pathSlug = charListToJsString(path);
+      let pathSlug = charListToJsString(path);
+      if (!pathSlug.endsWith(".fv")) {
+        pathSlug += ".fv";
+      }
       const dir = process.cwd();
       const fileText = readFileSync(dir + "/" + pathSlug).toString();
       const fileLines = fileText.split("\n");
@@ -43,5 +48,28 @@ export const LOCAL_ONLY_BUILTINS = {
       }
       return createVar(true, Primitives.BOOLEAN);
     }),
+  ],
+  parseCsv: [
+    newFunction(1, [Meta.STRING], ([csvString]) => {
+      const csvRegex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+      const realString = charListToJsString(csvString);
+      const feverList = realString.split(csvRegex).map(feverStringFromJsString);
+      return createList(feverList, Meta.STRING);
+    }),
+    newFunction(
+      2,
+      [Meta.STRING, createTypedList(Primitives.TYPE)],
+      ([csvString, typeCasts]) => {
+        const csvRegex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+        const realString = charListToJsString(csvString);
+        const feverList = realString
+          .split(csvRegex)
+          .map(feverStringFromJsString)
+          .map((feverString, index) =>
+            morphTypes(feverString, typeCasts.value[index], ctx),
+          );
+        return createList(feverList, inferListType(feverList));
+      },
+    ),
   ],
 };
