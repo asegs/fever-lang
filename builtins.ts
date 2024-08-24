@@ -18,6 +18,7 @@ import {
 } from "./types";
 import {
   callFunctionByReference,
+  ctx,
   dispatchFunction,
   evaluate,
   interpret,
@@ -343,12 +344,21 @@ export const builtins = {
     }),
   ],
   "==": [
-    newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) =>
-      createVar(
+    newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) => {
+      // Special cases
+      // List length mismatch
+      if (
+        a.type.baseName === "LIST" &&
+        b.type.baseName === "LIST" &&
+        a.value.length !== b.value.length
+      ) {
+        return createVar(false, Primitives.BOOLEAN);
+      }
+      return createVar(
         JSON.stringify(a.value) === JSON.stringify(b.value),
         Primitives.BOOLEAN,
-      ),
-    ),
+      );
+    }),
   ],
   "%": [
     newFunction(2, [Primitives.NUMBER, Primitives.NUMBER], ([a, b]) =>
@@ -758,6 +768,29 @@ export const builtins = {
       },
     ),
   ],
+  fast_slice: [
+    newFunction(2, [Meta.LIST, Primitives.NUMBER], ([lst, idx]) => {
+      const newList = lst.value.slice(idx.value);
+      return createVar(newList, inferListType(newList));
+    }),
+    newFunction(
+      3,
+      [Meta.LIST, Primitives.NUMBER, Primitives.NUMBER],
+      ([lst, startIdx, endIdx]) => {
+        const newList = lst.value.slice(startIdx.value, endIdx.value);
+        return createVar(newList, inferListType(newList));
+      },
+    ),
+  ],
+  fast_sort: [
+    newFunction(2, [Meta.LIST, Meta.FUNCTION], ([lst, fn]) => {
+      const sortedList = lst.value.sort(
+        (v1: FeverVar, v2: FeverVar) =>
+          callFunctionByReference(fn, [v1, v2], ctx, "compare").value,
+      );
+      return createVar(sortedList, inferListType(sortedList));
+    }),
+  ],
 };
 
 export const morphTypes = (value, toType, ctx) => {
@@ -794,15 +827,16 @@ export const standardLib = [
   "in_range? = {_:#, _:#, _: #} => false",
   "slice = {lst:[], from:#, to:#} => (lst ~> (in_range?(#, from, to)))",
   "head = {(len(lst) > 0):[]} => (get(lst,0))",
-  "tail = {lst:[]} => (slice(lst,1))",
+  "tail = {lst:[]} => (fast_slice(lst,1))",
   "set = {(unique(entries)):[]}",
-  "halve = {lst:[]} => ([slice(lst,0,floor(len(lst) / 2)), slice(lst, floor(len(lst) / 2 ))])",
+  "halve = {lst:[]} => ([fast_slice(lst,0,floor(len(lst) / 2)), fast_slice(lst, floor(len(lst) / 2 ))])",
   "merge = {_:fn, [], l2:[]} => (l2)",
   "merge = {_:fn, l1:[], []} => (l1)",
   "merge = {compare:fn, l1:[], ((compare(get(l1,0),get(l2,0))) < 0):[]} => ((get(l1,0)) + (merge(compare,tail(l1),l2)))",
   "merge = {compare:fn, l1:[], l2:[]} => ((get(l2,0)) + (merge(compare, l1, tail(l2))))",
   "sort = {(len(lst) <= 1):[], _:fn} => (lst)",
-  "sort = {lst:[], compare:fn} => (merge(compare,sort(get(halve(lst),0),compare), sort(get(halve(lst),1),compare)))",
+  "sort_helper = {split_list:[], compare:fn} => (merge(compare,sort(get(split_list,0),compare), sort(get(split_list,1),compare)))",
+  "sort = {lst:[], compare:fn} => (sort_helper(halve(lst), compare))",
   "compare = {n1:#,(n1 < n2):#} => -1",
   "compare = {n1:#,(n1 > n2):#} => 1",
   "compare = {_:#,_:#} => 0",

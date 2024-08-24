@@ -42,7 +42,7 @@ rebalance_if_necessary = {(avg_row_size(t) > max_avg_bucket): Table} => (all_nod
 // If the table is not oversized, just skip this step and return it.
 rebalance_if_necessary = {t:Table} => (t)
 // Shorthand to see if a key is found in the table
-contains = {t:Table, k:string} => (get(t, k) == null)
+contains = {t:Table, k:string} => (not(get(t, k) == null))
 keys = {t: Table} => (all_nodes(t) -> (key(@)))
 values = {t:Table} => (all_nodes(t) -> (value(@)))
 

@@ -1,23 +1,38 @@
 import * as path from "path";
 import * as fs from "fs";
-import { interpret } from "../interpreter.ts";
-import { Context } from "../vars.ts";
+import { ctx, interpret } from "../interpreter.ts";
+import {
+  breakdown,
+  clear,
+  orderedHistory,
+  timingBreakdown,
+  totalCalls,
+} from "../callStack.js";
+import { SpecialAction } from "../fever.js";
 
 //Handle comments better later on
 export const lineShouldBeEvaluated = (line: string) => {
   return line.length > 0 && !line.startsWith("//");
 };
 
-function file(inputPath: string) {
+function file(inputPath: string, specialAction: SpecialAction) {
+  if (specialAction === SpecialAction.PROFILE) {
+    ctx.useCallStack = true;
+  }
   if (!fs.existsSync(inputPath)) {
     console.error("No such input file: " + inputPath);
     process.exit(1);
   }
   const file = fs.readFileSync(inputPath, "utf8");
+  clear();
   file.split("\n").forEach((line, index) => {
     try {
       if (lineShouldBeEvaluated(line)) {
         interpret(line);
+      } else {
+        if (ctx.useCallStack) {
+          clear();
+        }
       }
     } catch (e) {
       console.log(
@@ -25,15 +40,21 @@ function file(inputPath: string) {
       );
     }
   });
+  if (ctx.useCallStack) {
+    console.log(orderedHistory());
+    console.log(totalCalls());
+    console.log(breakdown());
+    console.log(timingBreakdown());
+  }
 }
 
 export function internalFile(inputFile: string) {
   let dirPath = import.meta.url;
   dirPath = dirPath.slice(7, dirPath.length - 7);
   const inputPath = path.resolve(dirPath + inputFile);
-  file(inputPath);
+  file(inputPath, SpecialAction.NONE);
 }
 
-export function externalFile(inputFile: string) {
-  file(inputFile);
+export function externalFile(inputFile: string, specialAction: SpecialAction) {
+  file(inputFile, specialAction);
 }
