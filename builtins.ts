@@ -18,16 +18,16 @@ import {
 } from "./types";
 import {
   callFunctionByReference,
+  ctx,
   dispatchFunction,
   evaluate,
   interpret,
   recreateExpressionWithVariables,
 } from "./interpreter";
 import { feverStringFromJsString, inferListType } from "./literals";
-import { readFileSync } from "fs";
 import { Context } from "./vars";
 
-function newFunction(
+export function newFunction(
   arity: number,
   types: FeverType[],
   functionOperation: (args: FeverVar[], ctx: Context) => FeverVar,
@@ -344,12 +344,21 @@ export const builtins = {
     }),
   ],
   "==": [
-    newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) =>
-      createVar(
+    newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) => {
+      // Special cases
+      // List length mismatch
+      if (
+        a.type.baseName === "LIST" &&
+        b.type.baseName === "LIST" &&
+        a.value.length !== b.value.length
+      ) {
+        return createVar(false, Primitives.BOOLEAN);
+      }
+      return createVar(
         JSON.stringify(a.value) === JSON.stringify(b.value),
         Primitives.BOOLEAN,
-      ),
-    ),
+      );
+    }),
   ],
   "%": [
     newFunction(2, [Primitives.NUMBER, Primitives.NUMBER], ([a, b]) =>
@@ -556,6 +565,11 @@ export const builtins = {
       );
     }),
   ],
+  append: [
+    newFunction(2, [Meta.LIST, Primitives.ANY], ([list, item]) => {
+      return createVar([...list.value, item], list.type);
+    }),
+  ],
   floor: [
     newFunction(1, [Primitives.NUMBER], ([num]) => {
       return createVar(Math.floor(num.value), Primitives.NUMBER);
@@ -718,19 +732,6 @@ export const builtins = {
       },
     ),
   ],
-  read: [
-    newFunction(1, [Meta.STRING], ([path]) => {
-      // We should have global state based on a passed in file to get its directory.
-      const pathSlug = charListToJsString(path);
-      const dir = process.cwd();
-      const fileText = readFileSync(dir + "/" + pathSlug).toString();
-      const fileLines = fileText.split("\n");
-      return createVar(
-        fileLines.map((line) => feverStringFromJsString(line)),
-        createTypedList(Meta.STRING),
-      );
-    }),
-  ],
   to_number: [
     newFunction(1, [Meta.STRING], ([string]) => {
       const jsString = charListToJsString(string);
@@ -767,6 +768,29 @@ export const builtins = {
       },
     ),
   ],
+  fast_slice: [
+    newFunction(2, [Meta.LIST, Primitives.NUMBER], ([lst, idx]) => {
+      const newList = lst.value.slice(idx.value);
+      return createVar(newList, inferListType(newList));
+    }),
+    newFunction(
+      3,
+      [Meta.LIST, Primitives.NUMBER, Primitives.NUMBER],
+      ([lst, startIdx, endIdx]) => {
+        const newList = lst.value.slice(startIdx.value, endIdx.value);
+        return createVar(newList, inferListType(newList));
+      },
+    ),
+  ],
+  fast_sort: [
+    newFunction(2, [Meta.LIST, Meta.FUNCTION], ([lst, fn]) => {
+      const sortedList = lst.value.sort(
+        (v1: FeverVar, v2: FeverVar) =>
+          callFunctionByReference(fn, [v1, v2], ctx, "compare").value,
+      );
+      return createVar(sortedList, inferListType(sortedList));
+    }),
+  ],
 };
 
 export const morphTypes = (value, toType, ctx) => {
@@ -785,6 +809,7 @@ export const morphTypes = (value, toType, ctx) => {
 };
 
 export const standardLib = [
+  "copies = {of, count:#} => (1..count -> (of))",
   "contains? = {lst:[], item} => (lst \\> (false, (item == @ | $), true))",
   "unique_add = {lst:[], (contains?(lst, item))} => (lst)",
   "unique_add = {lst:[], item} => (lst + item)",
@@ -802,15 +827,16 @@ export const standardLib = [
   "in_range? = {_:#, _:#, _: #} => false",
   "slice = {lst:[], from:#, to:#} => (lst ~> (in_range?(#, from, to)))",
   "head = {(len(lst) > 0):[]} => (get(lst,0))",
-  "tail = {lst:[]} => (slice(lst,1))",
+  "tail = {lst:[]} => (fast_slice(lst,1))",
   "set = {(unique(entries)):[]}",
-  "halve = {lst:[]} => ([slice(lst,0,floor(len(lst) / 2)), slice(lst, floor(len(lst) / 2 ))])",
+  "halve = {lst:[]} => ([fast_slice(lst,0,floor(len(lst) / 2)), fast_slice(lst, floor(len(lst) / 2 ))])",
   "merge = {_:fn, [], l2:[]} => (l2)",
   "merge = {_:fn, l1:[], []} => (l1)",
   "merge = {compare:fn, l1:[], ((compare(get(l1,0),get(l2,0))) < 0):[]} => ((get(l1,0)) + (merge(compare,tail(l1),l2)))",
   "merge = {compare:fn, l1:[], l2:[]} => ((get(l2,0)) + (merge(compare, l1, tail(l2))))",
   "sort = {(len(lst) <= 1):[], _:fn} => (lst)",
-  "sort = {lst:[], compare:fn} => (merge(compare,sort(get(halve(lst),0),compare), sort(get(halve(lst),1),compare)))",
+  "sort_helper = {split_list:[], compare:fn} => (merge(compare,sort(get(split_list,0),compare), sort(get(split_list,1),compare)))",
+  "sort = {lst:[], compare:fn} => (sort_helper(halve(lst), compare))",
   "compare = {n1:#,(n1 < n2):#} => -1",
   "compare = {n1:#,(n1 > n2):#} => 1",
   "compare = {_:#,_:#} => 0",
@@ -830,15 +856,20 @@ export const standardLib = [
 
 // Defining adds doesn't work, ie.   "+ = {s:set, item} => (new(set, entries(s) + item))",
 
-export const registerBuiltins = (ctx: Context) => {
-  for (const functionName of Object.keys(builtins)) {
-    const patterns = builtins[functionName];
+export const registerBuiltins = (ctx: Context, extraBuiltins?: any) => {
+  const builtinReference = !!extraBuiltins ? extraBuiltins : builtins;
+  for (const functionName of Object.keys(builtinReference)) {
+    const patterns = builtinReference[functionName];
     for (const pattern of patterns) {
       registerNewFunction(functionName, ctx, pattern);
     }
   }
-  for (const line of standardLib) {
-    interpret(line);
+
+  // Only use text std lib if no extra builtins were supplied here
+  if (!extraBuiltins) {
+    for (const line of standardLib) {
+      interpret(line);
+    }
   }
 };
 
@@ -1130,6 +1161,7 @@ const namedReduce = (
   [element, index, accumulator]: string[],
   earlyTerminateIfNotFalse,
 ) => {
+  const initialAcc = acc;
   for (let i = 0; i < list.value.length; i++) {
     const item = list.value[i];
     const mapping = {};
@@ -1137,7 +1169,11 @@ const namedReduce = (
     mapping[index] = createVar(i, Primitives.NUMBER);
     mapping[accumulator] = acc;
     acc = evaluate(recreateExpressionWithVariables(expr, mapping));
-    if (earlyTerminateIfNotFalse && acc.value !== false) {
+    // Maybe this will be slow but it seems ok
+    if (
+      earlyTerminateIfNotFalse &&
+      !dispatchFunction("==", [initialAcc, acc]).value
+    ) {
       return acc;
     }
   }

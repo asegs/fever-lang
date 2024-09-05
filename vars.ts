@@ -1,14 +1,16 @@
-import { FeverType, FeverVar } from "./types";
+import { FeverType, FeverVar } from "./types.ts";
 import { typeToString } from "./builtins.ts";
 
 export class Context {
   scopes: { [key: string]: FeverVar }[];
+  useCallStack: boolean;
   depth: number;
   morphisms: {};
   constructor() {
     this.scopes = [{}];
     this.depth = 0;
     this.morphisms = {};
+    this.useCallStack = false;
   }
 
   enterScope() {

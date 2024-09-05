@@ -177,7 +177,13 @@ export function feverStringFromJsString(jsString) {
 export function inferListType(items: FeverVar[], optionalAlias?: string) {
   if (items.length > 0) {
     const first = items[0];
-    if (items.every((i) => typeAssignableFrom(i.type, first.type))) {
+    if (
+      items.every(
+        (i) =>
+          typeAssignableFrom(i.type, first.type) ||
+          (i.type.baseName === "LIST" && i.value.length === 0),
+      )
+    ) {
       return createTypedList(first.type, optionalAlias);
     }
   }

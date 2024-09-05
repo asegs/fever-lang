@@ -11,7 +11,7 @@ contexts:
         0: entity.name.type.fever
         1: text.fever
   main:
-    - match: 'true|false'
+    - match: 'true|false|null'
       captures:
         0: constant.language.fever
 

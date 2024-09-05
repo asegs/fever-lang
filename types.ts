@@ -252,7 +252,6 @@ export const typeSatisfaction = (
   }
 
   let combinedScore = 0;
-
   if (
     parent.baseName === "LIST" &&
     child.baseName === "LIST" &&
@@ -260,11 +259,12 @@ export const typeSatisfaction = (
   ) {
     return [TypeWeights.EQUIVALENT, genericTable];
   }
-
   for (let i = 0; i < child.types.length; i++) {
     let subChild;
     if (child.baseName === "LIST") {
-      subChild = actualChild;
+      // Should probably find first non-empty element
+      // But let's just do something better than ignoring this case
+      subChild = actualChild.value[0];
     } else {
       subChild = actualChild.value[i];
     }
