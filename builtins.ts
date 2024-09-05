@@ -791,6 +791,24 @@ export const builtins = {
       return createVar(sortedList, inferListType(sortedList));
     }),
   ],
+  global_assign: [
+    newFunction(2, [Meta.STRING, Primitives.ANY], ([name, value]) => {
+      const realName = charListToJsString(name);
+      ctx.globalAssignValue(realName, value);
+      return createVar(true, Primitives.BOOLEAN);
+    }),
+  ],
+  add_to_global_list: [
+    newFunction(2, [Meta.STRING, Primitives.ANY], ([name, value]) => {
+      const realName = charListToJsString(name);
+      const globalListValue = ctx.getOrNull(name);
+      ctx.globalAssignValue(
+        realName,
+        dispatchFunction("+", [globalListValue, value]),
+      );
+      return createVar(true, Primitives.BOOLEAN);
+    }),
+  ],
 };
 
 export const morphTypes = (value, toType, ctx) => {
