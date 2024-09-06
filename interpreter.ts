@@ -211,12 +211,31 @@ export function evaluate(
 ): FeverVar {
   if (
     realNode.type.baseName === "EXPRESSION" &&
-    unknownVariablesInExpression(realNode.value).length > 0
+    unknownVariablesInExpression(realNode.value).missing.length > 0
   ) {
     return realNode;
   }
+  if (aliasMatches(realNode.type, "MULTI_EXPRESSION")) {
+    // Unknown vars should also return assignment var if present
+    // Add to tracked list of assigned vars
+    let assignmentArgs = { missing: [], assignments: [] };
+    for (const line of realNode.value) {
+      unknownVariablesInExpressionRec(line, assignmentArgs);
+      if (assignmentArgs.missing.length > 0) {
+        return realNode;
+      }
+      assignmentArgs = { assignments: assignmentArgs.assignments, missing: [] };
+    }
+  }
   while (!ignoreExpressions && realNode.type.baseName === "EXPRESSION") {
     realNode = realNode.value;
+  }
+  if (aliasMatches(realNode.type, "MULTI_EXPRESSION")) {
+    let interimValue: FeverVar;
+    for (const line of realNode.value) {
+      interimValue = evaluate(line, skipVarLookup, ignoreExpressions);
+    }
+    return interimValue;
   }
   if (aliasMatches(realNode.type, "CALL")) {
     const [name, args] = getFunctionNameAndArgs(realNode);
@@ -259,8 +278,12 @@ export function evaluate(
   return realNode;
 }
 
-export function unknownVariablesInExpression(expr: FeverVar): FeverVar[] {
-  const foundVars: FeverVar[] = [];
+export function unknownVariablesInExpression(expr: FeverVar): {
+  [key: string]: FeverVar[];
+} {
+  const foundVars: {
+    [key: string]: FeverVar[];
+  } = { missing: [], assignments: [] };
   unknownVariablesInExpressionRec(expr, foundVars);
 
   return foundVars;
@@ -268,14 +291,26 @@ export function unknownVariablesInExpression(expr: FeverVar): FeverVar[] {
 
 function unknownVariablesInExpressionRec(
   expr: FeverVar,
-  table: FeverVar[],
+  table: {
+    [key: string]: FeverVar[];
+  },
 ): void {
   if (aliasMatches(expr.type, "FUNCTION")) {
     return;
   }
+  if (aliasMatches(expr.type, "CALL")) {
+    const [name, args] = getFunctionNameAndArgs(expr);
+    if (name === "=") {
+      table.assignments.push(args[0].value);
+    }
+  }
   // Probably need to check context for variable being defined
-  if (expr.type.baseName === "VARIABLE" && !ctx.hasVariable(expr.value)) {
-    table.push(expr);
+  if (
+    expr.type.baseName === "VARIABLE" &&
+    !ctx.hasVariable(expr.value) &&
+    !table.assignments.includes(expr.value)
+  ) {
+    table.missing.push(expr);
     return;
   }
   // List type value

@@ -1,2 +1,2 @@
-f = {x:#ss} => true
-show(f([[]]))
+show(f = {x} => (y=x+1;y*x))
+show(f(1))

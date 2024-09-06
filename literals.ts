@@ -140,7 +140,9 @@ export function abstractNodeToRealNode(
         if (realChildren.length > 1) {
           return createTuple(realChildren);
         } else {
-          if (unknownVariablesInExpression(realChildren[0]).length > 0) {
+          if (
+            unknownVariablesInExpression(realChildren[0]).missing.length > 0
+          ) {
             return createVar(realChildren[0], Primitives.EXPRESSION);
           }
           return evaluate(realChildren[0]);
@@ -161,6 +163,11 @@ export function abstractNodeToRealNode(
           signatureItems.push(pattern);
         }
         return createVar(signatureItems, Meta.SIGNATURE);
+      case ParseNodeType.GROUP:
+        const expressionList = parent.children.map((child: ParseNode) =>
+          abstractNodeToRealNode(child, skipVarLookup),
+        );
+        return createVar(expressionList, Meta.MULTI_EXPRESSION);
       default:
         return createVar(parent.text, Primitives.VARIABLE);
     }

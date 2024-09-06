@@ -373,6 +373,13 @@ export const builtins = {
         return createVar([signature, expression], Meta.CASE);
       },
     ),
+    newFunction(
+      2,
+      [Meta.SIGNATURE, Meta.MULTI_EXPRESSION],
+      ([signature, expression]) => {
+        return createVar([signature, expression], Meta.CASE);
+      },
+    ),
     newFunction(2, [Meta.SIGNATURE, Primitives.ANY], ([signature, value]) => {
       return createVar(
         [signature, createVar(value, Primitives.EXPRESSION)],
@@ -1046,6 +1053,8 @@ const serializeCase = (c) => {
   if (!(typeof expression.value === "object")) {
     // Natively defined function
     caseText += expression.value;
+  } else if (aliasMatches(expression.type, "MULTI_EXPRESSION")) {
+    caseText += "<multi-action>";
   } else if (aliasMatches(expression.value.type, "CALL")) {
     caseText += "<action>";
   } else if (expression.value.type.baseName === "VARIABLE") {
@@ -1263,9 +1272,19 @@ function addFunctionCase(name: FeverVar, func: FeverVar, ctx: Context) {
       for (let i = 0; i < args.length; i++) {
         mapping[names[i]] = args[i];
       }
-      return evaluate(
-        recreateExpressionWithVariables(expression, mapping).value,
-      );
+      if (aliasMatches(expression.type, "MULTI_EXPRESSION")) {
+        const recreatedMultiExpression = createVar(
+          expression.value.map((line: FeverVar) =>
+            recreateExpressionWithVariables(line, mapping),
+          ),
+          Meta.MULTI_EXPRESSION,
+        );
+        return evaluate(recreatedMultiExpression);
+      } else {
+        return evaluate(
+          recreateExpressionWithVariables(expression, mapping).value,
+        );
+      }
     };
     return registerNewFunction(
       name.value,
