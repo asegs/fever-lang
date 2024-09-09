@@ -9,6 +9,7 @@ import {
   totalCalls,
 } from "../callStack.js";
 import { SpecialAction } from "../fever.js";
+import { splitGeneral } from "../parser.js";
 
 //Handle comments better later on
 export const lineShouldBeEvaluated = (line: string) => {
@@ -25,7 +26,7 @@ function file(inputPath: string, specialAction: SpecialAction) {
   }
   const file = fs.readFileSync(inputPath, "utf8");
   clear();
-  file.split("\n").forEach((line, index) => {
+  splitGeneral(file, "\n").forEach((line, index) => {
     try {
       if (lineShouldBeEvaluated(line)) {
         interpret(line);

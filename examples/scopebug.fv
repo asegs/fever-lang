@@ -1,2 +1,6 @@
-show(f = {x} => (y=x+1;y*x))
-show(f(1))
+f = {x} => (
+    y = x + 5
+    z = y + x + 10
+    z * 2
+)
+show(f(4))

@@ -472,7 +472,9 @@ function processSyntaxNode(node: ParseNode): ParseNode {
     const subText = group.nestedText.slice(1, group.nestedText.length - 1);
     const isSignature = group.nestedText[0] === "{";
     // Could be newline later on!
-    const lines = splitGeneral(subText, ";");
+    const lines = splitGeneral(subText, "\n")
+      .filter((s) => s.length > 0)
+      .map((s) => s.trim());
     if (lines.length > 1) {
       const parsedLines = lines.map((l) => shunt(l));
       return {
