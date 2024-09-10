@@ -6,7 +6,7 @@ _I've got a fever of a hundred and three._
 
 ### What is it?
 
-Fever is a completely from scratch programming language.  It converts an expressive infix-friendly grammar to a lispy intermediate language which is then interpreted.
+Fever is a completely from scratch programming language, not based on any other.  It's interpreted, functional, declarative, intuitive, unintuitive, and different.
 Fever strives for total self-consistency.  This comes primarily at the expense of performance.
 There is a simple type system and heavy pattern matcher which work together to perform logic on the left side of expressions.
 
@@ -14,7 +14,7 @@ A large proportion of Fever's internals are implemented within the confines of i
 
 ### What is it for?
 
-Fever is for gasping in surprise and then diabolically laughing.
+Fever is for gasping in surprise and then diabolically laughing.  It has an application for teaching programming, with its minimal and natural functional elements.
 
 ### Why do you call it Fever?
 
@@ -170,6 +170,8 @@ x(location) //1
 y(location) //2
 
 second_location = new(coord,2,4)
+
+// This is now deprecated.  You'll have to write an add function yourself.
 location + second_location // (3,6)
 ```
 
@@ -243,5 +245,14 @@ f(x).g()
 ```
 
 Method calls effectively have the highest operator precedence and will always be grouped first, before any reordering.
+
+Fever also supports whitespace-ignoring multiline functions.  The last line is returned.
+
+```js
+f = {x} => (
+    y = x * 2
+    x * y
+)
+```
 
 
