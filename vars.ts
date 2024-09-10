@@ -26,6 +26,10 @@ export class Context {
     this.scopes[this.depth][name] = value;
   }
 
+  globalAssignValue(name: string, value: FeverVar) {
+    this.scopes[0][name] = value;
+  }
+
   deleteValue(name: string) {
     for (let i = this.scopes.length - 1; i >= 0; i--) {
       if (name in this.scopes[i]) {

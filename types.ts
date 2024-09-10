@@ -169,6 +169,7 @@ export const Meta = {
   TUPLE: DEFAULT_TUPLE,
   CALL: createTypedTuple([Primitives.VARIABLE, DEFAULT_TUPLE], "CALL"),
   CONCRETE_CALL: createTypedTuple([FUNCTION, DEFAULT_TUPLE], "CONCRETE_CALL"),
+  MULTI_EXPRESSION: createTypedList(Primitives.EXPRESSION, "MULTI_EXPRESSION"),
 };
 
 export const Shorthands = {
@@ -426,7 +427,7 @@ export const inferConditionFromString = (
   }
 
   const expressionObject = parseToExpr(string);
-  const missing = unknownVariablesInExpression(expressionObject);
+  const missing = unknownVariablesInExpression(expressionObject).missing;
   if (missing.length === 0) {
     /**
      123

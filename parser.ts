@@ -471,6 +471,19 @@ function processSyntaxNode(node: ParseNode): ParseNode {
   if (start !== -1) {
     const subText = group.nestedText.slice(1, group.nestedText.length - 1);
     const isSignature = group.nestedText[0] === "{";
+    // Could be newline later on!
+    const lines = splitGeneral(subText, "\n")
+      .filter((s) => s.length > 0)
+      .map((s) => s.trim());
+    if (lines.length > 1) {
+      const parsedLines = lines.map((l) => shunt(l));
+      return {
+        text: "",
+        type: ParseNodeType.GROUP,
+        children: parsedLines,
+      };
+    }
+
     entries = splitOnCommas(subText).map((e) =>
       isSignature ? makeSignatureFromText(e) : shunt(e),
     );
@@ -495,7 +508,6 @@ function processSyntaxNode(node: ParseNode): ParseNode {
       children: entries,
     };
   }
-
   return node;
 }
 
@@ -506,6 +518,7 @@ export enum ParseNodeType {
   LIST,
   TUPLE,
   SIGNATURE,
+  GROUP,
 }
 
 export type ParseNode = {

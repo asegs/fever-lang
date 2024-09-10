@@ -1,2 +1,6 @@
-f = {x:#ss} => true
-show(f([[]]))
+f = {x} => (
+    y = x + 5
+    z = y + x + 10
+    z * 2
+)
+show(f(4))

@@ -373,6 +373,13 @@ export const builtins = {
         return createVar([signature, expression], Meta.CASE);
       },
     ),
+    newFunction(
+      2,
+      [Meta.SIGNATURE, Meta.MULTI_EXPRESSION],
+      ([signature, expression]) => {
+        return createVar([signature, expression], Meta.CASE);
+      },
+    ),
     newFunction(2, [Meta.SIGNATURE, Primitives.ANY], ([signature, value]) => {
       return createVar(
         [signature, createVar(value, Primitives.EXPRESSION)],
@@ -791,6 +798,24 @@ export const builtins = {
       return createVar(sortedList, inferListType(sortedList));
     }),
   ],
+  global_assign: [
+    newFunction(2, [Meta.STRING, Primitives.ANY], ([name, value]) => {
+      const realName = charListToJsString(name);
+      ctx.globalAssignValue(realName, value);
+      return createVar(true, Primitives.BOOLEAN);
+    }),
+  ],
+  add_to_global_list: [
+    newFunction(2, [Meta.STRING, Primitives.ANY], ([name, value]) => {
+      const realName = charListToJsString(name);
+      const globalListValue = ctx.getOrNull(name);
+      ctx.globalAssignValue(
+        realName,
+        dispatchFunction("+", [globalListValue, value]),
+      );
+      return createVar(true, Primitives.BOOLEAN);
+    }),
+  ],
 };
 
 export const morphTypes = (value, toType, ctx) => {
@@ -1028,6 +1053,8 @@ const serializeCase = (c) => {
   if (!(typeof expression.value === "object")) {
     // Natively defined function
     caseText += expression.value;
+  } else if (aliasMatches(expression.type, "MULTI_EXPRESSION")) {
+    caseText += "<multi-action>";
   } else if (aliasMatches(expression.value.type, "CALL")) {
     caseText += "<action>";
   } else if (expression.value.type.baseName === "VARIABLE") {
@@ -1245,9 +1272,19 @@ function addFunctionCase(name: FeverVar, func: FeverVar, ctx: Context) {
       for (let i = 0; i < args.length; i++) {
         mapping[names[i]] = args[i];
       }
-      return evaluate(
-        recreateExpressionWithVariables(expression, mapping).value,
-      );
+      if (aliasMatches(expression.type, "MULTI_EXPRESSION")) {
+        const recreatedMultiExpression = createVar(
+          expression.value.map((line: FeverVar) =>
+            recreateExpressionWithVariables(line, mapping),
+          ),
+          Meta.MULTI_EXPRESSION,
+        );
+        return evaluate(recreatedMultiExpression);
+      } else {
+        return evaluate(
+          recreateExpressionWithVariables(expression, mapping).value,
+        );
+      }
     };
     return registerNewFunction(
       name.value,
