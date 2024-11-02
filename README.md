@@ -22,9 +22,7 @@ It came to me in a fever dream.
 
 
 ### How do I use it?
-Fever tries to do exactly what you might imagine it would when you look at its code. 
-You can visit the Sweat Lodge, an in-browser Fever REPL here:
-https://asegs.github.io/fever-lang/interactives/playground.html
+Fever tries to do exactly what you might imagine it would when you look at its code.
 
 You can run it by cloning this repo and running `node fever.js` in the directory.  As arguments you may pass in additional Fever files to be run and loaded into scope in order, such as `node fever.js examples/std.fv`.
 
