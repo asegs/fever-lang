@@ -2,6 +2,7 @@ import {
   aliasMatches,
   charListToJsString,
   createError,
+  createMonadPassthrough,
   createType,
   createTypedList,
   createTypedTuple,
@@ -238,6 +239,13 @@ export const builtins = {
 
       return res;
     }),
+    newFunction(
+      2,
+      [Primitives.ANY, Primitives.EXPRESSION],
+      ([item, expr], context) => {
+        return namedMonadicMap(item, expr, context, ["@", "#", "^"]);
+      },
+    ),
   ],
   "\\>": [
     newFunction(
@@ -417,7 +425,6 @@ export const builtins = {
           ? createTypedList(types[0].types[0], realName)
           : createTypedTuple(types, realName);
         Meta[realName.toUpperCase()] = newType;
-
         const permutations = [];
 
         for (let i = 0; i < size; i++) {
@@ -816,6 +823,9 @@ export const builtins = {
       return createVar(true, Primitives.BOOLEAN);
     }),
   ],
+  passthrough: [
+    newFunction(1, [Primitives.ANY], ([item]) => createMonadPassthrough(item)),
+  ],
 };
 
 export const morphTypes = (value, toType, ctx) => {
@@ -1179,6 +1189,37 @@ const namedMap = (
   }
   return result;
 };
+
+function namedMonadicMap(
+  item: FeverVar,
+  expression: FeverVar,
+  ctx: Context,
+  varNames: string[],
+) {
+  const variablesFromItem = dispatchFunction("to_monad", [item]);
+  const mappings = {};
+  for (let i = 0; i < 3; i++) {
+    if (variablesFromItem.value.length <= i) {
+      // No monad mappings registered
+      break;
+    }
+    mappings[varNames[i]] = variablesFromItem.value[i];
+  }
+
+  let result;
+
+  if (aliasMatches(mappings[varNames[0]].type, "PASSTHROUGH")) {
+    result = mappings[varNames[0]].value;
+  } else {
+    const recreatedExpression = recreateExpressionWithVariables(
+      expression,
+      mappings,
+    );
+    result = evaluate(recreatedExpression);
+  }
+
+  return dispatchFunction("from_monad", [result, item]);
+}
 
 const namedReduce = (
   list,

@@ -146,6 +146,10 @@ export function createCondition(
   return createVar([name, expr, specificity], Meta.CONDITION);
 }
 
+export function createMonadPassthrough(value: FeverVar) {
+  return createVar(value, createTypedTuple([Primitives.ANY], "PASSTHROUGH"));
+}
+
 const STRING = createTypedList(Primitives.CHARACTER, "STRING");
 const CONDITION = createTypedTuple(
   [STRING, Primitives.EXPRESSION, Primitives.NUMBER],
@@ -225,6 +229,10 @@ export const typeSatisfaction = (
     }
 
     return [weightedAnyType(depth), genericTable];
+  }
+
+  if (child.baseName !== parent.baseName) {
+    return [0, genericTable];
   }
 
   if (isAlias(parent)) {

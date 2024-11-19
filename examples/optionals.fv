@@ -16,8 +16,12 @@ not_null = {null} => false
 nullable = {v} => (maybe(v, not_null))
 
 // If a value is present, create an Optional of the provided function called on its value
--> = {empty(), _:fn} => empty()
--> = {o:Optional, lambda:fn} => (full(lambda(value(o))))
+// -> = {empty(), _:fn} => empty()
+// -> = {o:Optional, lambda:fn} => (full(lambda(value(o))))
+to_monad = {empty()} => [passthrough(empty())]
+to_monad = {o:Optional} => ([value(o)])
+from_monad = {empty(), o: Optional} => (empty())
+from_monad = {v, o: Optional} => (full(v))
 // If a value is present and satisfies the provided condition, return the initial value
 ~> = {empty(), _:fn} => empty()
 ~> = {o:Optional, lambda:fn} => (lambda(value(o)).?(o, empty()))

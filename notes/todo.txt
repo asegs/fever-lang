@@ -34,3 +34,5 @@ Also, since we don't split explicitly on assignment, assigning to higher order f
 User defined maps can't use default field names, confusing, ie. optional -> (@ * 2) would be nice but you need a full function
 Auto operations on tuples seems cool, but really causes a lot of problems
 Type expansion making objects way too big and redundant, store on either value or type
+
+Hmmm...auto defined types are being treated as lists?
