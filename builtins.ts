@@ -239,13 +239,9 @@ export const builtins = {
 
       return res;
     }),
-    newFunction(
-      2,
-      [Primitives.ANY, Primitives.EXPRESSION],
-      ([item, expr], context) => {
-        return namedMonadicMap(item, expr, context, ["@", "#", "^"]);
-      },
-    ),
+    newFunction(2, [Primitives.ANY, Primitives.EXPRESSION], ([item, expr]) => {
+      return namedMonadicMap(item, expr, ["@", "#", "^"]);
+    }),
   ],
   "\\>": [
     newFunction(
@@ -1193,11 +1189,12 @@ const namedMap = (
 function namedMonadicMap(
   item: FeverVar,
   expression: FeverVar,
-  ctx: Context,
   varNames: string[],
 ) {
-  const variablesFromItem = dispatchFunction("to_monad", [item]);
+  const variablesFromItem = dispatchFunction("lift", [item]);
   const mappings = {};
+  // Probably need to separate named args from default case
+  // Also this assumes there is just one concrete failure case, true for optionals but not errors
   for (let i = 0; i < 3; i++) {
     if (variablesFromItem.value.length <= i) {
       // No monad mappings registered
@@ -1218,7 +1215,15 @@ function namedMonadicMap(
     result = evaluate(recreatedExpression);
   }
 
-  return dispatchFunction("from_monad", [result, item]);
+  return dispatchFunction("drop", [result, item]);
+}
+
+function namedMonadicFilter(
+  item: FeverVar,
+  expression: FeverVar,
+  varNames: string[],
+) {
+  const variablesFromItem = dispatchFunction("lift", [item]);
 }
 
 const namedReduce = (
