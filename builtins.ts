@@ -346,6 +346,9 @@ export const builtins = {
     newFunction(2, [Meta.LIST, Meta.FUNCTION], ([list, funcRef], ctx) => {
       return namedFilter(list, null, ctx, ["@", "#", "^"], funcRef);
     }),
+    newFunction(2, [Primitives.ANY, Primitives.EXPRESSION], ([item, expr]) => {
+      return namedMonadicFilter(item, expr, ["@", "#", "^"]);
+    }),
   ],
   "==": [
     newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) => {
@@ -1192,15 +1195,15 @@ function namedMonadicMap(
   varNames: string[],
 ) {
   const variablesFromItem = dispatchFunction("lift", [item]);
+  const varMappings = variablesFromItem.value[0];
   const mappings = {};
-  // Probably need to separate named args from default case
   // Also this assumes there is just one concrete failure case, true for optionals but not errors
   for (let i = 0; i < 3; i++) {
-    if (variablesFromItem.value.length <= i) {
+    if (varMappings.value.length <= i) {
       // No monad mappings registered
       break;
     }
-    mappings[varNames[i]] = variablesFromItem.value[i];
+    mappings[varNames[i]] = varMappings.value[i];
   }
 
   let result;
@@ -1224,6 +1227,38 @@ function namedMonadicFilter(
   varNames: string[],
 ) {
   const variablesFromItem = dispatchFunction("lift", [item]);
+  const varMappings = variablesFromItem.value[0];
+  const falseCaseValue = variablesFromItem.value[1];
+
+  const mappings = {};
+  // Also this assumes there is just one concrete failure case, true for optionals but not errors
+  for (let i = 0; i < 3; i++) {
+    if (varMappings.value.length <= i) {
+      // No monad mappings registered
+      break;
+    }
+    mappings[varNames[i]] = varMappings.value[i];
+  }
+
+  let result;
+
+  if (aliasMatches(mappings[varNames[0]].type, "PASSTHROUGH")) {
+    result = mappings[varNames[0]].value;
+  } else {
+    const recreatedExpression = recreateExpressionWithVariables(
+      expression,
+      mappings,
+    );
+    const boolean = evaluate(recreatedExpression);
+    if (boolean.value) {
+      // The provided item will be returned
+      result = mappings[varNames[0]];
+    } else {
+      result = falseCaseValue;
+    }
+
+    return dispatchFunction("drop", [result, item]);
+  }
 }
 
 const namedReduce = (

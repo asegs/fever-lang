@@ -18,8 +18,8 @@ nullable = {v} => (maybe(v, not_null))
 // If a value is present, create an Optional of the provided function called on its value
 // -> = {empty(), _:fn} => empty()
 // -> = {o:Optional, lambda:fn} => (full(lambda(value(o))))
-lift = {empty()} => [passthrough(empty())]
-lift = {o:Optional} => ([value(o), empty()])
+lift = {empty()} => (([passthrough(empty())], empty()))
+lift = {o:Optional} => (([value(o), empty()], empty()))
 drop = {empty(), o: Optional} => (empty())
 drop = {v, o: Optional} => (full(v))
 // If a value is present and satisfies the provided condition, return the initial value
