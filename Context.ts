@@ -1,5 +1,5 @@
 import { FeverType, FeverVar } from "./types.ts";
-import { typeToString } from "./builtins.ts";
+import { typeToString } from "./lib/StringUtils.js";
 
 export class Context {
   scopes: { [key: string]: FeverVar }[];

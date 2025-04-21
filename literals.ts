@@ -12,6 +12,7 @@ import {
 } from "./types.ts";
 import { ParseNode, ParseNodeType, trimAndSplitOnCommas } from "./parser";
 import { ctx, evaluate, unknownVariablesInExpression } from "./interpreter.ts";
+import { feverStringFromJsString } from "./lib/StringUtils.js";
 
 function everyCharNumeric(text: string): boolean {
   return (
@@ -172,13 +173,6 @@ export function abstractNodeToRealNode(
         return createVar(parent.text, Primitives.VARIABLE);
     }
   }
-}
-
-export function feverStringFromJsString(jsString) {
-  return createVar(
-    jsString.split("").map((char) => createVar(char, Primitives.CHARACTER)),
-    Meta.STRING,
-  );
 }
 
 export function inferListType(items: FeverVar[], optionalAlias?: string) {

@@ -24,7 +24,7 @@ It came to me in a fever dream.
 ### How do I use it?
 Fever tries to do exactly what you might imagine it would when you look at its code.
 
-You can run it by cloning this repo and running `node fever.js` in the directory.  As arguments you may pass in additional Fever files to be run and loaded into scope in order, such as `node fever.js examples/std.fv`.
+You can run it by cloning this repo and running `node Fever.ts` in the directory.  As arguments you may pass in additional Fever files to be run and loaded into scope in order, such as `node fever.js examples/std.fv`.
 
 #### Expressions
 ```js

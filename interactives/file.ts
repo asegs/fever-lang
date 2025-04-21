@@ -7,8 +7,8 @@ import {
   orderedHistory,
   timingBreakdown,
   totalCalls,
-} from "../callStack.js";
-import { SpecialAction } from "../fever.js";
+} from "../CallStackDebugger.ts";
+import { SpecialAction } from "../Fever.js";
 import { splitGeneral } from "../parser.js";
 
 //Handle comments better later on

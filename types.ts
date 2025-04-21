@@ -4,7 +4,7 @@ import {
   parseToExpr,
   unknownVariablesInExpression,
 } from "./interpreter.ts";
-import { Context } from "./vars.ts";
+import { Context } from "./Context.ts";
 
 export enum TypeWeights {
   ANY = 0.5,
@@ -180,13 +180,6 @@ export const Shorthands = {
   "#": Primitives.NUMBER,
   fn: Meta.FUNCTION,
 };
-
-export function feverStringFromJsString(jsString: string): FeverVar {
-  return createVar(
-    jsString.split("").map((char) => createVar(char, Primitives.CHARACTER)),
-    Meta.STRING,
-  );
-}
 
 export function isAlias(t: FeverType): boolean {
   return "alias" in t;

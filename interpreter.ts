@@ -1,6 +1,6 @@
 import { abstractNodeToRealNode } from "./literals.ts";
 import { parse } from "./parser.ts";
-import { Context } from "./vars.ts";
+import { Context } from "./Context.ts";
 import {
   aliasMatches,
   createCall,
@@ -15,10 +15,15 @@ import {
   isAlias,
   typeSatisfaction,
 } from "./types.ts";
-import { morphTypes, registerBuiltins } from "./builtins.ts";
 import { LOCAL_ONLY_BUILTINS } from "./localOnlyBuiltins.ts";
 import { lineShouldBeEvaluated } from "./interactives/file.js";
-import { enterFunction, exitFunction, getNsTime } from "./callStack.js";
+import { enterFunction, exitFunction } from "./CallStackDebugger.ts";
+import { registerBuiltins } from "./lib/StandardLib.js";
+import { morphTypes } from "./lib/TypeUtils.js";
+import { argumentCountError } from "./lib/Errors.js";
+
+// 'show' is the only function that catches errors, the rest fall through.
+export const ERROR_CATCHING_FUNCTIONS = ["show"];
 
 export const ctx = new Context();
 
@@ -48,9 +53,8 @@ export function callFunctionByReference(
 ) {
   const errors = args.filter((arg) => arg.type.baseName === "ERROR");
 
-  // 'show' is the only function that catches errors, the rest fall through.
   if (errors.length > 0) {
-    if (name !== "show") {
+    if (!ERROR_CATCHING_FUNCTIONS.includes(name)) {
       return errors[0];
     }
   }
@@ -59,9 +63,7 @@ export function callFunctionByReference(
   const candidates = func.filter((f) => f.arity === args.length);
 
   if (candidates.length === 0) {
-    return createError(
-      "No definition of " + name + " that takes " + args.length + " arguments",
-    );
+    return argumentCountError(name, args.length);
   }
 
   if (args.length === 0) {
