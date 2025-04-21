@@ -13,7 +13,7 @@ import {
   Primitives,
   recursiveToString,
   typeAssignableFrom,
-} from "./types";
+} from "./Types.js";
 import {
   callFunctionByReference,
   ctx,
@@ -21,25 +21,26 @@ import {
   evaluate,
   interpret,
   recreateExpressionWithVariables,
-} from "./interpreter";
-import { inferListType } from "./literals";
-import { Context } from "./Context.ts";
+} from "../internals/Interpreter.js";
+import { inferListType } from "./Literals.js";
+import { Context } from "../internals/Context.ts";
 import {
   namedFilter,
   namedMap,
   namedMonadicFilter,
   namedMonadicMap,
   namedReduce,
-} from "./lib/HigherOrder.js";
-import { isNumeric, newOfType, stringify } from "./lib/CommonUtils.js";
+} from "../lib/HigherOrder.js";
+import { isNumeric, newOfType, stringify } from "../lib/CommonUtils.js";
 import {
   addFunctionCase,
   registerNewFunction,
   serializeFunction,
   typesFromSignature,
-} from "./lib/FunctionUtils.js";
-import { feverStringFromJsString, typeToString } from "./lib/StringUtils.js";
-import { morphTypes } from "./lib/TypeUtils.js";
+} from "../lib/FunctionUtils.js";
+import { feverStringFromJsString, typeToString } from "../lib/StringUtils.js";
+import { morphTypes } from "../lib/TypeUtils.js";
+import { failureToParseString, indexOutOfRange } from "../lib/Errors.js";
 
 export function newFunction(
   arity: number,
@@ -577,18 +578,14 @@ export const builtins = {
         return list.value[num.value];
       }
 
-      return createError(
-        "Index " + num.value + " out of range on " + recursiveToString(list),
-      );
+      return indexOutOfRange(num.value, recursiveToString(list));
     }),
     newFunction(2, [Meta.TUPLE, Primitives.NUMBER], ([tuple, num]) => {
       if (num.value < tuple.value.length) {
         return tuple.value[num.value];
       }
 
-      return createError(
-        "Index " + num.value + " out of range on " + recursiveToString(tuple),
-      );
+      return indexOutOfRange(num.value, recursiveToString(tuple));
     }),
   ],
   append: [
@@ -764,9 +761,7 @@ export const builtins = {
       if (isNumeric(jsString)) {
         return createVar(Number(jsString), Primitives.NUMBER);
       } else {
-        return createError(
-          '"' + jsString + '" cannot be interpreted as a number.',
-        );
+        return failureToParseString(jsString, "number");
       }
     }),
   ],

@@ -1,5 +1,5 @@
-import { abstractNodeToRealNode } from "./literals.ts";
-import { parse } from "./parser.ts";
+import { abstractNodeToRealNode } from "../middleware/Literals.ts";
+import { parse } from "./Parser.ts";
 import { Context } from "./Context.ts";
 import {
   aliasMatches,
@@ -14,13 +14,20 @@ import {
   getFunctionObjectAndArgs,
   isAlias,
   typeSatisfaction,
-} from "./types.ts";
-import { LOCAL_ONLY_BUILTINS } from "./localOnlyBuiltins.ts";
-import { lineShouldBeEvaluated } from "./interactives/file.js";
-import { enterFunction, exitFunction } from "./CallStackDebugger.ts";
-import { registerBuiltins } from "./lib/StandardLib.js";
-import { morphTypes } from "./lib/TypeUtils.js";
-import { argumentCountError } from "./lib/Errors.js";
+} from "../middleware/Types.ts";
+import { LOCAL_ONLY_BUILTINS } from "../middleware/LocalOnlyBuiltins.ts";
+import { lineShouldBeEvaluated } from "../interactives/file.js";
+import {
+  enterFunction,
+  exitFunction,
+} from "../middleware/CallStackDebugger.ts";
+import { registerBuiltins } from "../lib/StandardLib.js";
+import { morphTypes } from "../lib/TypeUtils.js";
+import {
+  argumentCountError,
+  noPatternMatch,
+  unknownFunctionError,
+} from "../lib/Errors.js";
 
 // 'show' is the only function that catches errors, the rest fall through.
 export const ERROR_CATCHING_FUNCTIONS = ["show"];
@@ -155,7 +162,7 @@ export function callFunctionByReference(
   }
 
   if (bestScore <= 0) {
-    return createError("No satisfactory match for " + name + ".");
+    return noPatternMatch(name);
   }
 
   assignGenericTableToTypeVars(ctx, usedGenericTable);
@@ -193,7 +200,7 @@ export function dispatchFunction(fnName: string, args: FeverVar[]): FeverVar {
 
     // You have defined neither and we have no idea what you want.
     if (!booleanName && !assertionName) {
-      return createError("Unknown function " + fnName + " invoked.");
+      return unknownFunctionError(fnName);
     }
 
     named = booleanName ?? assertionName;

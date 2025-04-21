@@ -1,4 +1,4 @@
-import { callFunctionByReference } from "../interpreter.js";
+import { callFunctionByReference } from "../internals/Interpreter.js";
 
 export function morphTypes(value, toType, ctx) {
   let intermediateValue = value;

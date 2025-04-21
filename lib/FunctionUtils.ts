@@ -2,7 +2,7 @@ import {
   dispatchFunction,
   evaluate,
   recreateExpressionWithVariables,
-} from "../interpreter.js";
+} from "../internals/Interpreter.js";
 import {
   aliasMatches,
   charListToJsString,
@@ -12,9 +12,9 @@ import {
   Meta,
   Primitives,
   TypeWeights,
-} from "../types.js";
-import { Context } from "../Context.ts";
-import { newFunction } from "../Builtins.ts";
+} from "../middleware/Types.js";
+import { Context } from "../internals/Context.ts";
+import { newFunction } from "../middleware/Builtins.ts";
 
 export const nativeFunctionMessage = "<natively defined function>";
 

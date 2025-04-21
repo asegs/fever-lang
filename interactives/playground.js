@@ -1,5 +1,10 @@
-import { callFunction, goals, instance, interpret } from "../interpreter.js";
-import { charListToJsString, primitives } from "../types.js";
+import {
+  callFunction,
+  goals,
+  instance,
+  interpret,
+} from "../internals/Interpreter.ts";
+import { charListToJsString, primitives } from "../middleware/Types.ts";
 
 const [variables, morphisms] = instance();
 

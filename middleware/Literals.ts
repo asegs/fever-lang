@@ -9,10 +9,18 @@ import {
   Meta,
   Primitives,
   typeAssignableFrom,
-} from "./types.ts";
-import { ParseNode, ParseNodeType, trimAndSplitOnCommas } from "./parser";
-import { ctx, evaluate, unknownVariablesInExpression } from "./interpreter.ts";
-import { feverStringFromJsString } from "./lib/StringUtils.js";
+} from "./Types.ts";
+import {
+  ParseNode,
+  ParseNodeType,
+  trimAndSplitOnCommas,
+} from "../internals/Parser.js";
+import {
+  ctx,
+  evaluate,
+  unknownVariablesInExpression,
+} from "../internals/Interpreter.ts";
+import { feverStringFromJsString } from "../lib/StringUtils.js";
 
 function everyCharNumeric(text: string): boolean {
   return (

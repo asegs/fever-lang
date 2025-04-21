@@ -8,11 +8,11 @@ import {
   createVar,
   Meta,
   Primitives,
-} from "./types.ts";
-import { ctx, interpret } from "./interpreter.js";
-import { inferListType } from "./literals.js";
-import { feverStringFromJsString } from "./lib/StringUtils.js";
-import { morphTypes } from "./lib/TypeUtils.js";
+} from "./Types.ts";
+import { ctx, interpret } from "../internals/Interpreter.js";
+import { inferListType } from "./Literals.js";
+import { feverStringFromJsString } from "../lib/StringUtils.js";
+import { morphTypes } from "../lib/TypeUtils.js";
 
 export const LOCAL_ONLY_BUILTINS = {
   read: [

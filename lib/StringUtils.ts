@@ -5,7 +5,7 @@ import {
   isAlias,
   Meta,
   Primitives,
-} from "../types.js";
+} from "../middleware/Types.js";
 
 export function typeToString(t: FeverType): string {
   return typeToStringRec(t, "");

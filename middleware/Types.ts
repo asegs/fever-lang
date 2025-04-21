@@ -1,10 +1,10 @@
-import { splitGeneral, splitOnCommas } from "./parser.ts";
+import { splitGeneral, splitOnCommas } from "../internals/Parser.ts";
 import {
   interpret,
   parseToExpr,
   unknownVariablesInExpression,
-} from "./interpreter.ts";
-import { Context } from "./Context.ts";
+} from "../internals/Interpreter.ts";
+import { Context } from "../internals/Context.ts";
 
 export enum TypeWeights {
   ANY = 0.5,

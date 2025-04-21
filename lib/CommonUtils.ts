@@ -1,6 +1,6 @@
-import { Context } from "../Context.js";
-import { createTypeVar, FeverVar } from "../types.js";
-import { dispatchFunction } from "../interpreter.js";
+import { Context } from "../internals/Context.js";
+import { createTypeVar, FeverVar } from "../middleware/Types.js";
+import { dispatchFunction } from "../internals/Interpreter.js";
 
 export function newOfType(t, args, ctx: Context) {
   const typeVar = createTypeVar(t);
