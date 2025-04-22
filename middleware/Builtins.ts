@@ -1,6 +1,5 @@
 import {
   charListToJsString,
-  createError,
   createMonadPassthrough,
   createType,
   createTypedList,
@@ -19,8 +18,6 @@ import {
   ctx,
   dispatchFunction,
   evaluate,
-  interpret,
-  recreateExpressionWithVariables,
 } from "../internals/Interpreter.js";
 import { inferListType } from "./Literals.js";
 import { Context } from "../internals/Context.ts";
@@ -756,8 +753,8 @@ export const builtins = {
     ),
   ],
   to_number: [
-    newFunction(1, [Meta.STRING], ([string]) => {
-      const jsString = charListToJsString(string);
+    newFunction(1, [Meta.STRING], ([feverString]) => {
+      const jsString = charListToJsString(feverString);
       if (isNumeric(jsString)) {
         return createVar(Number(jsString), Primitives.NUMBER);
       } else {
@@ -822,7 +819,7 @@ export const builtins = {
   add_to_global_list: [
     newFunction(2, [Meta.STRING, Primitives.ANY], ([name, value]) => {
       const realName = charListToJsString(name);
-      const globalListValue = ctx.getOrNull(name);
+      const globalListValue = ctx.getOrNull(realName);
       ctx.globalAssignValue(
         realName,
         dispatchFunction("+", [globalListValue, value]),

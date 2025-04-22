@@ -18,7 +18,9 @@ export function indexOutOfRange(index: number, structureString: string) {
 }
 
 export function failureToParseString(value: string, targetType: string) {
-  return '"' + value + '" cannot be interpreted as a ' + targetType + ".";
+  return createError(
+    '"' + value + '" cannot be interpreted as a ' + targetType + ".",
+  );
 }
 
 export function unknownFunctionError(name: string) {
