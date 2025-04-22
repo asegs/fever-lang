@@ -1,17 +1,18 @@
 import { readFileSync } from "fs";
 import readlineSync from "readline-sync";
-import { morphTypes, newFunction } from "./builtins.ts";
+import { newFunction } from "./Builtins.ts";
 import {
   charListToJsString,
   createList,
   createTypedList,
   createVar,
-  feverStringFromJsString,
   Meta,
   Primitives,
-} from "./types.ts";
-import { ctx, interpret } from "./interpreter.js";
-import { inferListType } from "./literals.js";
+} from "./Types.ts";
+import { ctx, interpret } from "../internals/Interpreter.js";
+import { inferListType } from "./Literals.js";
+import { feverStringFromJsString } from "../lib/StringUtils.js";
+import { morphTypes } from "../lib/TypeUtils.js";
 
 export const LOCAL_ONLY_BUILTINS = {
   read: [

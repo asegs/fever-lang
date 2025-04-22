@@ -1,15 +1,15 @@
 import * as path from "path";
 import * as fs from "fs";
-import { ctx, interpret } from "../interpreter.ts";
+import { ctx, interpret } from "../internals/Interpreter.ts";
 import {
   breakdown,
   clear,
   orderedHistory,
   timingBreakdown,
   totalCalls,
-} from "../callStack.js";
-import { SpecialAction } from "../fever.js";
-import { splitGeneral } from "../parser.js";
+} from "../middleware/CallStackDebugger.ts";
+import { SpecialAction } from "../Fever.js";
+import { splitGeneral } from "../internals/Parser.js";
 
 //Handle comments better later on
 export const lineShouldBeEvaluated = (line: string) => {

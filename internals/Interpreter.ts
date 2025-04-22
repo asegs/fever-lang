@@ -1,6 +1,6 @@
-import { abstractNodeToRealNode } from "./literals.ts";
-import { parse } from "./parser.ts";
-import { Context } from "./vars.ts";
+import { abstractNodeToRealNode } from "../middleware/Literals.ts";
+import { parse } from "./Parser.ts";
+import { Context } from "./Context.ts";
 import {
   aliasMatches,
   createCall,
@@ -14,11 +14,23 @@ import {
   getFunctionObjectAndArgs,
   isAlias,
   typeSatisfaction,
-} from "./types.ts";
-import { morphTypes, registerBuiltins } from "./builtins.ts";
-import { LOCAL_ONLY_BUILTINS } from "./localOnlyBuiltins.ts";
-import { lineShouldBeEvaluated } from "./interactives/file.js";
-import { enterFunction, exitFunction, getNsTime } from "./callStack.js";
+} from "../middleware/Types.ts";
+import { LOCAL_ONLY_BUILTINS } from "../middleware/LocalOnlyBuiltins.ts";
+import { lineShouldBeEvaluated } from "../interactives/file.js";
+import {
+  enterFunction,
+  exitFunction,
+} from "../middleware/CallStackDebugger.ts";
+import { registerBuiltins } from "../lib/StandardLib.js";
+import { morphTypes } from "../lib/TypeUtils.js";
+import {
+  argumentCountError,
+  noPatternMatch,
+  unknownFunctionError,
+} from "../lib/Errors.js";
+
+// 'show' is the only function that catches errors, the rest fall through.
+export const ERROR_CATCHING_FUNCTIONS = ["show"];
 
 export const ctx = new Context();
 
@@ -48,9 +60,8 @@ export function callFunctionByReference(
 ) {
   const errors = args.filter((arg) => arg.type.baseName === "ERROR");
 
-  // 'show' is the only function that catches errors, the rest fall through.
   if (errors.length > 0) {
-    if (name !== "show") {
+    if (!ERROR_CATCHING_FUNCTIONS.includes(name)) {
       return errors[0];
     }
   }
@@ -59,9 +70,7 @@ export function callFunctionByReference(
   const candidates = func.filter((f) => f.arity === args.length);
 
   if (candidates.length === 0) {
-    return createError(
-      "No definition of " + name + " that takes " + args.length + " arguments",
-    );
+    return argumentCountError(name, args.length);
   }
 
   if (args.length === 0) {
@@ -153,7 +162,7 @@ export function callFunctionByReference(
   }
 
   if (bestScore <= 0) {
-    return createError("No satisfactory match for " + name + ".");
+    return noPatternMatch(name);
   }
 
   assignGenericTableToTypeVars(ctx, usedGenericTable);
@@ -191,7 +200,7 @@ export function dispatchFunction(fnName: string, args: FeverVar[]): FeverVar {
 
     // You have defined neither and we have no idea what you want.
     if (!booleanName && !assertionName) {
-      return createError("Unknown function " + fnName + " invoked.");
+      return unknownFunctionError(fnName);
     }
 
     named = booleanName ?? assertionName;

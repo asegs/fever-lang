@@ -1,5 +1,4 @@
 import { prompt } from "./interactives/repl.ts";
-import { ctx } from "./interpreter.ts";
 import { externalFile } from "./interactives/file.ts";
 
 export enum SpecialAction {

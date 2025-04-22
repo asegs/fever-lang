@@ -1,6 +1,6 @@
 import { createInterface } from "readline";
-import { ctx, dispatchFunction, interpret } from "../interpreter.ts";
-import { Meta, Primitives, Shorthands } from "../types.ts";
+import { ctx, dispatchFunction, interpret } from "../internals/Interpreter.ts";
+import { Meta, Primitives, Shorthands } from "../middleware/Types.ts";
 
 export const prompt = () => {
   const rl = createInterface({

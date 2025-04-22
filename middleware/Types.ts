@@ -1,10 +1,10 @@
-import { splitGeneral, splitOnCommas } from "./parser.ts";
+import { splitGeneral, splitOnCommas } from "../internals/Parser.ts";
 import {
   interpret,
   parseToExpr,
   unknownVariablesInExpression,
-} from "./interpreter.ts";
-import { Context } from "./vars.ts";
+} from "../internals/Interpreter.ts";
+import { Context } from "../internals/Context.ts";
 
 export enum TypeWeights {
   ANY = 0.5,
@@ -146,6 +146,10 @@ export function createCondition(
   return createVar([name, expr, specificity], Meta.CONDITION);
 }
 
+export function createMonadPassthrough(value: FeverVar) {
+  return createVar(value, createTypedTuple([Primitives.ANY], "PASSTHROUGH"));
+}
+
 const STRING = createTypedList(Primitives.CHARACTER, "STRING");
 const CONDITION = createTypedTuple(
   [STRING, Primitives.EXPRESSION, Primitives.NUMBER],
@@ -176,13 +180,6 @@ export const Shorthands = {
   "#": Primitives.NUMBER,
   fn: Meta.FUNCTION,
 };
-
-export function feverStringFromJsString(jsString: string): FeverVar {
-  return createVar(
-    jsString.split("").map((char) => createVar(char, Primitives.CHARACTER)),
-    Meta.STRING,
-  );
-}
 
 export function isAlias(t: FeverType): boolean {
   return "alias" in t;
@@ -225,6 +222,10 @@ export const typeSatisfaction = (
     }
 
     return [weightedAnyType(depth), genericTable];
+  }
+
+  if (child.baseName !== parent.baseName) {
+    return [0, genericTable];
   }
 
   if (isAlias(parent)) {

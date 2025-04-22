@@ -1,3 +1,10 @@
+/**
+ * This is a utility class that can perform deep traces on the interpreter,
+ * and the functions that it invokes, at a significant performance cost.
+ *
+ * Attach with `--prof`!
+ */
+
 let currentFunctionPath = [];
 let enteredStackTiming = [];
 let encounteredSet: Set<string> = new Set();
