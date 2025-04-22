@@ -199,6 +199,25 @@ export function namedMonadicFilter(
   }
 }
 
+export function namedMonadicReduce(item: FeverVar, fallback: FeverVar) {
+  const variablesFromItem = lift(item);
+  const varMappings = variablesFromItem.value[0];
+  const falseCaseValue = variablesFromItem.value[1];
+
+  const supplied = varMappings.value[0];
+
+  // If we are reducing a passthrough, return the fallback if it's a default passthrough.
+  // Not sure how transferable that is.
+
+  if (aliasMatches(supplied.type, "PASSTHROUGH")) {
+    if (equals(supplied, falseCaseValue)) {
+      return fallback;
+    }
+  }
+
+  return supplied;
+}
+
 export function lift(value: FeverVar): FeverVar {
   return dispatchFunction("lift", [value]);
 }

@@ -26,6 +26,7 @@ import {
   namedMap,
   namedMonadicFilter,
   namedMonadicMap,
+  namedMonadicReduce,
   namedReduce,
 } from "../lib/HigherOrder.js";
 import { isNumeric, newOfType, stringify } from "../lib/CommonUtils.js";
@@ -325,6 +326,9 @@ export const builtins = {
         }
         return namedReduce(list, acc, reduction, ctx, nameTable, flag.value);
       },
+    ),
+    newFunction(2, [Primitives.ANY, Primitives.ANY], ([item, fallback]) =>
+      namedMonadicReduce(item, fallback),
     ),
   ],
   "~>": [
