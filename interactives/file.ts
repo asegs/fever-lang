@@ -11,9 +11,9 @@ import {
 import { SpecialAction } from "../Fever.js";
 import { splitGeneral } from "../internals/Parser.js";
 
-//Handle comments better later on
 export const lineShouldBeEvaluated = (line: string) => {
-  return line.length > 0 && !line.startsWith("//");
+  const trimmedLine = line.trim();
+  return trimmedLine.length > 0 && !trimmedLine.startsWith("//");
 };
 
 function file(inputPath: string, specialAction: SpecialAction) {
@@ -25,8 +25,10 @@ function file(inputPath: string, specialAction: SpecialAction) {
     process.exit(1);
   }
   const file = fs.readFileSync(inputPath, "utf8");
+  const fileNonCommentLines = file.split("\n").filter(lineShouldBeEvaluated);
+  const commentStrippedFile = fileNonCommentLines.join("\n");
   clear();
-  splitGeneral(file, "\n").forEach((line, index) => {
+  splitGeneral(commentStrippedFile, "\n").forEach((line, index) => {
     try {
       if (lineShouldBeEvaluated(line)) {
         interpret(line);

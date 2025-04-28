@@ -1,5 +1,6 @@
 f = {x} => (
     y = x + 5
+    // This does something weird, on purpose!
     z = y + x + 10
     z * 2
 )
