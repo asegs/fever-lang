@@ -5,3 +5,13 @@ f = {x} => (
     z * 2
 )
 show(f(4))
+
+operation_one = {x} => (
+    show("hello, world!" + x)
+    true
+)
+
+operation_two = {x} => (
+    show("this is wrong!!!" + x)
+    false
+)

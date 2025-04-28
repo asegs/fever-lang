@@ -12,7 +12,7 @@ import {
   FeverVar,
   getFunctionNameAndArgs,
   getFunctionObjectAndArgs,
-  isAlias,
+  isAlias, Primitives,
   typeSatisfaction,
 } from "../middleware/Types.ts";
 import { LOCAL_ONLY_BUILTINS } from "../middleware/LocalOnlyBuiltins.ts";
@@ -249,6 +249,14 @@ export function evaluate(
   if (aliasMatches(realNode.type, "CALL")) {
     const [name, args] = getFunctionNameAndArgs(realNode);
     const isAssignment = name === "=";
+    // Early returns!  Fun!
+    if (name === '?') {
+      return earlyReturnTernary(args);
+    } else if (name === '&') {
+      return earlyReturnAnd(args);
+    } else if (name === '|') {
+      return earlyReturnOr(args);
+    }
     return dispatchFunction(
       name,
       args.map((arg, index) => evaluate(arg, isAssignment && index === 0)),
@@ -394,6 +402,33 @@ export function recreateExpressionWithVariables(
   }
 
   return expr;
+}
+
+export function earlyReturnTernary(args: FeverVar[]): FeverVar {
+  const result = evaluate(args[0]);
+  if (result.value) {
+    return evaluate(args[1]);
+  } else {
+    return evaluate(args[2]);
+  }
+}
+
+export function earlyReturnAnd(args: FeverVar[]): FeverVar {
+  const firstResult = evaluate(args[0]);
+  if (!firstResult.value) {
+    return createVar(false, Primitives.BOOLEAN);
+  }
+  const secondResult = evaluate(args[1]);
+  return createVar(firstResult.value && secondResult.value, Primitives.BOOLEAN);
+}
+
+export function earlyReturnOr(args: FeverVar[]): FeverVar {
+  const firstResult = evaluate(args[0]);
+  if (firstResult.value) {
+    return createVar(true, Primitives.BOOLEAN);
+  }
+  const secondResult = evaluate(args[1]);
+  return createVar(firstResult.value || secondResult.value, Primitives.BOOLEAN);
 }
 
 export function parseToExpr(text: string): FeverVar {
