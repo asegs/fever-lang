@@ -2,7 +2,7 @@ _I've got a fever of a hundred and three._
 
 ## Fever: A Lisp From Your Wildest Dreams
 
-#### Fever is a completely new type of programming language.  It is rather unfinished but it offers a glimpse into what a language unbound by convention can be.
+#### Fever is a completely new type of programming language.  It offers a glimpse into what a language unbound by convention can be.
 
 ### What is it?
 
