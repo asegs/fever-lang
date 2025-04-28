@@ -14,13 +14,13 @@ import {
   ParseNode,
   ParseNodeType,
   trimAndSplitOnCommas,
-} from "../internals/Parser.js";
+} from "../internals/Parser";
 import {
   ctx,
   evaluate,
   unknownVariablesInExpression,
 } from "../internals/Interpreter.ts";
-import { feverStringFromJsString } from "../lib/StringUtils.js";
+import { feverStringFromJsString } from "../lib/StringUtils";
 
 function everyCharNumeric(text: string): boolean {
   return (

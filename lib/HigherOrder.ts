@@ -5,16 +5,16 @@ import {
   FeverVar,
   isAlias,
   Primitives,
-} from "../middleware/Types.js";
-import { Context } from "../internals/Context.js";
+} from "../middleware/Types";
+import { Context } from "../internals/Context";
 import {
   callFunctionByReference,
   dispatchFunction,
   evaluate,
   recreateExpressionWithVariables,
-} from "../internals/Interpreter.js";
-import { inferListType } from "../middleware/Literals.js";
-import { equals, newOfType } from "./CommonUtils.js";
+} from "../internals/Interpreter";
+import { inferListType } from "../middleware/Literals";
+import { equals, newOfType } from "./CommonUtils";
 
 export function namedMap(
   list: FeverVar,

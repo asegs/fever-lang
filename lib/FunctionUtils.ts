@@ -2,7 +2,7 @@ import {
   dispatchFunction,
   evaluate,
   recreateExpressionWithVariables,
-} from "../internals/Interpreter.js";
+} from "../internals/Interpreter";
 import {
   aliasMatches,
   charListToJsString,
@@ -12,7 +12,7 @@ import {
   Meta,
   Primitives,
   TypeWeights,
-} from "../middleware/Types.js";
+} from "../middleware/Types";
 import { Context } from "../internals/Context.ts";
 import { newFunction } from "../middleware/Builtins.ts";
 

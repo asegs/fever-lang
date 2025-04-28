@@ -16,18 +16,18 @@ import {
   typeSatisfaction,
 } from "../middleware/Types.ts";
 import { LOCAL_ONLY_BUILTINS } from "../middleware/LocalOnlyBuiltins.ts";
-import { lineShouldBeEvaluated } from "../interactives/file.js";
+import { lineShouldBeEvaluated } from "../interactives/file";
 import {
   enterFunction,
   exitFunction,
 } from "../middleware/CallStackDebugger.ts";
-import { registerBuiltins } from "../lib/StandardLib.js";
-import { morphTypes } from "../lib/TypeUtils.js";
+import { registerBuiltins } from "../lib/StandardLib";
+import { morphTypes } from "../lib/TypeUtils";
 import {
   argumentCountError,
   noPatternMatch,
   unknownFunctionError,
-} from "../lib/Errors.js";
+} from "../lib/Errors";
 
 // 'show' is the only function that catches errors, the rest fall through.
 export const ERROR_CATCHING_FUNCTIONS = ["show"];

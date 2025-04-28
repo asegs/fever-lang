@@ -8,8 +8,8 @@ import {
   timingBreakdown,
   totalCalls,
 } from "../middleware/CallStackDebugger.ts";
-import { SpecialAction } from "../Fever.js";
-import { splitGeneral } from "../internals/Parser.js";
+import { SpecialAction } from "../Fever";
+import { splitGeneral } from "../internals/Parser";
 
 export const lineShouldBeEvaluated = (line: string) => {
   const trimmedLine = line.trim();

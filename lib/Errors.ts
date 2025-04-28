@@ -1,4 +1,4 @@
-import { createError, FeverVar } from "../middleware/Types.js";
+import { createError, FeverVar } from "../middleware/Types";
 
 export function argumentCountError(
   name: string,

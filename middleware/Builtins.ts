@@ -12,14 +12,14 @@ import {
   Primitives,
   recursiveToString,
   typeAssignableFrom,
-} from "./Types.js";
+} from "./Types";
 import {
   callFunctionByReference,
   ctx,
   dispatchFunction,
   evaluate,
-} from "../internals/Interpreter.js";
-import { inferListType } from "./Literals.js";
+} from "../internals/Interpreter";
+import { inferListType } from "./Literals";
 import { Context } from "../internals/Context.ts";
 import {
   namedFilter,
@@ -28,17 +28,17 @@ import {
   namedMonadicMap,
   namedMonadicReduce,
   namedReduce,
-} from "../lib/HigherOrder.js";
-import { isNumeric, newOfType, stringify } from "../lib/CommonUtils.js";
+} from "../lib/HigherOrder";
+import { isNumeric, newOfType, stringify } from "../lib/CommonUtils";
 import {
   addFunctionCase,
   registerNewFunction,
   serializeFunction,
   typesFromSignature,
-} from "../lib/FunctionUtils.js";
-import { feverStringFromJsString, typeToString } from "../lib/StringUtils.js";
-import { morphTypes } from "../lib/TypeUtils.js";
-import { failureToParseString, indexOutOfRange } from "../lib/Errors.js";
+} from "../lib/FunctionUtils";
+import { feverStringFromJsString, typeToString } from "../lib/StringUtils";
+import { morphTypes } from "../lib/TypeUtils";
+import { failureToParseString, indexOutOfRange } from "../lib/Errors";
 
 export function newFunction(
   arity: number,

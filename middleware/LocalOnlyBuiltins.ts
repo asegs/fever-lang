@@ -9,10 +9,10 @@ import {
   Meta,
   Primitives,
 } from "./Types.ts";
-import { ctx, interpret } from "../internals/Interpreter.js";
-import { inferListType } from "./Literals.js";
-import { feverStringFromJsString } from "../lib/StringUtils.js";
-import { morphTypes } from "../lib/TypeUtils.js";
+import { ctx, interpret } from "../internals/Interpreter";
+import { inferListType } from "./Literals";
+import { feverStringFromJsString } from "../lib/StringUtils";
+import { morphTypes } from "../lib/TypeUtils";
 
 export const LOCAL_ONLY_BUILTINS = {
   read: [

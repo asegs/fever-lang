@@ -1,5 +1,5 @@
 import { FeverType, FeverVar } from "../middleware/Types.ts";
-import { typeToString } from "../lib/StringUtils.js";
+import { typeToString } from "../lib/StringUtils";
 
 export class Context {
   scopes: { [key: string]: FeverVar }[];

@@ -1,6 +1,6 @@
 import { Context } from "../internals/Context.ts";
-import { registerNewFunction } from "./FunctionUtils.js";
-import { interpret } from "../internals/Interpreter.js";
+import { registerNewFunction } from "./FunctionUtils";
+import { interpret } from "../internals/Interpreter";
 import { builtins } from "../middleware/Builtins.ts";
 
 // Defining adds doesn't work, ie.   "+ = {s:set, item} => (new(set, entries(s) + item))",
