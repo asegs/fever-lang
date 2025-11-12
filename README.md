@@ -26,6 +26,9 @@ Fever tries to do exactly what you might imagine it would when you look at its c
 
 You can run it by cloning this repo and running `tsx Fever.ts` in the directory.  As arguments you may pass in additional Fever files to be run and loaded into scope in order, such as `tsx Fever.ts examples/std.fv`.  `ts-node` or any other Typescript runner works as well.
 
+You can also use this web REPL, if it suits you.
+https://asegs.github.io/fever-lang/interactives/playground.html
+
 #### Expressions
 ```js
 1 + 2 //3
