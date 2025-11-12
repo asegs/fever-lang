@@ -5,6 +5,7 @@ import {
   unknownVariablesInExpression,
 } from "../internals/Interpreter.ts";
 import { Context } from "../internals/Context.ts";
+import {charListToJsString} from "../lib/TypeUtils.js";
 
 export enum TypeWeights {
   ANY = 0.5,
@@ -296,14 +297,7 @@ export const typeSatisfaction = (
   //Tuple(String, Number, Character) <-> Tuple(String, Character, Character) => 0.8333 (assuming 1 step morphism from number to character)
 };
 
-//Could definitely tune performance!
-export const charListToJsString = (v) => {
-  let concatenated = "";
-  for (let i = 0; i < v.value.length; i++) {
-    concatenated += v.value[i].value;
-  }
-  return concatenated;
-};
+
 
 export function typeAssignableFrom(child, parent) {
   if (parent === Primitives.ANY) {

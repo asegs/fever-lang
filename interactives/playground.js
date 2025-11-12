@@ -1,15 +1,9 @@
-import {
-  callFunction,
-  goals,
-  instance,
-  interpret,
-} from "../internals/Interpreter.ts";
-import { charListToJsString, primitives } from "../middleware/Types.ts";
-
-const [variables, morphisms] = instance();
+import * as Interpreter from "../public/Interpreter.js";
+import * as TypeUtils from "../public/TypeUtils.js"
 
 const history = [];
 let historyIndex = 0;
+
 const interpretInBrowser = (text) => {
   const resultsDiv = document.getElementById("results");
 
@@ -23,14 +17,15 @@ const interpretInBrowser = (text) => {
     history.push(text);
     historyIndex++;
   }
+
   let output;
 
-  const result = interpret(text, variables, morphisms, goals.EVALUATE);
-  if (result.type === primitives.ERROR) {
+  const result = Interpreter.interpret(text);
+  if (result.type.basename === "ERROR") {
     output = result.value;
   } else {
-    output = charListToJsString(
-      callFunction("stringify", [result], variables, morphisms),
+    output = TypeUtils.charListToJsString(
+      Interpreter.dispatchFunction("stringify", [result]),
     );
   }
 

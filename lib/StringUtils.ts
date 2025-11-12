@@ -40,3 +40,8 @@ export function feverStringFromJsString(jsString: string): FeverVar {
     Meta.STRING,
   );
 }
+
+export function lineShouldBeEvaluated (line: string) {
+  const trimmedLine = line.trim();
+  return trimmedLine.length > 0 && !trimmedLine.startsWith("//");
+};

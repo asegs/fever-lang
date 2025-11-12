@@ -1,0 +1,9 @@
+Comment out local only context in Interpreter.ts
+
+
+npx esbuild internals/Interpreter.ts \
+  --bundle \
+  --outfile=public/Interpreter.js \
+  --format=esm
+
+npx esbuild lib/TypeUtils.ts   --bundle   --outfile=public/TypeUtils.js   --format=esm

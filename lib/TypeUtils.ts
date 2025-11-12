@@ -14,3 +14,12 @@ export function morphTypes(value, toType, ctx) {
   }
   return intermediateValue;
 }
+
+//Could definitely tune performance!
+export function charListToJsString (v) {
+  let concatenated = "";
+  for (let i = 0; i < v.value.length; i++) {
+    concatenated += v.value[i].value;
+  }
+  return concatenated;
+};

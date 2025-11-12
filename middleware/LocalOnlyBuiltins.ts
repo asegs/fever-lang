@@ -2,7 +2,6 @@ import { readFileSync } from "fs";
 import readlineSync from "readline-sync";
 import { newFunction } from "./Builtins.ts";
 import {
-  charListToJsString,
   createList,
   createTypedList,
   createVar,
@@ -12,7 +11,7 @@ import {
 import { ctx, interpret } from "../internals/Interpreter";
 import { inferListType } from "./Literals";
 import { feverStringFromJsString } from "../lib/StringUtils";
-import { morphTypes } from "../lib/TypeUtils";
+import {charListToJsString, morphTypes} from "../lib/TypeUtils";
 
 export const LOCAL_ONLY_BUILTINS = {
   read: [

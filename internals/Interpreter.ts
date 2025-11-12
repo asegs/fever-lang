@@ -16,7 +16,7 @@ import {
   typeSatisfaction,
 } from "../middleware/Types.ts";
 import { LOCAL_ONLY_BUILTINS } from "../middleware/LocalOnlyBuiltins.ts";
-import { lineShouldBeEvaluated } from "../interactives/file";
+import { lineShouldBeEvaluated } from "../lib/StringUtils";
 import {
   enterFunction,
   exitFunction,

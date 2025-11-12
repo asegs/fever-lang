@@ -5,7 +5,6 @@ import {
 } from "../internals/Interpreter";
 import {
   aliasMatches,
-  charListToJsString,
   createVar,
   FeverVar,
   isAlias,
@@ -15,6 +14,7 @@ import {
 } from "../middleware/Types";
 import { Context } from "../internals/Context.ts";
 import { newFunction } from "../middleware/Builtins.ts";
+import {charListToJsString} from "./TypeUtils.ts";
 
 export const nativeFunctionMessage = "<natively defined function>";
 

@@ -1,5 +1,4 @@
 import {
-  charListToJsString,
   createMonadPassthrough,
   createType,
   createTypedList,
@@ -37,7 +36,7 @@ import {
   typesFromSignature,
 } from "../lib/FunctionUtils";
 import { feverStringFromJsString, typeToString } from "../lib/StringUtils";
-import { morphTypes } from "../lib/TypeUtils";
+import {charListToJsString, morphTypes} from "../lib/TypeUtils";
 import { failureToParseString, indexOutOfRange } from "../lib/Errors";
 
 export function newFunction(

@@ -10,11 +10,7 @@ import {
 } from "../middleware/CallStackDebugger.ts";
 import { SpecialAction } from "../Fever";
 import { splitGeneral } from "../internals/Parser";
-
-export const lineShouldBeEvaluated = (line: string) => {
-  const trimmedLine = line.trim();
-  return trimmedLine.length > 0 && !trimmedLine.startsWith("//");
-};
+import {lineShouldBeEvaluated} from "../lib/StringUtils";
 
 function file(inputPath: string, specialAction: SpecialAction) {
   if (specialAction === SpecialAction.PROFILE) {
