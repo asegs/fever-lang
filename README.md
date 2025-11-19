@@ -1,5 +1,6 @@
 _I've got a fever of a hundred and three._
 
+[![.github/workflows/ci.yml](https://github.com/asegs/fever-lang/actions/workflows/ci.yml/badge.svg?branch=master&event=push)](https://github.com/asegs/fever-lang/actions/workflows/ci.yml)
 ## Fever: A Lisp From Your Wildest Dreams
 
 #### Fever is a completely new type of programming language.  It offers a glimpse into what a language unbound by convention can be.
