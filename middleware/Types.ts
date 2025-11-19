@@ -5,7 +5,7 @@ import {
   unknownVariablesInExpression,
 } from "../internals/Interpreter.ts";
 import { Context } from "../internals/Context.ts";
-import {charListToJsString} from "../lib/TypeUtils.js";
+import {charListToJsString} from "../lib/TypeUtils.ts";
 
 export enum TypeWeights {
   ANY = 0.5,
