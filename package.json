@@ -26,6 +26,8 @@
     "vitest": "^4.0.10"
   },
   "dependencies": {
+    "@kmamal/sdl": "^0.11.13",
+    "nan": "^2.26.2",
     "readline-sync": "^1.4.10"
   }
 }

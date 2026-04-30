@@ -1,4 +1,4 @@
-import { abstractNodeToRealNode } from "../middleware/Literals.ts";
+import { abstractNodeToRealNode, inferListType } from "../middleware/Literals.ts";
 import { parse } from "./Parser.ts";
 import { Context } from "./Context.ts";
 import {
@@ -287,10 +287,19 @@ export function evaluate(
     realNode.type.baseName !== "EXPRESSION"
   ) {
     // Make a copy, otherwise fully resolved values will overwrite expressions
-    return createVar(
-      realNode.value.map((item) => evaluate(item, skipVarLookup, true)),
-      realNode.type,
-    );
+    const newValues = realNode.value.map((item) => evaluate(item, skipVarLookup, true));
+    // A bit tricky - need to rebuild array/tuple with new types.
+    if (realNode.type.baseName === 'LIST') {
+        return createVar(
+            newValues,
+            inferListType(newValues, realNode.type.alias)
+        )
+    } else {
+        return createVar(
+            newValues,
+            {...realNode.type, ...{'types': newValues.map(v => v.type)}}
+        );
+    }
   }
   return realNode;
 }

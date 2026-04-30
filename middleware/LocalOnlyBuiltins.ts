@@ -1,9 +1,12 @@
 import { readFileSync } from "fs";
 import readlineSync from "readline-sync";
 import { newFunction } from "./Builtins.ts";
+import { PixelWindow } from '../lib/Rendering';
 import {
+  createError,
   createList,
   createTypedList,
+  createTypedTuple,
   createVar,
   Meta,
   Primitives,
@@ -13,7 +16,40 @@ import { inferListType } from "./Literals";
 import { feverStringFromJsString } from "../lib/StringUtils";
 import {charListToJsString, morphTypes} from "../lib/TypeUtils";
 
+let px = undefined;
+
 export const LOCAL_ONLY_BUILTINS = {
+  canvas: [
+      newFunction(2, [Primitives.NUMBER, Primitives.NUMBER], ([width, height]) => {
+        px = new PixelWindow(width.value, height.value);
+        px.present();
+        return createVar(true, Primitives.BOOLEAN);
+      }),
+      newFunction(3, [Primitives.NUMBER, Primitives.NUMBER, Meta.STRING], ([width, height, title]) => {
+        px = new PixelWindow(width.value, height.value, charListToJsString(title));
+        px.present();
+        return createVar(true, Primitives.BOOLEAN);
+      }),
+  ],
+  blit: [
+      newFunction(3, [Primitives.NUMBER, Primitives.NUMBER, createTypedTuple([Primitives.NUMBER, Primitives.NUMBER, Primitives.NUMBER])], ([x, y, rgb]) => {
+        if (!px) {
+          return createError("You must call `canvas(width, height)` at least once before drawing pixels.");
+        }
+        px.setPixel(x.value, y.value, [rgb.value[0].value, rgb.value[1].value, rgb.value[2].value]);
+        px.present();
+        return createVar(true, Primitives.BOOLEAN);
+      })
+    ],
+  present: [
+    newFunction(0, [], () => {
+       if (!px) {
+         return createError("You must call `canvas(width, height)` at least once before drawing pixels.");
+       }
+       px.present();
+       return createVar(true, Primitives.BOOLEAN);
+    })
+  ],
   read: [
     newFunction(1, [Meta.STRING], ([path]) => {
       // We should have global state based on a passed in file to get its directory.
