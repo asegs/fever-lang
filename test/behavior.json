@@ -9,7 +9,7 @@
         "meta": false
       }
     },
-    "time": 493310
+    "time": 434663
   },
   "3 * 3": {
     "statement": "3 * 3",
@@ -21,7 +21,7 @@
         "meta": false
       }
     },
-    "time": 66114
+    "time": 72269
   },
   "3 + 3 * 10": {
     "statement": "3 + 3 * 10",
@@ -33,7 +33,7 @@
         "meta": false
       }
     },
-    "time": 71001
+    "time": 59663
   },
   "a = 3": {
     "statement": "a = 3",
@@ -45,7 +45,7 @@
         "meta": false
       }
     },
-    "time": 54051
+    "time": 48192
   },
   "a * 8": {
     "statement": "a * 8",
@@ -57,7 +57,7 @@
         "meta": false
       }
     },
-    "time": 33058
+    "time": 30921
   },
   "[1,2,3]": {
     "statement": "[1,2,3]",
@@ -100,7 +100,7 @@
         "meta": true
       }
     },
-    "time": 36872
+    "time": 39977
   },
   "1..5": {
     "statement": "1..5",
@@ -159,7 +159,7 @@
         "meta": true
       }
     },
-    "time": 129314
+    "time": 98781
   },
   "5..3": {
     "statement": "5..3",
@@ -202,7 +202,7 @@
         "meta": true
       }
     },
-    "time": 1242130
+    "time": 32058
   },
   "(1,2,3)": {
     "statement": "(1,2,3)",
@@ -255,7 +255,7 @@
         "meta": true
       }
     },
-    "time": 61660
+    "time": 47802
   },
   "(1,2,(3+5))": {
     "statement": "(1,2,(3+5))",
@@ -308,7 +308,7 @@
         "meta": true
       }
     },
-    "time": 203716
+    "time": 115968
   },
   "(\"hello\", \"world\", 10, [1,2,3], (4,5,6))": {
     "statement": "(\"hello\", \"world\", 10, [1,2,3], (4,5,6))",
@@ -591,7 +591,7 @@
         "meta": true
       }
     },
-    "time": 441962
+    "time": 233644
   },
   "(1 + 5)": {
     "statement": "(1 + 5)",
@@ -603,7 +603,7 @@
         "meta": false
       }
     },
-    "time": 125161
+    "time": 57855
   },
   "(a + 5)": {
     "statement": "(a + 5)",
@@ -615,7 +615,7 @@
         "meta": false
       }
     },
-    "time": 94086
+    "time": 51958
   },
   "(n + 5)": {
     "statement": "(n + 5)",
@@ -720,7 +720,7 @@
         "meta": false
       }
     },
-    "time": 47612
+    "time": 22436
   },
   "[1,2,3] -> (@ + 1)": {
     "statement": "[1,2,3] -> (@ + 1)",
@@ -763,7 +763,7 @@
         "meta": true
       }
     },
-    "time": 655071
+    "time": 295977
   },
   "[1,2,3] -> (@ + #)": {
     "statement": "[1,2,3] -> (@ + #)",
@@ -806,7 +806,7 @@
         "meta": true
       }
     },
-    "time": 344224
+    "time": 167921
   },
   "[1,2,3] -> (len(^))": {
     "statement": "[1,2,3] -> (len(^))",
@@ -849,7 +849,7 @@
         "meta": true
       }
     },
-    "time": 357935
+    "time": 118782
   },
   "[1,2,3] ~> (# % 2 == 0)": {
     "statement": "[1,2,3] ~> (# % 2 == 0)",
@@ -884,7 +884,7 @@
         "meta": true
       }
     },
-    "time": 408028
+    "time": 272644
   },
   "[1,2,3] \\> (0, ($ + @))": {
     "statement": "[1,2,3] \\> (0, ($ + @))",
@@ -896,7 +896,7 @@
         "meta": false
       }
     },
-    "time": 181001
+    "time": 255512
   },
   "add = {x, y} => (x + y)": {
     "statement": "add = {x, y} => (x + y)",
@@ -1469,7 +1469,7 @@
         }
       ]
     },
-    "time": 77746
+    "time": 80918
   },
   "add(1,2)": {
     "statement": "add(1,2)",
@@ -1481,7 +1481,7 @@
         "meta": false
       }
     },
-    "time": 94230
+    "time": 128268
   },
   "add_numbers = {x:#, y:#} => (x + y)": {
     "statement": "add_numbers = {x:#, y:#} => (x + y)",
@@ -2054,7 +2054,7 @@
         }
       ]
     },
-    "time": 76941
+    "time": 87589
   },
   "add_numbers(1,2)": {
     "statement": "add_numbers(1,2)",
@@ -2066,7 +2066,7 @@
         "meta": false
       }
     },
-    "time": 38678
+    "time": 46380
   },
   "add_numbers(\"hello\", \"world\")": {
     "statement": "add_numbers(\"hello\", \"world\")",
@@ -2078,7 +2078,7 @@
         "meta": false
       }
     },
-    "time": 60188
+    "time": 72887
   },
   "is_twenty? = {20} => true": {
     "statement": "is_twenty? = {20} => true",
@@ -2791,7 +2791,7 @@
         }
       ]
     },
-    "time": 347982
+    "time": 64225
   },
   "is_twenty? = {n} => false": {
     "statement": "is_twenty? = {n} => false",
@@ -3504,7 +3504,7 @@
         }
       ]
     },
-    "time": 237822
+    "time": 61801
   },
   "is_twenty?(20)": {
     "statement": "is_twenty?(20)",
@@ -3516,7 +3516,7 @@
         "meta": false
       }
     },
-    "time": 114353
+    "time": 35352
   },
   "is_twenty?(19)": {
     "statement": "is_twenty?(19)",
@@ -3528,7 +3528,7 @@
         "meta": false
       }
     },
-    "time": 40971
+    "time": 33666
   },
   "is_twenty?(\"hello\")": {
     "statement": "is_twenty?(\"hello\")",
@@ -3540,7 +3540,7 @@
         "meta": false
       }
     },
-    "time": 30310
+    "time": 28164
   },
   "is_equal = {_,_} => false": {
     "statement": "is_equal = {_,_} => false",
@@ -4523,7 +4523,7 @@
         }
       ]
     },
-    "time": 67958
+    "time": 58842
   },
   "is_equal = {x,x} => true": {
     "statement": "is_equal = {x,x} => true",
@@ -5506,7 +5506,7 @@
         }
       ]
     },
-    "time": 84602
+    "time": 81942
   },
   "is_equal(1,2)": {
     "statement": "is_equal(1,2)",
@@ -5518,7 +5518,7 @@
         "meta": false
       }
     },
-    "time": 42046
+    "time": 43590
   },
   "is_equal(1,1)": {
     "statement": "is_equal(1,1)",
@@ -5530,7 +5530,7 @@
         "meta": false
       }
     },
-    "time": 45273
+    "time": 30233
   },
   "is_double = {_,_} => false": {
     "statement": "is_double = {_,_} => false",
@@ -6606,7 +6606,7 @@
         }
       ]
     },
-    "time": 52377
+    "time": 55315
   },
   "is_double = {n, (n * 2)} => true": {
     "statement": "is_double = {n, (n * 2)} => true",
@@ -7682,7 +7682,7 @@
         }
       ]
     },
-    "time": 102366
+    "time": 93992
   },
   "is_double(1,1)": {
     "statement": "is_double(1,1)",
@@ -7694,7 +7694,7 @@
         "meta": false
       }
     },
-    "time": 47154
+    "time": 50755
   },
   "is_double(1,2)": {
     "statement": "is_double(1,2)",
@@ -7706,7 +7706,7 @@
         "meta": false
       }
     },
-    "time": 36772
+    "time": 57394
   },
   "coord = {x:#, y:#}": {
     "statement": "coord = {x:#, y:#}",
@@ -7734,7 +7734,7 @@
         "meta": false
       }
     },
-    "time": 119412
+    "time": 100588
   },
   "location = new(coord, 1,2)": {
     "statement": "location = new(coord, 1,2)",
@@ -7775,7 +7775,7 @@
         "alias": "coord"
       }
     },
-    "time": 119392
+    "time": 121263
   },
   "is_coord = {_:coord} => true": {
     "statement": "is_coord = {_:coord} => true",
@@ -8426,7 +8426,7 @@
         }
       ]
     },
-    "time": 65090
+    "time": 71380
   },
   "is_coord = {_} => false": {
     "statement": "is_coord = {_} => false",
@@ -9077,7 +9077,7 @@
         }
       ]
     },
-    "time": 44743
+    "time": 41554
   },
   "is_coord(location)": {
     "statement": "is_coord(location)",
@@ -9089,7 +9089,7 @@
         "meta": false
       }
     },
-    "time": 25441
+    "time": 24655
   },
   "is_coord((1,2))": {
     "statement": "is_coord((1,2))",
@@ -9101,7 +9101,7 @@
         "meta": false
       }
     },
-    "time": 23597
+    "time": 25561
   },
   "set = {(unique(l)):[]}": {
     "statement": "set = {(unique(l)):[]}",
@@ -9125,7 +9125,7 @@
         "meta": false
       }
     },
-    "time": 90372
+    "time": 105905
   },
   "item = new(set,[1,2,2])": {
     "statement": "item = new(set,[1,2,2])",
@@ -9161,7 +9161,7 @@
         "alias": "set"
       }
     },
-    "time": 530099
+    "time": 1483013
   },
   "types_match = {m:T, n:T} => true": {
     "statement": "types_match = {m:T, n:T} => true",
@@ -10062,7 +10062,7 @@
         }
       ]
     },
-    "time": 98557
+    "time": 98916
   },
   "types_match = {_,_} => false": {
     "statement": "types_match = {_,_} => false",
@@ -10963,7 +10963,7 @@
         }
       ]
     },
-    "time": 53073
+    "time": 51480
   },
   "types_match(1,2)": {
     "statement": "types_match(1,2)",
@@ -10975,7 +10975,7 @@
         "meta": false
       }
     },
-    "time": 39723
+    "time": 36172
   },
   "types_match(1,\"hello\")": {
     "statement": "types_match(1,\"hello\")",
@@ -10987,7 +10987,7 @@
         "meta": false
       }
     },
-    "time": 35880
+    "time": 31188
   },
   "get_type = {_:T} => (T)": {
     "statement": "get_type = {_:T} => (T)",
@@ -11341,7 +11341,7 @@
         }
       ]
     },
-    "time": 77598
+    "time": 50651
   },
   "f = {m:(T,T)} => (m)": {
     "statement": "f = {m:(T,T)} => (m)",
@@ -11618,2781 +11618,6 @@
             "meta": true,
             "alias": "CASE"
           }
-        },
-        {
-          "value": [
-            {
-              "value": [
-                {
-                  "value": [
-                    {
-                      "value": [
-                        {
-                          "value": "x",
-                          "type": {
-                            "baseName": "LIST",
-                            "types": [
-                              {
-                                "baseName": "CHARACTER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "STRING"
-                          }
-                        },
-                        {
-                          "value": {
-                            "value": true,
-                            "type": {
-                              "baseName": "BOOLEAN",
-                              "types": [],
-                              "meta": false
-                            }
-                          },
-                          "type": {
-                            "baseName": "EXPRESSION",
-                            "types": [],
-                            "meta": false
-                          }
-                        },
-                        {
-                          "value": 0.5,
-                          "type": {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        }
-                      ],
-                      "type": {
-                        "baseName": "TUPLE",
-                        "types": [
-                          {
-                            "baseName": "LIST",
-                            "types": [
-                              {
-                                "baseName": "CHARACTER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "STRING"
-                          },
-                          {
-                            "baseName": "EXPRESSION",
-                            "types": [],
-                            "meta": false
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "meta": true,
-                        "alias": "CONDITION"
-                      }
-                    },
-                    {
-                      "value": {
-                        "baseName": "NUMBER",
-                        "types": [],
-                        "meta": false
-                      },
-                      "type": {
-                        "baseName": "TYPE",
-                        "types": [],
-                        "meta": false
-                      }
-                    }
-                  ],
-                  "type": {
-                    "baseName": "TUPLE",
-                    "types": [
-                      {
-                        "baseName": "TUPLE",
-                        "types": [
-                          {
-                            "baseName": "LIST",
-                            "types": [
-                              {
-                                "baseName": "CHARACTER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "STRING"
-                          },
-                          {
-                            "baseName": "EXPRESSION",
-                            "types": [],
-                            "meta": false
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "meta": true,
-                        "alias": "CONDITION"
-                      },
-                      {
-                        "baseName": "TYPE",
-                        "types": [],
-                        "meta": false
-                      }
-                    ],
-                    "meta": true,
-                    "alias": "PATTERN"
-                  }
-                }
-              ],
-              "type": {
-                "baseName": "LIST",
-                "types": [
-                  {
-                    "baseName": "TUPLE",
-                    "types": [
-                      {
-                        "baseName": "TUPLE",
-                        "types": [
-                          {
-                            "baseName": "LIST",
-                            "types": [
-                              {
-                                "baseName": "CHARACTER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "STRING"
-                          },
-                          {
-                            "baseName": "EXPRESSION",
-                            "types": [],
-                            "meta": false
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "meta": true,
-                        "alias": "CONDITION"
-                      },
-                      {
-                        "baseName": "TYPE",
-                        "types": [],
-                        "meta": false
-                      }
-                    ],
-                    "meta": true,
-                    "alias": "PATTERN"
-                  }
-                ],
-                "meta": true,
-                "alias": "SIGNATURE"
-              }
-            },
-            {
-              "value": {
-                "value": [
-                  {
-                    "value": [
-                      {
-                        "value": [
-                          {
-                            "value": [
-                              {
-                                "value": [
-                                  {
-                                    "value": [
-                                      {
-                                        "value": "ofType",
-                                        "type": {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        }
-                                      },
-                                      {
-                                        "value": "<natively defined function>",
-                                        "type": {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      },
-                                      {
-                                        "value": 0.5,
-                                        "type": {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      }
-                                    ],
-                                    "type": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    }
-                                  },
-                                  {
-                                    "value": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "coord"
-                                    },
-                                    "type": {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  }
-                                ],
-                                "type": {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              }
-                            ],
-                            "type": {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            }
-                          },
-                          {
-                            "value": "<natively defined function>",
-                            "type": {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          }
-                        ],
-                        "type": {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      },
-                      {
-                        "value": [
-                          {
-                            "value": [
-                              {
-                                "value": [
-                                  {
-                                    "value": [
-                                      {
-                                        "value": "ofType",
-                                        "type": {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        }
-                                      },
-                                      {
-                                        "value": "<natively defined function>",
-                                        "type": {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      },
-                                      {
-                                        "value": 0.5,
-                                        "type": {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      }
-                                    ],
-                                    "type": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    }
-                                  },
-                                  {
-                                    "value": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "coord"
-                                    },
-                                    "type": {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  }
-                                ],
-                                "type": {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              },
-                              {
-                                "value": [
-                                  {
-                                    "value": [
-                                      {
-                                        "value": "newValue",
-                                        "type": {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        }
-                                      },
-                                      {
-                                        "value": "<natively defined function>",
-                                        "type": {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      },
-                                      {
-                                        "value": 0.5,
-                                        "type": {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      }
-                                    ],
-                                    "type": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    }
-                                  },
-                                  {
-                                    "value": {
-                                      "baseName": "NUMBER",
-                                      "types": [],
-                                      "meta": false
-                                    },
-                                    "type": {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  }
-                                ],
-                                "type": {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              }
-                            ],
-                            "type": {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            }
-                          },
-                          {
-                            "value": "<natively defined function>",
-                            "type": {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          }
-                        ],
-                        "type": {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      }
-                    ],
-                    "type": {
-                      "baseName": "LIST",
-                      "types": [
-                        {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      ],
-                      "meta": true,
-                      "alias": "FUNCTION"
-                    },
-                    "invocations": [
-                      {
-                        "arity": 1,
-                        "types": [
-                          {
-                            "baseName": "TUPLE",
-                            "types": [
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              },
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "coord"
-                          }
-                        ],
-                        "conditions": [
-                          null
-                        ],
-                        "specificities": [
-                          0.5
-                        ]
-                      },
-                      {
-                        "arity": 2,
-                        "types": [
-                          {
-                            "baseName": "TUPLE",
-                            "types": [
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              },
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "coord"
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "conditions": [
-                          null,
-                          null
-                        ],
-                        "specificities": [
-                          0.5,
-                          0.5
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "value": [
-                      {
-                        "value": [
-                          {
-                            "value": [
-                              {
-                                "value": [
-                                  {
-                                    "value": [
-                                      {
-                                        "value": "ofType",
-                                        "type": {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        }
-                                      },
-                                      {
-                                        "value": "<natively defined function>",
-                                        "type": {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      },
-                                      {
-                                        "value": 0.5,
-                                        "type": {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      }
-                                    ],
-                                    "type": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    }
-                                  },
-                                  {
-                                    "value": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "coord"
-                                    },
-                                    "type": {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  }
-                                ],
-                                "type": {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              }
-                            ],
-                            "type": {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            }
-                          },
-                          {
-                            "value": "<natively defined function>",
-                            "type": {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          }
-                        ],
-                        "type": {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      },
-                      {
-                        "value": [
-                          {
-                            "value": [
-                              {
-                                "value": [
-                                  {
-                                    "value": [
-                                      {
-                                        "value": "ofType",
-                                        "type": {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        }
-                                      },
-                                      {
-                                        "value": "<natively defined function>",
-                                        "type": {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      },
-                                      {
-                                        "value": 0.5,
-                                        "type": {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      }
-                                    ],
-                                    "type": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    }
-                                  },
-                                  {
-                                    "value": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "coord"
-                                    },
-                                    "type": {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  }
-                                ],
-                                "type": {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              },
-                              {
-                                "value": [
-                                  {
-                                    "value": [
-                                      {
-                                        "value": "newValue",
-                                        "type": {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        }
-                                      },
-                                      {
-                                        "value": "<natively defined function>",
-                                        "type": {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      },
-                                      {
-                                        "value": 0.5,
-                                        "type": {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      }
-                                    ],
-                                    "type": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    }
-                                  },
-                                  {
-                                    "value": {
-                                      "baseName": "NUMBER",
-                                      "types": [],
-                                      "meta": false
-                                    },
-                                    "type": {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  }
-                                ],
-                                "type": {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              }
-                            ],
-                            "type": {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            }
-                          },
-                          {
-                            "value": "<natively defined function>",
-                            "type": {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          }
-                        ],
-                        "type": {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      }
-                    ],
-                    "type": {
-                      "baseName": "LIST",
-                      "types": [
-                        {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      ],
-                      "meta": true,
-                      "alias": "FUNCTION"
-                    },
-                    "invocations": [
-                      {
-                        "arity": 1,
-                        "types": [
-                          {
-                            "baseName": "TUPLE",
-                            "types": [
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              },
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "coord"
-                          }
-                        ],
-                        "conditions": [
-                          null
-                        ],
-                        "specificities": [
-                          0.5
-                        ]
-                      },
-                      {
-                        "arity": 2,
-                        "types": [
-                          {
-                            "baseName": "TUPLE",
-                            "types": [
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              },
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "coord"
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "conditions": [
-                          null,
-                          null
-                        ],
-                        "specificities": [
-                          0.5,
-                          0.5
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "value": [
-                      {
-                        "value": [
-                          {
-                            "value": [
-                              {
-                                "value": [
-                                  {
-                                    "value": [
-                                      {
-                                        "value": "ofType",
-                                        "type": {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        }
-                                      },
-                                      {
-                                        "value": "<natively defined function>",
-                                        "type": {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      },
-                                      {
-                                        "value": 0.5,
-                                        "type": {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      }
-                                    ],
-                                    "type": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    }
-                                  },
-                                  {
-                                    "value": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "coord"
-                                    },
-                                    "type": {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  }
-                                ],
-                                "type": {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              }
-                            ],
-                            "type": {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            }
-                          },
-                          {
-                            "value": "<natively defined function>",
-                            "type": {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          }
-                        ],
-                        "type": {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      },
-                      {
-                        "value": [
-                          {
-                            "value": [
-                              {
-                                "value": [
-                                  {
-                                    "value": [
-                                      {
-                                        "value": "ofType",
-                                        "type": {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        }
-                                      },
-                                      {
-                                        "value": "<natively defined function>",
-                                        "type": {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      },
-                                      {
-                                        "value": 0.5,
-                                        "type": {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      }
-                                    ],
-                                    "type": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    }
-                                  },
-                                  {
-                                    "value": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "coord"
-                                    },
-                                    "type": {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  }
-                                ],
-                                "type": {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              },
-                              {
-                                "value": [
-                                  {
-                                    "value": [
-                                      {
-                                        "value": "newValue",
-                                        "type": {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        }
-                                      },
-                                      {
-                                        "value": "<natively defined function>",
-                                        "type": {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      },
-                                      {
-                                        "value": 0.5,
-                                        "type": {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      }
-                                    ],
-                                    "type": {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    }
-                                  },
-                                  {
-                                    "value": {
-                                      "baseName": "NUMBER",
-                                      "types": [],
-                                      "meta": false
-                                    },
-                                    "type": {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  }
-                                ],
-                                "type": {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              }
-                            ],
-                            "type": {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            }
-                          },
-                          {
-                            "value": "<natively defined function>",
-                            "type": {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          }
-                        ],
-                        "type": {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      }
-                    ],
-                    "type": {
-                      "baseName": "LIST",
-                      "types": [
-                        {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      ],
-                      "meta": true,
-                      "alias": "FUNCTION"
-                    },
-                    "invocations": [
-                      {
-                        "arity": 1,
-                        "types": [
-                          {
-                            "baseName": "TUPLE",
-                            "types": [
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              },
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "coord"
-                          }
-                        ],
-                        "conditions": [
-                          null
-                        ],
-                        "specificities": [
-                          0.5
-                        ]
-                      },
-                      {
-                        "arity": 2,
-                        "types": [
-                          {
-                            "baseName": "TUPLE",
-                            "types": [
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              },
-                              {
-                                "baseName": "NUMBER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "coord"
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "conditions": [
-                          null,
-                          null
-                        ],
-                        "specificities": [
-                          0.5,
-                          0.5
-                        ]
-                      }
-                    ]
-                  }
-                ],
-                "type": {
-                  "baseName": "TUPLE",
-                  "types": [
-                    {
-                      "baseName": "LIST",
-                      "types": [
-                        {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      ],
-                      "meta": true,
-                      "alias": "FUNCTION"
-                    },
-                    {
-                      "baseName": "LIST",
-                      "types": [
-                        {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      ],
-                      "meta": true,
-                      "alias": "FUNCTION"
-                    },
-                    {
-                      "baseName": "LIST",
-                      "types": [
-                        {
-                          "baseName": "TUPLE",
-                          "types": [
-                            {
-                              "baseName": "LIST",
-                              "types": [
-                                {
-                                  "baseName": "TUPLE",
-                                  "types": [
-                                    {
-                                      "baseName": "TUPLE",
-                                      "types": [
-                                        {
-                                          "baseName": "LIST",
-                                          "types": [
-                                            {
-                                              "baseName": "CHARACTER",
-                                              "types": [],
-                                              "meta": false
-                                            }
-                                          ],
-                                          "meta": true,
-                                          "alias": "STRING"
-                                        },
-                                        {
-                                          "baseName": "EXPRESSION",
-                                          "types": [],
-                                          "meta": false
-                                        },
-                                        {
-                                          "baseName": "NUMBER",
-                                          "types": [],
-                                          "meta": false
-                                        }
-                                      ],
-                                      "meta": true,
-                                      "alias": "CONDITION"
-                                    },
-                                    {
-                                      "baseName": "TYPE",
-                                      "types": [],
-                                      "meta": false
-                                    }
-                                  ],
-                                  "meta": true,
-                                  "alias": "PATTERN"
-                                }
-                              ],
-                              "meta": true,
-                              "alias": "SIGNATURE"
-                            },
-                            {
-                              "baseName": "EXPRESSION",
-                              "types": [],
-                              "meta": false
-                            }
-                          ],
-                          "meta": true,
-                          "alias": "CASE"
-                        }
-                      ],
-                      "meta": true,
-                      "alias": "FUNCTION"
-                    }
-                  ],
-                  "meta": true
-                }
-              },
-              "type": {
-                "baseName": "EXPRESSION",
-                "types": [],
-                "meta": false
-              }
-            }
-          ],
-          "type": {
-            "baseName": "TUPLE",
-            "types": [
-              {
-                "baseName": "LIST",
-                "types": [
-                  {
-                    "baseName": "TUPLE",
-                    "types": [
-                      {
-                        "baseName": "TUPLE",
-                        "types": [
-                          {
-                            "baseName": "LIST",
-                            "types": [
-                              {
-                                "baseName": "CHARACTER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "STRING"
-                          },
-                          {
-                            "baseName": "EXPRESSION",
-                            "types": [],
-                            "meta": false
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "meta": true,
-                        "alias": "CONDITION"
-                      },
-                      {
-                        "baseName": "TYPE",
-                        "types": [],
-                        "meta": false
-                      }
-                    ],
-                    "meta": true,
-                    "alias": "PATTERN"
-                  }
-                ],
-                "meta": true,
-                "alias": "SIGNATURE"
-              },
-              {
-                "baseName": "EXPRESSION",
-                "types": [],
-                "meta": false
-              }
-            ],
-            "meta": true,
-            "alias": "CASE"
-          }
         }
       ],
       "type": {
@@ -14491,26 +11716,10 @@
           "conditions": [
             null
           ]
-        },
-        {
-          "arity": 1,
-          "types": [
-            {
-              "baseName": "NUMBER",
-              "types": [],
-              "meta": false
-            }
-          ],
-          "specificities": [
-            0.5
-          ],
-          "conditions": [
-            null
-          ]
         }
       ]
     },
-    "time": 100383
+    "time": 92012
   },
   "g = {m:(T,S,T), n:S} => (n)": {
     "statement": "g = {m:(T,S,T), n:S} => (n)",
@@ -15037,7 +12246,7 @@
         }
       ]
     },
-    "time": 99856
+    "time": 78871
   },
   "h = {m:T, ms:[T]} => (ms)": {
     "statement": "h = {m:T, ms:[T]} => (ms)",
@@ -15540,7 +12749,7 @@
         }
       ]
     },
-    "time": 81832
+    "time": 64994
   },
   "bool_to_int = {true} => 1": {
     "statement": "bool_to_int = {true} => 1",
@@ -16339,7 +13548,7 @@
         }
       ]
     },
-    "time": 65276
+    "time": 49291
   },
   "bool_to_int = {false} => 0": {
     "statement": "bool_to_int = {false} => 0",
@@ -17138,7 +14347,7 @@
         }
       ]
     },
-    "time": 47838
+    "time": 43165
   },
   "morph(bool_to_int, boolean, number)": {
     "statement": "morph(bool_to_int, boolean, number)",
@@ -17150,7 +14359,7 @@
         "meta": false
       }
     },
-    "time": 113985
+    "time": 104045
   },
   "add_one = {n:#} => (n + 1)": {
     "statement": "add_one = {n:#} => (n + 1)",
@@ -17588,7 +14797,7 @@
         }
       ]
     },
-    "time": 69974
+    "time": 72066
   },
   "add_one(true)": {
     "statement": "add_one(true)",
@@ -17600,7 +14809,7 @@
         "meta": false
       }
     },
-    "time": 108792
+    "time": 107203
   },
   "add_one(false)": {
     "statement": "add_one(false)",
@@ -17612,7 +14821,7 @@
         "meta": false
       }
     },
-    "time": 58826
+    "time": 55856
   },
   "contains?([1,2,3],3)": {
     "statement": "contains?([1,2,3],3)",
@@ -17624,7 +14833,7 @@
         "meta": false
       }
     },
-    "time": 102189
+    "time": 91524
   },
   "[1,2,3].contains?(3)": {
     "statement": "[1,2,3].contains?(3)",
@@ -17636,7 +14845,7 @@
         "meta": false
       }
     },
-    "time": 148098
+    "time": 117121
   },
   "square = {m:#} => (m * m)": {
     "statement": "square = {m:#} => (m * m)",
@@ -18074,7 +15283,7 @@
         }
       ]
     },
-    "time": 99160
+    "time": 56588
   },
   "3.square()": {
     "statement": "3.square()",
@@ -18086,7 +15295,7 @@
         "meta": false
       }
     },
-    "time": 67279
+    "time": 55894
   },
   "7 + 1": {
     "statement": "7 + 1",
@@ -18098,284 +15307,12 @@
         "meta": false
       }
     },
-    "time": 32687
+    "time": 25306
   },
-  "f = {x:#} => ((x,x,x))": {
-    "statement": "f = {x:#} => ((x,x,x))",
+  "m = {x:#} => ((x,x,x))": {
+    "statement": "m = {x:#} => ((x,x,x))",
     "result": {
       "value": [
-        {
-          "value": [
-            {
-              "value": [
-                {
-                  "value": [
-                    {
-                      "value": [
-                        {
-                          "value": "m",
-                          "type": {
-                            "baseName": "LIST",
-                            "types": [
-                              {
-                                "baseName": "CHARACTER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "STRING"
-                          }
-                        },
-                        {
-                          "value": {
-                            "value": true,
-                            "type": {
-                              "baseName": "BOOLEAN",
-                              "types": [],
-                              "meta": false
-                            }
-                          },
-                          "type": {
-                            "baseName": "EXPRESSION",
-                            "types": [],
-                            "meta": false
-                          }
-                        },
-                        {
-                          "value": 0.5,
-                          "type": {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        }
-                      ],
-                      "type": {
-                        "baseName": "TUPLE",
-                        "types": [
-                          {
-                            "baseName": "LIST",
-                            "types": [
-                              {
-                                "baseName": "CHARACTER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "STRING"
-                          },
-                          {
-                            "baseName": "EXPRESSION",
-                            "types": [],
-                            "meta": false
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "meta": true,
-                        "alias": "CONDITION"
-                      }
-                    },
-                    {
-                      "value": {
-                        "baseName": "TUPLE",
-                        "types": [
-                          {
-                            "baseName": "ANY",
-                            "types": [],
-                            "meta": false,
-                            "generic": "T"
-                          },
-                          {
-                            "baseName": "ANY",
-                            "types": [],
-                            "meta": false,
-                            "generic": "T"
-                          }
-                        ],
-                        "meta": true
-                      },
-                      "type": {
-                        "baseName": "TYPE",
-                        "types": [],
-                        "meta": false
-                      }
-                    }
-                  ],
-                  "type": {
-                    "baseName": "TUPLE",
-                    "types": [
-                      {
-                        "baseName": "TUPLE",
-                        "types": [
-                          {
-                            "baseName": "LIST",
-                            "types": [
-                              {
-                                "baseName": "CHARACTER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "STRING"
-                          },
-                          {
-                            "baseName": "EXPRESSION",
-                            "types": [],
-                            "meta": false
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "meta": true,
-                        "alias": "CONDITION"
-                      },
-                      {
-                        "baseName": "TYPE",
-                        "types": [],
-                        "meta": false
-                      }
-                    ],
-                    "meta": true,
-                    "alias": "PATTERN"
-                  }
-                }
-              ],
-              "type": {
-                "baseName": "LIST",
-                "types": [
-                  {
-                    "baseName": "TUPLE",
-                    "types": [
-                      {
-                        "baseName": "TUPLE",
-                        "types": [
-                          {
-                            "baseName": "LIST",
-                            "types": [
-                              {
-                                "baseName": "CHARACTER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "STRING"
-                          },
-                          {
-                            "baseName": "EXPRESSION",
-                            "types": [],
-                            "meta": false
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "meta": true,
-                        "alias": "CONDITION"
-                      },
-                      {
-                        "baseName": "TYPE",
-                        "types": [],
-                        "meta": false
-                      }
-                    ],
-                    "meta": true,
-                    "alias": "PATTERN"
-                  }
-                ],
-                "meta": true,
-                "alias": "SIGNATURE"
-              }
-            },
-            {
-              "value": {
-                "value": "m",
-                "type": {
-                  "baseName": "VARIABLE",
-                  "types": [],
-                  "meta": false
-                }
-              },
-              "type": {
-                "baseName": "EXPRESSION",
-                "types": [],
-                "meta": false
-              }
-            }
-          ],
-          "type": {
-            "baseName": "TUPLE",
-            "types": [
-              {
-                "baseName": "LIST",
-                "types": [
-                  {
-                    "baseName": "TUPLE",
-                    "types": [
-                      {
-                        "baseName": "TUPLE",
-                        "types": [
-                          {
-                            "baseName": "LIST",
-                            "types": [
-                              {
-                                "baseName": "CHARACTER",
-                                "types": [],
-                                "meta": false
-                              }
-                            ],
-                            "meta": true,
-                            "alias": "STRING"
-                          },
-                          {
-                            "baseName": "EXPRESSION",
-                            "types": [],
-                            "meta": false
-                          },
-                          {
-                            "baseName": "NUMBER",
-                            "types": [],
-                            "meta": false
-                          }
-                        ],
-                        "meta": true,
-                        "alias": "CONDITION"
-                      },
-                      {
-                        "baseName": "TYPE",
-                        "types": [],
-                        "meta": false
-                      }
-                    ],
-                    "meta": true,
-                    "alias": "PATTERN"
-                  }
-                ],
-                "meta": true,
-                "alias": "SIGNATURE"
-              },
-              {
-                "baseName": "EXPRESSION",
-                "types": [],
-                "meta": false
-              }
-            ],
-            "meta": true,
-            "alias": "CASE"
-          }
-        },
         {
           "value": [
             {
@@ -18587,7 +15524,7 @@
                                         }
                                       },
                                       {
-                                        "value": "<natively defined function>",
+                                        "value": "true",
                                         "type": {
                                           "baseName": "EXPRESSION",
                                           "types": [],
@@ -18844,7 +15781,7 @@
                                         }
                                       },
                                       {
-                                        "value": "<natively defined function>",
+                                        "value": "true",
                                         "type": {
                                           "baseName": "EXPRESSION",
                                           "types": [],
@@ -18962,7 +15899,7 @@
                                   {
                                     "value": [
                                       {
-                                        "value": "newValue",
+                                        "value": " newValue",
                                         "type": {
                                           "baseName": "LIST",
                                           "types": [
@@ -18977,7 +15914,7 @@
                                         }
                                       },
                                       {
-                                        "value": "<natively defined function>",
+                                        "value": "true",
                                         "type": {
                                           "baseName": "EXPRESSION",
                                           "types": [],
@@ -19358,7 +16295,7 @@
                                         }
                                       },
                                       {
-                                        "value": "<natively defined function>",
+                                        "value": "true",
                                         "type": {
                                           "baseName": "EXPRESSION",
                                           "types": [],
@@ -19615,7 +16552,7 @@
                                         }
                                       },
                                       {
-                                        "value": "<natively defined function>",
+                                        "value": "true",
                                         "type": {
                                           "baseName": "EXPRESSION",
                                           "types": [],
@@ -19733,7 +16670,7 @@
                                   {
                                     "value": [
                                       {
-                                        "value": "newValue",
+                                        "value": " newValue",
                                         "type": {
                                           "baseName": "LIST",
                                           "types": [
@@ -19748,7 +16685,7 @@
                                         }
                                       },
                                       {
-                                        "value": "<natively defined function>",
+                                        "value": "true",
                                         "type": {
                                           "baseName": "EXPRESSION",
                                           "types": [],
@@ -20129,7 +17066,7 @@
                                         }
                                       },
                                       {
-                                        "value": "<natively defined function>",
+                                        "value": "true",
                                         "type": {
                                           "baseName": "EXPRESSION",
                                           "types": [],
@@ -20386,7 +17323,7 @@
                                         }
                                       },
                                       {
-                                        "value": "<natively defined function>",
+                                        "value": "true",
                                         "type": {
                                           "baseName": "EXPRESSION",
                                           "types": [],
@@ -20504,7 +17441,7 @@
                                   {
                                     "value": [
                                       {
-                                        "value": "newValue",
+                                        "value": " newValue",
                                         "type": {
                                           "baseName": "LIST",
                                           "types": [
@@ -20519,7 +17456,7 @@
                                         }
                                       },
                                       {
-                                        "value": "<natively defined function>",
+                                        "value": "true",
                                         "type": {
                                           "baseName": "EXPRESSION",
                                           "types": [],
@@ -21224,35 +18161,6 @@
           "arity": 1,
           "types": [
             {
-              "baseName": "TUPLE",
-              "types": [
-                {
-                  "baseName": "ANY",
-                  "types": [],
-                  "meta": false,
-                  "generic": "T"
-                },
-                {
-                  "baseName": "ANY",
-                  "types": [],
-                  "meta": false,
-                  "generic": "T"
-                }
-              ],
-              "meta": true
-            }
-          ],
-          "specificities": [
-            0.5
-          ],
-          "conditions": [
-            null
-          ]
-        },
-        {
-          "arity": 1,
-          "types": [
-            {
               "baseName": "NUMBER",
               "types": [],
               "meta": false
@@ -21267,10 +18175,10 @@
         }
       ]
     },
-    "time": 93933
+    "time": 66394
   },
-  "type(f(3))": {
-    "statement": "type(f(3))",
+  "type(m(3))": {
+    "statement": "type(m(3))",
     "result": {
       "value": {
         "baseName": "TUPLE",
@@ -21485,6 +18393,6 @@
         "meta": false
       }
     },
-    "time": 82472
+    "time": 68874
   }
 }
