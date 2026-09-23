@@ -47,15 +47,13 @@ export const LOCAL_ONLY_BUILTINS = {
        }
        px.present();
        return createVar(true, Primitives.BOOLEAN);
-    })
-  ],
-  present: [
+    }),
     newFunction(1, [Primitives.ANY], ([x]) => {
-       if (!px) {
-         return createError("You must call `canvas(width, height)` at least once before drawing pixels.");
-       }
-       px.present();
-       return x;
+      if (!px) {
+        return createError("You must call `canvas(width, height)` at least once before drawing pixels.");
+      }
+      px.present();
+      return x;
     })
   ],
   read: [

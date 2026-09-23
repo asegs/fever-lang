@@ -36,3 +36,8 @@ Auto operations on tuples seems cool, but really causes a lot of problems
 Type expansion making objects way too big and redundant, store on either value or type
 
 Hmmm...auto defined types are being treated as lists?
+
+Lambda anon functions via {x,y} -> (x + y), can be called the same way?
+Could rename case to lambda, but a case in its own isn't parsed or built into a function, whereas a lambda is
+So -> operator signifies parse it into a full function object without registration in scope
+String <-> char equivalence

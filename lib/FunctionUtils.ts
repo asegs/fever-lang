@@ -233,6 +233,38 @@ export function simpleTypeSpec(t) {
   return TypeWeights.EQUIVALENT;
 }
 
+// Create a function object without actually registering it.
+export function createFunctionObject(signature: FeverVar, expression: FeverVar) {
+  const size = signature.value.length;
+
+  const types = typesFromSignature(signature);
+  const conditions = conditionsFromSignature(signature);
+  const names = namesFromSignature(signature);
+  const specificities = specificitiesFromSignature(signature);
+
+  const operation = (args, ctx) => {
+    const mapping = {};
+    for (let i = 0; i < args.length; i++) {
+      mapping[names[i]] = args[i];
+    }
+    if (aliasMatches(expression.type, "MULTI_EXPRESSION")) {
+      const recreatedMultiExpression = createVar(
+          expression.value.map((line: FeverVar) =>
+              recreateExpressionWithVariables(line, mapping),
+          ),
+          Meta.MULTI_EXPRESSION,
+      );
+      return evaluate(recreatedMultiExpression);
+    } else {
+      return evaluate(
+          recreateExpressionWithVariables(expression, mapping).value,
+      );
+    }
+  };
+
+
+}
+
 export function addFunctionCase(name: FeverVar, func: FeverVar, ctx: Context) {
   {
     const signature = func.value[0];

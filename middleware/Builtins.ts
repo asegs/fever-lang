@@ -38,6 +38,7 @@ import {
 import { feverStringFromJsString, typeToString } from "../lib/StringUtils";
 import {charListToJsString, morphTypes} from "../lib/TypeUtils";
 import { failureToParseString, indexOutOfRange } from "../lib/Errors";
+import {registerOperator} from "../internals/Parser.ts";
 
 export function newFunction(
   arity: number,
@@ -164,15 +165,41 @@ export const builtins = {
       createVar(a.value && b.value, Primitives.BOOLEAN),
     ),
   ],
+  "and": [
+    newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) =>
+      createVar(a.value && b.value, Primitives.BOOLEAN),
+    ),
+  ],
   "|": [
     newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) =>
       createVar(a.value || b.value, Primitives.BOOLEAN),
+    ),
+  ],
+  "or": [
+    newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) =>
+        createVar(a.value || b.value, Primitives.BOOLEAN),
+    ),
+  ],
+  "in": [
+    newFunction(2, [Primitives.ANY, Meta.LIST], ([a, b]) => {
+      for (const entry of b.value) {
+          if (dispatchFunction("==", [a, entry]).value) {
+            return createVar(true, Primitives.BOOLEAN);
+          }
+        }
+        return createVar(false, Primitives.BOOLEAN);
+      }
     ),
   ],
   "<=": [
     newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) =>
       createVar(a.value <= b.value, Primitives.BOOLEAN),
     ),
+  ],
+  "^": [
+      newFunction(2, [Primitives.NUMBER, Primitives.NUMBER], ([a,b]) =>
+        createVar(Math.pow(a.value, b.value), Primitives.NUMBER)
+      )
   ],
   ">=": [
     newFunction(2, [Primitives.ANY, Primitives.ANY], ([a, b]) =>
@@ -253,6 +280,9 @@ export const builtins = {
     newFunction(2, [Primitives.ANY, Primitives.EXPRESSION], ([item, expr]) => {
       return namedMonadicMap(item, expr, ["@", "#", "^"]);
     }),
+    newFunction(2, Meta.SIGNATURE, Primitives.EXPRESSION, ([signature, expr]) => {
+      return
+    })
   ],
   "\\>": [
     newFunction(
@@ -518,6 +548,29 @@ export const builtins = {
         return typeVar;
       },
     ),
+  ],
+  ":=": [
+    newFunction(
+        2,
+        [Primitives.VARIABLE, Primitives.ANY],
+        ([name, value], variables) => {
+          variables.assignValue(name.value, value);
+          return value;
+        },
+    )
+  ],
+  "infix": [
+    // I really wish this could take the function directly, but there is no good way to resolve the actual function name now.
+    // We could install function names to function objects, or possibly iterate scoped functions (although that would find identical ones).
+    // We could also introduce a function that captures a variable without resolving it like "ref".
+    newFunction(
+        2,
+        [Meta.STRING, Primitives.NUMBER],
+        ([func, precedence], variables) => {
+          registerOperator(charListToJsString(func), precedence.value, true, true);
+          return createVar(true, Primitives.BOOLEAN);
+        },
+    )
   ],
   show: [
     newFunction(
