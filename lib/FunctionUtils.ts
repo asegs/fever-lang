@@ -1,19 +1,7 @@
-import {
-  dispatchFunction,
-  evaluate,
-  recreateExpressionWithVariables,
-} from "../internals/Interpreter";
-import {
-  aliasMatches,
-  createVar,
-  FeverVar,
-  isAlias,
-  Meta,
-  Primitives,
-  TypeWeights,
-} from "../middleware/Types";
-import { Context } from "../internals/Context.ts";
-import { newFunction } from "../middleware/Builtins.ts";
+import {dispatchFunction, evaluate, recreateExpressionWithVariables,} from "../internals/Interpreter";
+import {aliasMatches, createVar, FeverVar, isAlias, Meta, Primitives, TypeWeights,} from "../middleware/Types";
+import {Context} from "../internals/Context.ts";
+import {newFunction} from "../middleware/Builtins.ts";
 import {charListToJsString} from "./TypeUtils.ts";
 
 export const nativeFunctionMessage = "<natively defined function>";
@@ -67,8 +55,7 @@ export function registerNewFunction(
   }
   const named = variables.getOrNull(name);
   if (!named) {
-    const newFunc = createVar([newCase], Meta.FUNCTION);
-    newFunc["invocations"] = [functionObject];
+    const newFunc = createCallableFunction(functionObject, newCase);
     variables.assignValue(name, newFunc);
     return newFunc;
   }
@@ -265,44 +252,58 @@ export function createFunctionObject(signature: FeverVar, expression: FeverVar) 
 
 }
 
-export function addFunctionCase(name: FeverVar, func: FeverVar, ctx: Context) {
+export function addFunctionCase(name: FeverVar, newCase: FeverVar, ctx: Context) {
   {
-    const signature = func.value[0];
-    const expression = func.value[1];
-    const size = signature.value.length;
-
-    const types = typesFromSignature(signature);
-    const conditions = conditionsFromSignature(signature);
-    const names = namesFromSignature(signature);
-    const specificities = specificitiesFromSignature(signature);
-
-    const operation = (args, ctx) => {
-      const mapping = {};
-      for (let i = 0; i < args.length; i++) {
-        mapping[names[i]] = args[i];
-      }
-      if (aliasMatches(expression.type, "MULTI_EXPRESSION")) {
-        const recreatedMultiExpression = createVar(
-          expression.value.map((line: FeverVar) =>
-            recreateExpressionWithVariables(line, mapping),
-          ),
-          Meta.MULTI_EXPRESSION,
-        );
-        return evaluate(recreatedMultiExpression);
-      } else {
-        return evaluate(
-          recreateExpressionWithVariables(expression, mapping).value,
-        );
-      }
-    };
+    const newFunction = caseToFunction(newCase);
     return registerNewFunction(
       name.value,
       ctx,
-      newFunction(size, types, operation, {
-        conditions: conditions,
-        specificities: specificities,
-      }),
-      func,
+      newFunction,
+      newCase,
     );
   }
+}
+
+
+export function caseToFunction(newCase: FeverVar) {
+  const signature = newCase.value[0];
+  const expression = newCase.value[1];
+  const size = signature.value.length;
+
+  const types = typesFromSignature(signature);
+  const conditions = conditionsFromSignature(signature);
+  const names = namesFromSignature(signature);
+  const specificities = specificitiesFromSignature(signature);
+
+  const operation = (args, ctx) => {
+    const mapping = {};
+    for (let i = 0; i < args.length; i++) {
+      mapping[names[i]] = args[i];
+    }
+    if (aliasMatches(expression.type, "MULTI_EXPRESSION")) {
+      const recreatedMultiExpression = createVar(
+          expression.value.map((line: FeverVar) =>
+              recreateExpressionWithVariables(line, mapping),
+          ),
+          Meta.MULTI_EXPRESSION,
+      );
+      return evaluate(recreatedMultiExpression);
+    } else {
+      return evaluate(
+          recreateExpressionWithVariables(expression, mapping).value,
+      );
+    }
+  };
+
+  return newFunction(size, types, operation, {
+    conditions: conditions,
+    specificities: specificities,
+  });
+}
+
+export function createCallableFunction(functionObject, newCase: FeverVar) {
+  const callableFunction = createVar([newCase], Meta.FUNCTION);
+  callableFunction["invocations"] = [functionObject];
+
+  return callableFunction;
 }

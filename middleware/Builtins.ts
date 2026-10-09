@@ -30,7 +30,7 @@ import {
 } from "../lib/HigherOrder";
 import { isNumeric, newOfType, stringify } from "../lib/CommonUtils";
 import {
-  addFunctionCase,
+  addFunctionCase, caseToFunction, createCallableFunction,
   registerNewFunction,
   serializeFunction,
   typesFromSignature,
@@ -280,8 +280,10 @@ export const builtins = {
     newFunction(2, [Primitives.ANY, Primitives.EXPRESSION], ([item, expr]) => {
       return namedMonadicMap(item, expr, ["@", "#", "^"]);
     }),
-    newFunction(2, Meta.SIGNATURE, Primitives.EXPRESSION, ([signature, expr]) => {
-      return
+    newFunction(2, [Meta.SIGNATURE, Primitives.EXPRESSION], ([signature, expr]) => {
+      const singleCase = createVar([signature, expr], Meta.CASE);
+      const functionObject = caseToFunction(singleCase);
+      return createCallableFunction(functionObject, singleCase);
     })
   ],
   "\\>": [
@@ -450,7 +452,7 @@ export const builtins = {
     newFunction(
       2,
       [Primitives.VARIABLE, Meta.CASE],
-      ([name, func], variables) => addFunctionCase(name, func, variables),
+      ([name, newCase], variables) => addFunctionCase(name, newCase, variables),
     ),
     newFunction(
       2,
