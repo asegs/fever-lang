@@ -1,0 +1,32 @@
+vec3 = {x:#, y:#, z:#}
+neg = {v:vec3} => (new(vec3, x(v) * -1, y(v) * -1, z(v) * -1))
++ = {v1:vec3, v2:vec3} => (new(vec3, x(v1) + x(v2), y(v1) + y(v2), z(v1) + z(v2)))
+- = {v1:vec3, v2:vec3} => (new(vec3, x(v1) - x(v2), y(v1) - y(v2), z(v1) - z(v2)))
+dot = {v1:vec3, v2:vec3} => (new(vec3, x(v1) * x(v2), y(v1) * y(v2), z(v1) * z(v2)))
+* = {v:vec3, t:#} => (new(vec3, x(v) * t, y(v) * t, z(v) * t))
+* = {t:#, v:vec3} => (new(vec3, x(v) * t, y(v) * t, z(v) * t))
+* = {v1:vec3, v2:vec3} => (new(vec3, x(v1) * x(v2), y(v1) * y(v2), z(v1) * z(v2)))
+/ = {v:vec3, t:#} => (v * (1 / t))
+dot = {v1:vec3, v2:vec3} => (x(v1) * x(v2) + y(v1) * y(v2) + z(v1) * z(v2))
+cross = {v1:vec3, v2: vec3} => (new(vec3, y(v1) * z(v2) - z(v1) * y(v2), z(v1) * x(v2) - x(v1) * z(v2), x(v1) * y(v2) - y(v1) * x(v2)))
+len_squared = {v:vec3} => (new(vec3, x(v) ^ 2, y(v) ^ 2, z(v) ^ 2))
+len = {v:vec3} => (sqrt(len_squared(v)))
+unit_vector = {v:vec3} => (v / len(v))
+show = {v:vec3} => (show("{" + x(v) + "," + y(v) + "," + z(v) + "}"))
+
+color = vec3
+show(color)
+
+height = 256
+width = 256
+canvas(height, width)
+color_px = {x:#, y:#} => (
+    r = x/(width - 1)
+    g = y/(height-1)
+    b = 0
+    c = new(color, r, g, b)
+
+    show(blit(x,y,(x(c), y(c), z(c))))
+)
+0..height -> (0..width -> ([x], (color_px(x, @))))
+present()

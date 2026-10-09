@@ -36,3 +36,5 @@ Auto operations on tuples seems cool, but really causes a lot of problems
 Type expansion making objects way too big and redundant, store on either value or type
 
 Hmmm...auto defined types are being treated as lists?
+
+String <-> char equivalence

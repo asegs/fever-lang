@@ -1,24 +1,47 @@
-// All built in operators and their precedence.  Higher precedence is grouped first.
-const operatorsToPrecedences = {
-  "+": 9,
-  "-": 9,
-  "*": 10,
-  "/": 10,
-  "%": 8,
-  ">": 6,
-  "<": 6,
-  "<=": 6,
-  ">=": 6,
-  "==": 6,
-  "..": 7,
-  "&": 5,
-  "|": 5,
-  "->": 4,
-  "~>": 4,
-  "\\>": 4,
-  "=>": 3,
-  "=": 2,
-};
+type Operator = {
+  operator: string,
+  precedence: number,
+  leftSpace?: boolean,
+  rightSpace?: boolean
+}
+
+const operators:{ [id: string] : Operator; } = {};
+
+export function registerOperator(operator: string, precedence: number, leftSpace?: boolean, rightSpace?: boolean) {
+    const operatorEntry: Operator = {
+        operator: operator,
+        precedence: precedence,
+        leftSpace: !!leftSpace,
+        rightSpace: !!rightSpace
+    };
+
+    operators[operator] = operatorEntry;
+}
+
+registerOperator("+", 9);
+registerOperator("-", 9);
+registerOperator("*", 10);
+registerOperator("/", 10);
+registerOperator("^", 11);
+registerOperator("%", 8);
+registerOperator(">", 6);
+registerOperator("<", 6);
+registerOperator("<=", 6);
+registerOperator(">=", 6);
+registerOperator("==", 6);
+registerOperator("..", 7);
+registerOperator("&", 5);
+registerOperator("|", 5);
+registerOperator("->", 4);
+registerOperator("~>", 4);
+registerOperator("\\>", 4);
+registerOperator("=>", 3);
+registerOperator("=", 2);
+registerOperator(":=", 2);
+
+registerOperator("and", 5, true, true);
+registerOperator("or", 5, true, true);
+registerOperator("in", 6, true, true);
 
 // A character from a string and its next character as well.
 type SucceededCharacter = {
@@ -46,20 +69,87 @@ function getSucceedingCharacter(text: string, idx: number): SucceededCharacter {
 // Checks to see if the next character added to the current is a valid operator.
 // If so, takes those two.  If not, checks the current one.  If it is, takes that.
 // If neither are valid, decides not an operator.
+
+// This unfortunately restricts >2 character operators.  Maybe a different more advanced lookahead and response?
+// I.e. return the operator?
 function handleAmbiguousOperators(text: string, idx: number): OperatorAction {
   const surroundings = getSucceedingCharacter(text, idx);
   if (!surroundings.next) {
-    return surroundings.current in operatorsToPrecedences
+    return surroundings.current in operators
       ? OperatorAction.TAKE
       : OperatorAction.IGNORE;
   }
-  if (surroundings.current + surroundings.next in operatorsToPrecedences) {
+  if (surroundings.current + surroundings.next in operators) {
     return OperatorAction.TAKE_AND_NEXT;
   }
-  if (surroundings.current in operatorsToPrecedences) {
+  if (surroundings.current in operators) {
     return OperatorAction.TAKE;
   }
   return OperatorAction.IGNORE;
+}
+
+function nextOperator(text: string, idx: number): string {
+    const preceededBySpace = idx > 0 && text[idx - 1] === ' ';
+    let buffer = "";
+    let candidates = Object.values(operators);
+    let lastExactMatch = null;
+    let offset = 0;
+    do {
+      if (idx + offset >= text.length) {
+        if (lastExactMatch) {
+            // Will we still need to do a space check here?
+            return lastExactMatch.operator;
+        }
+        return "";
+      }
+      buffer += text[idx + offset++];
+      candidates = candidates.filter(o => {
+        if (!o.operator.startsWith(buffer)) {
+          return false;
+        }
+        if (!preceededBySpace && o.leftSpace) {
+          return false;
+        }
+        return !(idx + offset >= text.length && o.rightSpace);
+      });
+      const exactMatches = candidates.filter(o => {
+        if (o.operator !== buffer) {
+          return false;
+        }
+
+        return !(o.rightSpace && text[idx + offset] !== " ");
+
+
+
+      });
+      if (exactMatches.length === 1) {
+        lastExactMatch = exactMatches[0];
+
+        if (candidates.length === 1) {
+          break;
+        }
+      }
+    } while (candidates.length > 0);
+
+    let returnedOperator = "";
+
+    if (candidates.length === 0) {
+      if (lastExactMatch) {
+        returnedOperator = lastExactMatch.operator;
+      } else {
+        return "";
+      }
+    } else {
+      returnedOperator = lastExactMatch.operator;
+    }
+
+    if (returnedOperator === "-") {
+      if (isNegation(text, idx)) {
+            return "";
+      }
+    }
+
+    return returnedOperator;
 }
 
 // Finds the last non-space character in a string at a position.
@@ -79,32 +169,8 @@ const isNegation = (text: string, idx: number): boolean => {
   if (prev === null) {
     return true;
   }
-  return prev in operatorsToPrecedences || extras.includes(prev);
+  return prev in operators || extras.includes(prev);
 };
-
-// Handles cases where more context than the next character is needed to disambiguate a potential operator.
-const specialOperatorCases = {
-  "-": (text: string, idx: number): OperatorAction => {
-    const action = handleAmbiguousOperators(text, idx);
-    if (action === OperatorAction.TAKE_AND_NEXT) {
-      return OperatorAction.TAKE_AND_NEXT;
-    }
-    return isNegation(text, idx) ? OperatorAction.IGNORE : OperatorAction.TAKE;
-  },
-};
-
-// Wraps the special cases and normal operator disambiguation logic into one function.
-function getCharacterAction(
-  char: string,
-  source: string,
-  position: number,
-): OperatorAction {
-  if (char in specialOperatorCases) {
-    return specialOperatorCases[char](source, position);
-  }
-
-  return handleAmbiguousOperators(source, position);
-}
 
 // Used when traversing through source with nesting to track current depth in various structures.
 class Tracker {
@@ -237,7 +303,7 @@ function isNumeric(char: string) {
 
 // Checks if the current text buffer is the end of any valid infix operator.
 function infixEndsWith(buf: string) {
-  return Object.keys(operatorsToPrecedences).some((key) => key.endsWith(buf));
+  return Object.keys(operators).some((key) => key.endsWith(buf));
 }
 
 // Takes method calls and rewrites them as function invocations, preserving order.
@@ -301,7 +367,7 @@ function preprocessMethodSyntax(text: string): string {
           //Match operators
           if (infixEndsWith(char + operatorBuffer)) {
             operatorBuffer = char + operatorBuffer;
-            if (operatorBuffer in operatorsToPrecedences) {
+            if (operatorBuffer in operators) {
               //End, bump index back to before operator, minus 1 so it hits the last char of it.
               backwardsOffset += operatorBuffer.length - 1;
               break;
@@ -351,8 +417,8 @@ function tokenize(segment: string): ParseNode[] {
     }
     tracker.handleSyntaxChars(char);
     if (tracker.isInTopLevelContext()) {
-      const score = getCharacterAction(char, segment, i);
-      if (score === OperatorAction.IGNORE) {
+      const operatorMaybe = nextOperator(segment, i);
+      if (operatorMaybe.length === 0) {
         // Not an operator
         buffer += char;
       } else {
@@ -361,14 +427,8 @@ function tokenize(segment: string): ParseNode[] {
           tokens.push(syntaxToken(buffer));
           buffer = "";
         }
-        if (score === OperatorAction.TAKE) {
-          // Single char operator
-          tokens.push(operatorToken(char));
-        } else if (score === OperatorAction.TAKE_AND_NEXT) {
-          // Double char operator
-          tokens.push(operatorToken(char + segment[i + 1]));
-          i++;
-        }
+        tokens.push(operatorToken(operatorMaybe));
+        i += operatorMaybe.length - 1;
       }
     } else {
       buffer += char;
@@ -602,20 +662,20 @@ export function shunt(segment: string, isTopLevel?: boolean): ParseNode {
       continue;
     }
 
-    const precedence = operatorsToPrecedences[token.text];
+    const precedence = operators[token.text].precedence;
 
     if (stack.length === 0) {
       stack.push(token);
       continue;
     }
-    if (operatorsToPrecedences[stack[stack.length - 1].text] <= precedence) {
+    if (operators[stack[stack.length - 1].text].precedence <= precedence) {
       stack.push(token);
       pushedToken = true;
     }
 
     while (
       stack.length > 0 &&
-      operatorsToPrecedences[stack[stack.length - 1].text] > precedence
+      operators[stack[stack.length - 1].text].precedence > precedence
     ) {
       result.push(stack.pop());
     }
